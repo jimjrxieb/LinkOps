@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+dist/
+build/
+
+# Docker
+*.log
+docker-compose.yml.local
+
+# ML Models and Data
+*.h5
+*.pth
+*.pkl
+data/
+models/
+
+# IDE and OS
+.vscode/
+.idea/
+*.DS_Store
