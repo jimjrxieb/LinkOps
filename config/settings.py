@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     # Database settings
     DATABASE_URL: str = Field(
         default="postgresql://user:password@localhost:5432/linkops",
-        description="PostgreSQL database URL"
+        description="PostgreSQL database URL (set via DATABASE_URL env var)"
     )
     DATABASE_POOL_SIZE: int = Field(default=10, description="Database pool size")
     DATABASE_MAX_OVERFLOW: int = Field(default=20, description="Database max overflow")
