@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - LinkOps Core{% endblock %}
+
+{% block content %}
+<h2>🏠 Dashboard</h2>
+<p>Welcome to LinkOps Core - Your AI-powered automation platform.</p>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 2rem;">
+    <div class="card">
+        <h3>🔮 Orbs</h3>
+        <p>Manage your automation orbs - collections of runes and scripts.</p>
+        <a href="/gui/orbs" class="btn">View Orbs</a>
+    </div>
+    
+    <div class="card">
+        <h3>📋 Agent Logs</h3>
+        <p>Monitor agent activities and automation results.</p>
+        <a href="/gui/logs" class="btn">View Logs</a>
+    </div>
+    
+    <div class="card">
+        <h3>📷 Whis Upload</h3>
+        <p>Upload screenshots for OCR processing and AI analysis.</p>
+        <a href="/gui/whis" class="btn">Upload Screenshot</a>
+    </div>
+    
+    <div class="card">
+        <h3>🤖 James Link</h3>
+        <p>Task recall and orb ranking with search functionality.</p>
+        <a href="/gui/james" class="btn">Search & Rank</a>
+    </div>
+    
+    <div class="card">
+        <h3>📚 API Documentation</h3>
+        <p>Explore the REST API endpoints and integration options.</p>
+        <a href="/docs" class="btn">View API Docs</a>
+    </div>
+</div>
+
+<div style="margin-top: 2rem; padding: 1rem; background: #e3f2fd; border-radius: 8px;">
+    <h3>🚀 Quick Start</h3>
+    <ol style="margin-left: 1.5rem; margin-top: 0.5rem;">
+        <li>Upload a screenshot using the Whis interface</li>
+        <li>Review the extracted text in the logs</li>
+        <li>Create an Orb from the processed data</li>
+        <li>Add runes to automate actions</li>
+        <li>Use James to search and rank your orbs</li>
+    </ol>
+</div>
+{% endblock %} 

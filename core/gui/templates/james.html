@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>🤖 James Link Assistant</h2>
+
+<form method="get">
+  Ask a question: <input type="text" name="q" size="80" placeholder="e.g. show me kubernetes orbs">
+  <input type="submit" value="Ask">
+</form>
+
+{% if results %}
+  <h3>James Found These Orbs:</h3>
+  <ul>
+    {% for orb in results %}
+      <li>
+        <strong>{{ orb.name }}</strong> ({{ orb.category }})<br>
+        {{ orb.description }}
+      </li>
+      <hr>
+    {% endfor %}
+  </ul>
+{% elif query %}
+  <p>No orbs found for: <strong>{{ query }}</strong></p>
+{% endif %}
+
+<a href="/gui">← Back to GUI</a>
+{% endblock %} 

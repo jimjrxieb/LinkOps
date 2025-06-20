@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Whis Upload - LinkOps Core{% endblock %}
+
+{% block content %}
+<h2>Upload Screenshot or Text Dump to Whis</h2>
+
+<!-- Text Dump Form -->
+<form method="post" action="/gui/whis/text">
+  Task ID: <input type="text" name="task_id" required><br><br>
+  Text Dump:<br>
+  <textarea name="text" rows="10" cols="80" placeholder="Paste logs, answers, etc here..."></textarea><br>
+  <input type="submit" value="Submit Text Dump">
+</form>
+
+<hr>
+
+<!-- Image Upload Form -->
+<form method="post" enctype="multipart/form-data">
+  Task ID: <input type="text" name="task_id" required><br><br>
+  File: <input type="file" name="file" accept="image/*" required><br><br>
+  <input type="submit" value="Upload Screenshot">
+</form>
+
+{% if error %}
+    <div class="status error">
+        <h3>❌ Error</h3>
+        <p>{{ error }}</p>
+    </div>
+{% endif %}
+
+{% if status %}
+    <div class="status success">
+        <h3>✅ Upload Successful!</h3>
+        <p><strong>File:</strong> {{ path }}</p>
+        <p><strong>Task ID:</strong> {{ task_id }}</p>
+        <p><strong>Uploaded:</strong> {{ time.strftime('%Y-%m-%d %H:%M:%S') if time else 'Unknown' }}</p>
+    </div>
+    
+    {% if extracted_text %}
+    <div class="card">
+        <h3>📝 Extracted Text</h3>
+        <div style="background: #f8f9fa; padding: 1rem; border-radius: 4px; max-height: 300px; overflow-y: auto;">
+            <pre style="white-space: pre-wrap; font-family: monospace;">{{ extracted_text }}</pre>
+        </div>
+    </div>
+    {% endif %}
+{% endif %}
+
+<div style="margin-top: 2rem; padding: 1rem; background: #fff3cd; border-radius: 8px;">
+    <h3>💡 How it works:</h3>
+    <ol style="margin-left: 1.5rem; margin-top: 0.5rem;">
+        <li>Upload a screenshot of your CKA question or any text</li>
+        <li>The system will extract text using OCR (Tesseract)</li>
+        <li>Text will be logged and can be converted to an Orb</li>
+        <li>Use the manual orb creator to create structured data</li>
+    </ol>
+</div>
+
+<a href="/gui" class="back-link">← Back to Dashboard</a>
+{% endblock %} 

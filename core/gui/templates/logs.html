@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Logs - LinkOps Core{% endblock %}
+
+{% block content %}
+<h2>📋 Recent Agent Logs</h2>
+
+{% if logs %}
+    <div style="display: grid; gap: 1rem;">
+        {% for log in logs %}
+        <div class="card">
+            <h3>{{ log.agent }} - {{ log.task_id }}</h3>
+            <p><strong>Action:</strong> {{ log.action }}</p>
+            <p><strong>Result:</strong> {{ log.result[:200] }}{% if log.result|length > 200 %}...{% endif %}</p>
+            <p><strong>Created:</strong> {{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') if log.created_at else 'Unknown' }}</p>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="status success">
+        <p>No logs found. Agent activities will appear here.</p>
+    </div>
+{% endif %}
+
+<a href="/gui" class="back-link">← Back to Dashboard</a>
+{% endblock %} 

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Orbs - LinkOps Core{% endblock %}
+
+{% block content %}
+<h2>🔮 All Orbs</h2>
+
+{% if orbs %}
+    <div style="display: grid; gap: 1rem;">
+        {% for orb in orbs %}
+        <div class="card">
+            <h3>{{ orb.name }}</h3>
+            <p><strong>Category:</strong> {{ orb.category }}</p>
+            <p><strong>Description:</strong> {{ orb.description }}</p>
+            <p><strong>Created:</strong> {{ orb.created_at.strftime('%Y-%m-%d %H:%M:%S') if orb.created_at else 'Unknown' }}</p>
+            <p><strong>Updated:</strong> {{ orb.updated_at.strftime('%Y-%m-%d %H:%M:%S') if orb.updated_at else 'Never' }}</p>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="status success">
+        <p>No orbs found. Create your first orb by uploading a screenshot!</p>
+    </div>
+{% endif %}
+
+<a href="/gui" class="back-link">← Back to Dashboard</a>
+{% endblock %} 
