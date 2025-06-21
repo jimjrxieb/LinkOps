@@ -3,59 +3,340 @@
 {% block title %}Whis Upload - LinkOps Core{% endblock %}
 
 {% block content %}
-<h2>Upload Screenshot or Text Dump to Whis</h2>
+<h2>🧠 Whis: AI Training & Learning</h2>
 
-<!-- Text Dump Form -->
-<form method="post" action="/gui/whis/text">
-  Task ID: <input type="text" name="task_id" required><br><br>
-  Text Dump:<br>
-  <textarea name="text" rows="10" cols="80" placeholder="Paste logs, answers, etc here..."></textarea><br>
-  <input type="submit" value="Submit Text Dump">
-</form>
-
-<hr>
-
-<!-- Image Upload Form -->
-<form method="post" enctype="multipart/form-data">
-  Task ID: <input type="text" name="task_id" required><br><br>
-  File: <input type="file" name="file" accept="image/*" required><br><br>
-  <input type="submit" value="Upload Screenshot">
-</form>
-
-{% if error %}
-    <div class="status error">
-        <h3>❌ Error</h3>
-        <p>{{ error }}</p>
-    </div>
-{% endif %}
-
-{% if status %}
-    <div class="status success">
-        <h3>✅ Upload Successful!</h3>
-        <p><strong>File:</strong> {{ path }}</p>
-        <p><strong>Task ID:</strong> {{ task_id }}</p>
-        <p><strong>Uploaded:</strong> {{ time.strftime('%Y-%m-%d %H:%M:%S') if time else 'Unknown' }}</p>
-    </div>
-    
-    {% if extracted_text %}
-    <div class="card">
-        <h3>📝 Extracted Text</h3>
-        <div style="background: #f8f9fa; padding: 1rem; border-radius: 4px; max-height: 300px; overflow-y: auto;">
-            <pre style="white-space: pre-wrap; font-family: monospace;">{{ extracted_text }}</pre>
-        </div>
-    </div>
-    {% endif %}
-{% endif %}
-
-<div style="margin-top: 2rem; padding: 1rem; background: #fff3cd; border-radius: 8px;">
-    <h3>💡 How it works:</h3>
-    <ol style="margin-left: 1.5rem; margin-top: 0.5rem;">
-        <li>Upload a screenshot of your CKA question or any text</li>
-        <li>The system will extract text using OCR (Tesseract)</li>
-        <li>Text will be logged and can be converted to an Orb</li>
-        <li>Use the manual orb creator to create structured data</li>
-    </ol>
+<div style="margin-bottom: 2rem; padding: 1rem; background: #e8f5e8; border-radius: 8px; border-left: 4px solid #4caf50;">
+    <h3>🎓 How Whis Learns</h3>
+    <p><strong>Whis is the student.</strong> He learns from James's work and improves the system overnight.</p>
+    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+        <li>📚 <strong>From OpenAI Fallbacks:</strong> Learns new patterns when James can't find matches</li>
+        <li>🔄 <strong>From Match Usage:</strong> Reinforces good patterns when James finds matches</li>
+        <li>🌙 <strong>Night Training:</strong> Processes queue and updates orbs automatically</li>
+    </ul>
 </div>
 
+<!-- Training Queue Status -->
+<div style="margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+    <h3>📋 Training Queue Status</h3>
+    <div id="queueStatus" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+        <div style="flex: 1; text-align: center; padding: 1rem; background: #fff; border-radius: 4px; border: 1px solid #dee2e6;">
+            <h4 style="margin: 0; color: #007bff;">Pending</h4>
+            <div id="pendingCount" style="font-size: 2rem; font-weight: bold; color: #007bff;">-</div>
+        </div>
+        <div style="flex: 1; text-align: center; padding: 1rem; background: #fff; border-radius: 4px; border: 1px solid #dee2e6;">
+            <h4 style="margin: 0; color: #28a745;">Trained</h4>
+            <div id="trainedCount" style="font-size: 2rem; font-weight: bold; color: #28a745;">-</div>
+        </div>
+        <div style="flex: 1; text-align: center; padding: 1rem; background: #fff; border-radius: 4px; border: 1px solid #dee2e6;">
+            <div style="font-size: 0.9rem; color: #6c757d;">OpenAI Fallbacks</div>
+            <div id="fallbackCount" style="font-size: 1.5rem; font-weight: bold; color: #ffc107;">-</div>
+        </div>
+        <div style="flex: 1; text-align: center; padding: 1rem; background: #fff; border-radius: 4px; border: 1px solid #dee2e6;">
+            <div style="font-size: 0.9rem; color: #6c757d;">Match Usages</div>
+            <div id="matchCount" style="font-size: 1.5rem; font-weight: bold; color: #17a2b8;">-</div>
+        </div>
+    </div>
+    
+    <div style="display: flex; gap: 1rem;">
+        <button onclick="refreshQueueStatus()" style="background: #007bff; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">
+            🔄 Refresh Status
+        </button>
+        <button onclick="triggerTraining()" style="background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">
+            🚀 Trigger Training
+        </button>
+        <button onclick="viewQueueDetails()" style="background: #17a2b8; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">
+            📋 View Details
+        </button>
+        <button onclick="viewTrainedItems()" style="background: #ffc107; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">
+            🔍 Review Trained
+        </button>
+    </div>
+</div>
+
+<!-- Queue Details Table -->
+<div id="queueDetails" style="display: none; margin-bottom: 2rem;">
+    <h3>📋 Queue Details</h3>
+    <div id="queueTable" style="background: #fff; border-radius: 8px; overflow: hidden; border: 1px solid #dee2e6;">
+        <!-- Table will be populated by JavaScript -->
+    </div>
+</div>
+
+<!-- Trained Items Review -->
+<div id="trainedReview" style="display: none; margin-bottom: 2rem;">
+    <h3>🔍 Review Trained Items</h3>
+    <div id="trainedItems" style="background: #fff; border-radius: 8px; overflow: hidden; border: 1px solid #dee2e6;">
+        <!-- Trained items will be populated by JavaScript -->
+    </div>
+</div>
+
+<!-- Manual Training Form -->
+<div style="margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+    <h3>🎯 Manual Training</h3>
+    <form method="post">
+        <div style="margin-bottom: 1rem;">
+            <label for="taskId" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Task ID:</label>
+            <input type="text" id="taskId" name="task_id" required style="width: 100%; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px;">
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <label for="content" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Content:</label>
+            <textarea id="content" name="content" rows="6" required style="width: 100%; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px; resize: vertical;"></textarea>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <label for="source" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Source:</label>
+            <select id="source" name="source" style="width: 100%; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px;">
+                <option value="manual">Manual Entry</option>
+                <option value="openai_fallback">OpenAI Fallback</option>
+                <option value="match_usage">Match Usage</option>
+                <option value="james">James</option>
+                <option value="katie">Katie</option>
+                <option value="igris">Igris</option>
+            </select>
+        </div>
+        
+        <button type="submit" style="background: #28a745; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; font-weight: bold;">
+            🎓 Train Whis
+        </button>
+    </form>
+</div>
+
+<!-- Training Results -->
+{% if training_result %}
+<div style="margin-bottom: 2rem; padding: 1rem; background: #d4edda; border-radius: 8px; border: 1px solid #c3e6cb;">
+    <h4>✅ Training Result</h4>
+    <p><strong>Category:</strong> {{ training_result.category }}</p>
+    <p><strong>Suggestion:</strong></p>
+    <pre style="background: #f8f9fa; padding: 1rem; border-radius: 4px; overflow-x: auto;">{{ training_result.suggestion }}</pre>
+</div>
+{% endif %}
+
 <a href="/gui" class="back-link">← Back to Dashboard</a>
+
+<script>
+// Load queue status on page load
+document.addEventListener('DOMContentLoaded', function() {
+    refreshQueueStatus();
+});
+
+async function refreshQueueStatus() {
+    try {
+        const response = await fetch('/api/whis/queue-status');
+        const data = await response.json();
+        
+        document.getElementById('pendingCount').textContent = data.pending || 0;
+        document.getElementById('trainedCount').textContent = data.trained || 0;
+        document.getElementById('fallbackCount').textContent = data.fallbacks || 0;
+        document.getElementById('matchCount').textContent = data.matches || 0;
+    } catch (error) {
+        console.error('Failed to refresh queue status:', error);
+    }
+}
+
+async function triggerTraining() {
+    try {
+        const response = await fetch('/api/whis/train', {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            alert('🚀 Training triggered successfully!');
+            refreshQueueStatus();
+        } else {
+            alert('❌ Failed to trigger training');
+        }
+    } catch (error) {
+        alert('❌ Network error: ' + error.message);
+    }
+}
+
+async function viewQueueDetails() {
+    const detailsDiv = document.getElementById('queueDetails');
+    const tableDiv = document.getElementById('queueTable');
+    
+    if (detailsDiv.style.display === 'none') {
+        try {
+            const response = await fetch('/api/whis/queue-details');
+            const data = await response.json();
+            
+            let tableHTML = `
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead style="background: #f8f9fa;">
+                        <tr>
+                            <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #dee2e6;">Task ID</th>
+                            <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #dee2e6;">Source</th>
+                            <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #dee2e6;">Status</th>
+                            <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #dee2e6;">Created</th>
+                            <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #dee2e6;">Content Preview</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            data.items.forEach(item => {
+                const statusColor = item.status === 'pending' ? '#ffc107' : '#28a745';
+                const sourceColor = item.source === 'openai_fallback' ? '#ffc107' : 
+                                  item.source === 'match_usage' ? '#17a2b8' : '#6c757d';
+                
+                tableHTML += `
+                    <tr style="border-bottom: 1px solid #dee2e6;">
+                        <td style="padding: 0.75rem;">${item.task_id}</td>
+                        <td style="padding: 0.75rem;">
+                            <span style="background: ${sourceColor}; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">
+                                ${item.source}
+                            </span>
+                        </td>
+                        <td style="padding: 0.75rem;">
+                            <span style="background: ${statusColor}; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">
+                                ${item.status}
+                            </span>
+                        </td>
+                        <td style="padding: 0.75rem;">${new Date(item.created_at).toLocaleDateString()}</td>
+                        <td style="padding: 0.75rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            ${item.raw_text.substring(0, 100)}${item.raw_text.length > 100 ? '...' : ''}
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += '</tbody></table>';
+            tableDiv.innerHTML = tableHTML;
+            detailsDiv.style.display = 'block';
+        } catch (error) {
+            console.error('Failed to load queue details:', error);
+            alert('❌ Failed to load queue details');
+        }
+    } else {
+        detailsDiv.style.display = 'none';
+    }
+}
+
+async function viewTrainedItems() {
+    const reviewDiv = document.getElementById('trainedReview');
+    const itemsDiv = document.getElementById('trainedItems');
+    
+    if (reviewDiv.style.display === 'none') {
+        try {
+            const response = await fetch('/api/whis/queue?status=trained');
+            const data = await response.json();
+            
+            if (data.length === 0) {
+                itemsDiv.innerHTML = '<div style="padding: 2rem; text-align: center; color: #6c757d;">No trained items to review</div>';
+                reviewDiv.style.display = 'block';
+                return;
+            }
+            
+            let itemsHTML = '';
+            
+            data.forEach(item => {
+                // Parse the raw_text to extract components
+                const lines = item.raw_text.split('\n');
+                let agent = 'unknown';
+                let original = '';
+                let generatedRune = '';
+                
+                for (let i = 0; i < lines.length; i++) {
+                    if (lines[i].startsWith('# Agent:')) {
+                        agent = lines[i].replace('# Agent:', '').trim();
+                    } else if (lines[i].startsWith('# Original:') || lines[i].startsWith('# Sanitized:')) {
+                        original = lines[i].replace('# Original:', '').replace('# Sanitized:', '').trim();
+                    } else if (lines[i].startsWith('# Generated Rune:')) {
+                        generatedRune = lines.slice(i + 1).join('\n').trim();
+                        break;
+                }
+                
+                itemsHTML += `
+                    <div style="border-bottom: 1px solid #dee2e6; padding: 1.5rem;">
+                        <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 1rem;">
+                            <div>
+                                <h4 style="margin: 0; color: #007bff;">${item.task_id}</h4>
+                                <span style="background: #28a745; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">
+                                    ${agent}
+                                </span>
+                                <span style="background: #ffc107; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; margin-left: 0.5rem;">
+                                    ${item.source}
+                                </span>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button onclick="approveItem('${item.id}')" style="background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">
+                                    ✅ Approve
+                                </button>
+                                <button onclick="rejectItem('${item.id}')" style="background: #dc3545; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">
+                                    ❌ Reject
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <h5 style="margin: 0 0 0.5rem 0; color: #6c757d;">Original Input:</h5>
+                            <div style="background: #f8f9fa; padding: 1rem; border-radius: 4px; font-family: monospace; font-size: 0.9rem;">
+                                ${original}
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h5 style="margin: 0 0 0.5rem 0; color: #6c757d;">Generated Rune:</h5>
+                            <textarea id="rune-${item.id}" style="width: 100%; min-height: 150px; padding: 1rem; border: 1px solid #ced4da; border-radius: 4px; font-family: monospace; font-size: 0.9rem; resize: vertical;">${generatedRune}</textarea>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            itemsDiv.innerHTML = itemsHTML;
+            reviewDiv.style.display = 'block';
+        } catch (error) {
+            console.error('Failed to load trained items:', error);
+            alert('❌ Failed to load trained items');
+        }
+    } else {
+        reviewDiv.style.display = 'none';
+    }
+}
+
+async function approveItem(itemId) {
+    try {
+        const runeContent = document.getElementById(`rune-${itemId}`).value;
+        
+        const response = await fetch(`/api/whis/queue/${itemId}/approve`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ edited_rune: runeContent })
+        });
+        
+        if (response.ok) {
+            alert('✅ Item approved and saved as rune!');
+            viewTrainedItems(); // Refresh the list
+            refreshQueueStatus();
+        } else {
+            alert('❌ Failed to approve item');
+        }
+    } catch (error) {
+        alert('❌ Network error: ' + error.message);
+    }
+}
+
+async function rejectItem(itemId) {
+    if (!confirm('Are you sure you want to reject this item? It will be deleted from the queue.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/whis/queue/${itemId}/reject`, {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            alert('❌ Item rejected and removed from queue');
+            viewTrainedItems(); // Refresh the list
+            refreshQueueStatus();
+        } else {
+            alert('❌ Failed to reject item');
+        }
+    } catch (error) {
+        alert('❌ Network error: ' + error.message);
+    }
+}
+</script>
 {% endblock %} 

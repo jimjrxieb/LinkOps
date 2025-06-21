@@ -1,0 +1,336 @@
+{% extends "base.html" %}
+
+{% block title %}Whis Training Review - LinkOps Core{% endblock %}
+
+{% block content %}
+<h2>🧠 Whis Training Review Panel</h2>
+
+<!-- Main Training Buttons -->
+<div style="margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white;">
+    <h3 style="margin-top: 0; color: white;">🎯 Training Actions</h3>
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <button onclick="nightTraining()" style="background: #6f42c1; color: white; border: none; padding: 1rem 2rem; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            🌙 Night Training
+        </button>
+        <button onclick="getTrainingStats()" style="background: #17a2b8; color: white; border: none; padding: 1rem 2rem; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            📊 Training Stats
+        </button>
+        <button onclick="refreshApprovalQueue()" style="background: #ffc107; color: #212529; border: none; padding: 1rem 2rem; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            🔄 Refresh Queue
+        </button>
+    </div>
+    <div id="trainingStatus" style="margin-top: 1rem; padding: 0.5rem; background: rgba(255,255,255,0.1); border-radius: 4px; display: none;">
+        <div id="statusMessage"></div>
+    </div>
+</div>
+
+<div style="margin-bottom: 2rem; padding: 1rem; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3;">
+    <h3>🎯 Updated Training Workflow</h3>
+    <p><strong>🔒 No Manual Training:</strong> All input must come from sanitized James submissions (via /api/tasks or /api/logs).</p>
+    <p><strong>🌙 Night Training:</strong> Process all logs from today and update the correct static Orb (Whis, Katie, Igris, James).</p>
+    <p><strong>📋 Approval Queue:</strong> New Runes are flagged for human validation before becoming part of Whis's memory.</p>
+</div>
+
+<!-- Stats Section -->
+<div style="margin-bottom: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+    <h3>📊 System Statistics</h3>
+    <div id="systemStats" style="display: flex; gap: 2rem; margin-top: 1rem; flex-wrap: wrap;">
+        <div style="text-align: center;">
+            <div id="pendingApprovals" style="font-size: 2rem; font-weight: bold; color: #ffc107;">-</div>
+            <div>Pending Approvals</div>
+        </div>
+        <div style="text-align: center;">
+            <div id="totalRunes" style="font-size: 2rem; font-weight: bold; color: #17a2b8;">-</div>
+            <div>Total Runes</div>
+        </div>
+        <div style="text-align: center;">
+            <div id="totalLogs" style="font-size: 2rem; font-weight: bold; color: #28a745;">-</div>
+            <div>Total Logs</div>
+        </div>
+        <div style="text-align: center;">
+            <div id="recentActivity" style="font-size: 2rem; font-weight: bold; color: #6c757d;">-</div>
+            <div>Recent Activity</div>
+        </div>
+    </div>
+</div>
+
+<!-- Approval Queue Section -->
+<div style="margin-bottom: 2rem; padding: 1rem; background: #fff3cd; border-radius: 8px; border: 1px solid #ffeaa7;">
+    <h3>🟨 Orb & Rune Approval Queue</h3>
+    <p>New Runes awaiting human validation before becoming part of Whis's memory:</p>
+    
+    <div id="approvalQueue" style="margin-top: 1rem;">
+        <div style="text-align: center; padding: 2rem; color: #6c757d;">
+            <div>🔄 Loading approval queue...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Training Queue Section -->
+<div style="margin-bottom: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+    <h3>🔄 Training Queue Status</h3>
+    <p>Shows task_ids awaiting processing:</p>
+    
+    <div id="trainingQueue" style="margin-top: 1rem;">
+        <div style="text-align: center; padding: 2rem; color: #6c757d;">
+            <div>🔄 Loading training queue...</div>
+        </div>
+    </div>
+</div>
+
+<a href="/gui" class="back-link">← Back to Dashboard</a>
+
+<script>
+let approvalQueueItems = [];
+let trainingQueueStats = {};
+
+function showStatus(message, isError = false) {
+    const statusDiv = document.getElementById('trainingStatus');
+    const messageDiv = document.getElementById('statusMessage');
+    statusDiv.style.display = 'block';
+    statusDiv.style.background = isError ? 'rgba(220,53,69,0.2)' : 'rgba(40,167,69,0.2)';
+    messageDiv.innerHTML = message;
+    
+    setTimeout(() => {
+        statusDiv.style.display = 'none';
+    }, 5000);
+}
+
+async function nightTraining() {
+    if (!confirm('🌙 Run Night Training?\n\nThis will process all logs from today and:\n• Update the correct static Orbs (Whis, Katie, Igris, James)\n• Create new Runes (flagged for approval)\n• Increment counters for repeated tasks')) {
+        return;
+    }
+    
+    showStatus('🌙 Starting night training...', false);
+    
+    try {
+        const response = await fetch('/api/whis/train-nightly', {
+            method: 'POST'
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            const message = `
+                ✅ Night Training Complete!<br>
+                📊 Tasks Processed: ${data.tasks_processed}<br>
+                🧠 Runes Created: ${data.runes_created}<br>
+                🔄 Orbs Updated: ${data.orbs_updated.join(', ')}<br>
+                🔁 Repeated Tasks: ${data.repeated_tasks.length}
+            `;
+            showStatus(message, false);
+            
+            // Refresh queues after training
+            setTimeout(() => {
+                loadApprovalQueue();
+                loadTrainingQueue();
+                loadSystemStats();
+            }, 1000);
+        } else {
+            showStatus(`❌ Error: ${data.error || 'Unknown error'}`, true);
+        }
+    } catch (error) {
+        showStatus(`❌ Network error: ${error.message}`, true);
+    }
+}
+
+async function getTrainingStats() {
+    showStatus('📊 Loading training statistics...', false);
+    
+    try {
+        const response = await fetch('/api/whis/training-stats');
+        const data = await response.json();
+        
+        if (response.ok) {
+            const message = `
+                📊 Training Statistics<br>
+                📝 Logs Today: ${data.logs_today}<br>
+                🤖 Agent Breakdown: ${Object.entries(data.agent_breakdown).map(([agent, count]) => `${agent}: ${count}`).join(', ')}<br>
+                🧠 Orb Runes: ${Object.entries(data.orb_rune_counts).map(([orb, count]) => `${orb}: ${count}`).join(', ')}<br>
+                ⏳ Pending Approvals: ${data.pending_approvals}
+            `;
+            showStatus(message, false);
+        } else {
+            showStatus(`❌ Error: ${data.error || 'Unknown error'}`, true);
+        }
+    } catch (error) {
+        showStatus(`❌ Network error: ${error.message}`, true);
+    }
+}
+
+async function loadApprovalQueue() {
+    try {
+        const response = await fetch('/api/whis/approvals');
+        const data = await response.json();
+        
+        approvalQueueItems = data;
+        displayApprovalQueue(data);
+    } catch (error) {
+        console.error('Error loading approval queue:', error);
+        document.getElementById('approvalQueue').innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: #dc3545;">
+                <div>❌ Error loading approval queue: ${error.message}</div>
+            </div>
+        `;
+    }
+}
+
+function displayApprovalQueue(items) {
+    if (items.length === 0) {
+        document.getElementById('approvalQueue').innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: #6c757d;">
+                <div>✅ No runes awaiting approval</div>
+            </div>
+        `;
+        return;
+    }
+    
+    const itemsHtml = items.map(item => {
+        return `
+            <div style="margin-bottom: 1rem; padding: 1rem; background: white; border-radius: 8px; border: 1px solid #dee2e6; border-left: 4px solid #ffc107;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <h4 style="margin: 0;">🟨 ${item.task_id || 'Unknown Task'}</h4>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <span style="background: #ffc107; color: #212529; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">
+                            Pending Approval
+                        </span>
+                        <span style="background: #6c757d; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">
+                            ${item.orb}
+                        </span>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <strong>Created:</strong> ${new Date(item.created_at).toLocaleString()}
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <strong>Content:</strong>
+                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 4px; max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 0.9rem; white-space: pre-wrap;">
+                        ${item.script_content || 'No content available'}
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 0.5rem;">
+                    <button onclick="approveRune('${item.rune_id}')" style="background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">
+                        ✅ Approve Rune
+                    </button>
+                    <button onclick="viewRuneDetails('${item.rune_id}')" style="background: #17a2b8; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">
+                        👁️ View Details
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    document.getElementById('approvalQueue').innerHTML = itemsHtml;
+}
+
+async function approveRune(runeId) {
+    if (!confirm('Approve this rune? It will become part of Whis\'s memory.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/whis/approve-rune', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ rune_id: runeId })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showStatus(`✅ Rune approved! ID: ${runeId}`, false);
+            loadApprovalQueue(); // Refresh the queue
+            loadSystemStats(); // Refresh stats
+        } else {
+            showStatus(`❌ Error: ${data.detail || 'Unknown error'}`, true);
+        }
+    } catch (error) {
+        showStatus(`❌ Network error: ${error.message}`, true);
+    }
+}
+
+function viewRuneDetails(runeId) {
+    const rune = approvalQueueItems.find(item => item.rune_id === runeId);
+    if (rune) {
+        alert(`Rune Details:\n\nID: ${rune.rune_id}\nOrb: ${rune.orb}\nTask: ${rune.task_id}\nLanguage: ${rune.language}\nVersion: ${rune.version}\nCreated: ${new Date(rune.created_at).toLocaleString()}`);
+    }
+}
+
+async function loadTrainingQueue() {
+    try {
+        const response = await fetch('/api/whis/queue');
+        const data = await response.json();
+        
+        trainingQueueStats = data;
+        displayTrainingQueue(data);
+    } catch (error) {
+        console.error('Error loading training queue:', error);
+        document.getElementById('trainingQueue').innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: #dc3545;">
+                <div>❌ Error loading training queue: ${error.message}</div>
+            </div>
+        `;
+    }
+}
+
+function displayTrainingQueue(stats) {
+    const queueHtml = `
+        <div style="display: flex; gap: 2rem; margin-top: 1rem; flex-wrap: wrap;">
+            <div style="text-align: center;">
+                <div style="font-size: 2rem; font-weight: bold; color: #ffc107;">${stats.pending}</div>
+                <div>Pending</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 2rem; font-weight: bold; color: #17a2b8;">${stats.trained}</div>
+                <div>Trained</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 2rem; font-weight: bold; color: #28a745;">${stats.matches}</div>
+                <div>Matches</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 2rem; font-weight: bold; color: #dc3545;">${stats.fallbacks}</div>
+                <div>Fallbacks</div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('trainingQueue').innerHTML = queueHtml;
+}
+
+async function loadSystemStats() {
+    try {
+        const response = await fetch('/api/whis/stats');
+        const data = await response.json();
+        
+        if (response.ok) {
+            document.getElementById('pendingApprovals').textContent = data.pending_approvals || 0;
+            document.getElementById('totalRunes').textContent = data.total_runes || 0;
+            document.getElementById('totalLogs').textContent = data.total_logs || 0;
+            document.getElementById('recentActivity').textContent = data.recent_runes || 0;
+        }
+    } catch (error) {
+        console.error('Error loading system stats:', error);
+    }
+}
+
+function refreshApprovalQueue() {
+    loadApprovalQueue();
+    loadTrainingQueue();
+    loadSystemStats();
+    showStatus('🔄 Queues refreshed!', false);
+}
+
+// Load data on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadApprovalQueue();
+    loadTrainingQueue();
+    loadSystemStats();
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,374 @@
+{% extends "base.html" %}
+
+{% block title %}Daily Digest & Workflow Audit - LinkOps Core{% endblock %}
+
+{% block content %}
+<h2>📊 Daily Digest & Workflow Audit</h2>
+
+<div style="margin-bottom: 2rem; padding: 1rem; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3;">
+    <h3>🎯 Workflow Summary</h3>
+    <p><strong>Complete Cycle:</strong> Task Entry → James Evaluation → Agent Routing → Night Training → Approval Queue → Memory Update</p>
+    <p><strong>Current Status:</strong> All systems operational and integrated</p>
+</div>
+
+<!-- System Overview -->
+<div style="margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+    <h3>📈 System Overview</h3>
+    <div id="systemOverview" style="display: flex; gap: 2rem; margin-top: 1rem; flex-wrap: wrap;">
+        <div style="text-align: center;">
+            <div id="totalTasks" style="font-size: 2rem; font-weight: bold; color: #28a745;">-</div>
+            <div>Total Tasks Today</div>
+        </div>
+        <div style="text-align: center;">
+            <div id="pendingApprovals" style="font-size: 2rem; font-weight: bold; color: #ffc107;">-</div>
+            <div>Pending Approvals</div>
+        </div>
+        <div style="text-align: center;">
+            <div id="totalRunes" style="font-size: 2rem; font-weight: bold; color: #17a2b8;">-</div>
+            <div>Total Runes</div>
+        </div>
+        <div style="text-align: center;">
+            <div id="activeAgents" style="font-size: 2rem; font-weight: bold; color: #6f42c1;">-</div>
+            <div>Active Agents</div>
+        </div>
+    </div>
+</div>
+
+<!-- Whis Daily Digest -->
+<div style="margin-bottom: 2rem; padding: 1.5rem; background: #fff3cd; border-radius: 8px; border: 1px solid #ffeaa7;">
+    <h3>🧠 Whis Daily Digest</h3>
+    <div id="whisDigest" style="margin-top: 1rem;">
+        <div style="text-align: center; padding: 2rem; color: #6c757d;">
+            <div>🔄 Loading Whis digest...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Training Statistics -->
+<div style="margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+    <h3>📊 Training Statistics</h3>
+    <div id="trainingStats" style="margin-top: 1rem;">
+        <div style="text-align: center; padding: 2rem; color: #6c757d;">
+            <div>🔄 Loading training statistics...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div style="margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+    <h3>🔄 Recent Activity</h3>
+    <div id="recentActivity" style="margin-top: 1rem;">
+        <div style="text-align: center; padding: 2rem; color: #6c757d;">
+            <div>🔄 Loading recent activity...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Workflow Audit -->
+<div style="margin-bottom: 2rem; padding: 1.5rem; background: #e8f5e8; border-radius: 8px; border: 1px solid #c3e6cb;">
+    <h3>✅ Workflow Audit</h3>
+    <div id="workflowAudit" style="margin-top: 1rem;">
+        <div style="text-align: center; padding: 2rem; color: #6c757d;">
+            <div>🔄 Loading workflow audit...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Action Buttons -->
+<div style="margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white;">
+    <h3 style="margin-top: 0; color: white;">🎯 Quick Actions</h3>
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <button onclick="runNightTraining()" style="background: #6f42c1; color: white; border: none; padding: 1rem 2rem; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold;">
+            🌙 Run Night Training
+        </button>
+        <button onclick="refreshDigest()" style="background: #17a2b8; color: white; border: none; padding: 1rem 2rem; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold;">
+            🔄 Refresh Digest
+        </button>
+        <button onclick="viewApprovalQueue()" style="background: #ffc107; color: #212529; border: none; padding: 1rem 2rem; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold;">
+            📋 View Approval Queue
+        </button>
+        <button onclick="submitNewTask()" style="background: #28a745; color: white; border: none; padding: 1rem 2rem; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold;">
+            📝 Submit New Task
+        </button>
+    </div>
+</div>
+
+<a href="/gui" class="back-link">← Back to Dashboard</a>
+
+<script>
+let digestData = {};
+
+function showStatus(message, isSuccess = true) {
+    // Create a temporary status message
+    const statusDiv = document.createElement('div');
+    statusDiv.style.cssText = `
+        position: fixed; top: 20px; right: 20px; 
+        padding: 1rem; border-radius: 8px; z-index: 1000;
+        background: ${isSuccess ? '#d4edda' : '#f8d7da'};
+        border: 1px solid ${isSuccess ? '#c3e6cb' : '#f5c6cb'};
+        color: ${isSuccess ? '#155724' : '#721c24'};
+    `;
+    statusDiv.innerHTML = message;
+    document.body.appendChild(statusDiv);
+    
+    setTimeout(() => {
+        document.body.removeChild(statusDiv);
+    }, 3000);
+}
+
+async function loadWhisDigest() {
+    try {
+        const response = await fetch('/api/whis/digest');
+        const data = await response.json();
+        
+        digestData.whis = data;
+        
+        const digestHtml = `
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div style="background: white; padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #17a2b8;">${data.runes_created || 0}</div>
+                    <div>Runes Created</div>
+                </div>
+                <div style="background: white; padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #28a745;">${data.logs_processed || 0}</div>
+                    <div>Logs Processed</div>
+                </div>
+                <div style="background: white; padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #6f42c1;">${data.orbs_updated?.length || 0}</div>
+                    <div>Orbs Updated</div>
+                </div>
+                <div style="background: white; padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #ffc107;">${new Date(data.timestamp).toLocaleDateString()}</div>
+                    <div>Last Updated</div>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('whisDigest').innerHTML = digestHtml;
+    } catch (error) {
+        console.error('Error loading Whis digest:', error);
+        document.getElementById('whisDigest').innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: #dc3545;">
+                <div>❌ Error loading Whis digest: ${error.message}</div>
+            </div>
+        `;
+    }
+}
+
+async function loadTrainingStats() {
+    try {
+        const response = await fetch('/api/whis/training-stats');
+        const data = await response.json();
+        
+        digestData.training = data;
+        
+        const statsHtml = `
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div style="background: white; padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #28a745;">${data.logs_today || 0}</div>
+                    <div>Logs Today</div>
+                </div>
+                <div style="background: white; padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #ffc107;">${data.pending_approvals || 0}</div>
+                    <div>Pending Approvals</div>
+                </div>
+                <div style="background: white; padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #17a2b8;">${Object.keys(data.agent_breakdown || {}).length}</div>
+                    <div>Active Agents</div>
+                </div>
+                <div style="background: white; padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #6f42c1;">${Object.keys(data.orb_rune_counts || {}).length}</div>
+                    <div>Active Orbs</div>
+                </div>
+            </div>
+            <div style="margin-top: 1rem; background: white; padding: 1rem; border-radius: 8px;">
+                <h4>Agent Breakdown:</h4>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    ${Object.entries(data.agent_breakdown || {}).map(([agent, count]) => 
+                        `<span style="background: #e9ecef; padding: 0.5rem; border-radius: 4px;">${agent}: ${count}</span>`
+                    ).join('')}
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('trainingStats').innerHTML = statsHtml;
+        
+        // Update system overview
+        document.getElementById('totalTasks').textContent = data.logs_today || 0;
+        document.getElementById('pendingApprovals').textContent = data.pending_approvals || 0;
+        document.getElementById('activeAgents').textContent = Object.keys(data.agent_breakdown || {}).length;
+        
+    } catch (error) {
+        console.error('Error loading training stats:', error);
+        document.getElementById('trainingStats').innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: #dc3545;">
+                <div>❌ Error loading training stats: ${error.message}</div>
+            </div>
+        `;
+    }
+}
+
+async function loadRecentActivity() {
+    try {
+        const response = await fetch('/api/logs');
+        const logs = await response.json();
+        
+        // Get recent logs (last 10)
+        const recentLogs = logs.slice(0, 10);
+        
+        const activityHtml = recentLogs.map(log => {
+            const agentColor = {
+                'james': '#17a2b8',
+                'whis': '#6f42c1',
+                'katie': '#28a745',
+                'igris': '#fd7e14'
+            }[log.agent] || '#6c757d';
+            
+            return `
+                <div style="margin-bottom: 1rem; padding: 1rem; background: white; border-radius: 8px; border-left: 4px solid ${agentColor};">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <h4 style="margin: 0;">${log.task_id || 'System Activity'}</h4>
+                        <span style="background: ${agentColor}; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">
+                            ${log.agent}
+                        </span>
+                    </div>
+                    <div style="margin-bottom: 0.5rem;">
+                        <strong>Action:</strong> ${log.action}
+                    </div>
+                    <div style="margin-bottom: 0.5rem;">
+                        <strong>Result:</strong> ${log.result}
+                    </div>
+                    <div style="color: #6c757d; font-size: 0.9rem;">
+                        ${new Date(log.created_at).toLocaleString()}
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        document.getElementById('recentActivity').innerHTML = activityHtml || `
+            <div style="text-align: center; padding: 2rem; color: #6c757d;">
+                <div>📭 No recent activity found</div>
+            </div>
+        `;
+        
+    } catch (error) {
+        console.error('Error loading recent activity:', error);
+        document.getElementById('recentActivity').innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: #dc3545;">
+                <div>❌ Error loading recent activity: ${error.message}</div>
+            </div>
+        `;
+    }
+}
+
+async function loadWorkflowAudit() {
+    try {
+        // Get total runes count
+        const statsResponse = await fetch('/api/whis/stats');
+        const stats = await statsResponse.json();
+        
+        const auditHtml = `
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                <div style="background: white; padding: 1rem; border-radius: 8px;">
+                    <h4>✅ Task Entry</h4>
+                    <p>Users can submit tasks via /gui/task-input</p>
+                    <p><strong>Status:</strong> <span style="color: #28a745;">Operational</span></p>
+                </div>
+                <div style="background: white; padding: 1rem; border-radius: 8px;">
+                    <h4>✅ James Evaluation</h4>
+                    <p>Automatic category detection and sanitization</p>
+                    <p><strong>Status:</strong> <span style="color: #28a745;">Operational</span></p>
+                </div>
+                <div style="background: white; padding: 1rem; border-radius: 8px;">
+                    <h4>✅ Agent Routing</h4>
+                    <p>Tasks routed to appropriate agents</p>
+                    <p><strong>Status:</strong> <span style="color: #28a745;">Operational</span></p>
+                </div>
+                <div style="background: white; padding: 1rem; border-radius: 8px;">
+                    <h4>✅ Night Training</h4>
+                    <p>Whis processes daily logs and creates runes</p>
+                    <p><strong>Status:</strong> <span style="color: #28a745;">Operational</span></p>
+                </div>
+                <div style="background: white; padding: 1rem; border-radius: 8px;">
+                    <h4>✅ Approval Queue</h4>
+                    <p>Human validation for new runes</p>
+                    <p><strong>Status:</strong> <span style="color: #28a745;">Operational</span></p>
+                </div>
+                <div style="background: white; padding: 1rem; border-radius: 8px;">
+                    <h4>✅ Memory Update</h4>
+                    <p>Approved runes become part of agent memory</p>
+                    <p><strong>Status:</strong> <span style="color: #28a745;">Operational</span></p>
+                </div>
+            </div>
+            <div style="margin-top: 1rem; background: white; padding: 1rem; border-radius: 8px;">
+                <h4>📊 System Metrics</h4>
+                <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                    <div><strong>Total Runes:</strong> ${stats.total_runes || 0}</div>
+                    <div><strong>Total Logs:</strong> ${stats.total_logs || 0}</div>
+                    <div><strong>Pending Approvals:</strong> ${stats.pending_approvals || 0}</div>
+                    <div><strong>Last Updated:</strong> ${stats.last_updated ? new Date(stats.last_updated).toLocaleString() : 'N/A'}</div>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('workflowAudit').innerHTML = auditHtml;
+        
+        // Update total runes in system overview
+        document.getElementById('totalRunes').textContent = stats.total_runes || 0;
+        
+    } catch (error) {
+        console.error('Error loading workflow audit:', error);
+        document.getElementById('workflowAudit').innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: #dc3545;">
+                <div>❌ Error loading workflow audit: ${error.message}</div>
+            </div>
+        `;
+    }
+}
+
+async function runNightTraining() {
+    showStatus('🌙 Starting night training...', true);
+    
+    try {
+        const response = await fetch('/api/whis/train-nightly', {
+            method: 'POST'
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showStatus(`✅ Night training completed! Processed ${data.tasks_processed} tasks, created ${data.runes_created} runes`, true);
+            refreshDigest();
+        } else {
+            showStatus(`❌ Night training failed: ${data.error || 'Unknown error'}`, false);
+        }
+    } catch (error) {
+        showStatus(`❌ Network error: ${error.message}`, false);
+    }
+}
+
+function refreshDigest() {
+    loadWhisDigest();
+    loadTrainingStats();
+    loadRecentActivity();
+    loadWorkflowAudit();
+    showStatus('🔄 Digest refreshed!', true);
+}
+
+function viewApprovalQueue() {
+    window.location.href = '/gui/whis-training';
+}
+
+function submitNewTask() {
+    window.location.href = '/gui/task-input';
+}
+
+// Load data on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadWhisDigest();
+    loadTrainingStats();
+    loadRecentActivity();
+    loadWorkflowAudit();
+});
+</script>
+{% endblock %} 

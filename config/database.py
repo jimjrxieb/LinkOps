@@ -7,9 +7,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import QueuePool
 
-from config.settings import get_settings
-
-settings = get_settings()
+from config.settings import settings
 
 # Create SQLAlchemy engine
 engine = create_engine(

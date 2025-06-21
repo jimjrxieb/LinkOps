@@ -8,6 +8,9 @@ sqlalchemy==2.0.23
 psycopg2-binary==2.9.9
 alembic==1.12.1
 
+# Data processing
+pandas==2.2.2
+
 # Environment and configuration
 python-dotenv==1.0.0
 pydantic==2.5.0

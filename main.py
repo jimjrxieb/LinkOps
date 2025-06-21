@@ -7,14 +7,16 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from dotenv import load_dotenv
 
 from core.api.app import create_app
-from config.settings import get_settings
+from config.settings import settings
+
+# Load environment variables from .env file
+load_dotenv()
 
 def main():
     """Main application entry point"""
-    settings = get_settings()
-    
     # Create FastAPI application
     app = create_app()
     

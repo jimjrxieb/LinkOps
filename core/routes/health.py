@@ -9,8 +9,8 @@ import psutil
 import os
 
 from config.database import get_db
-from config.kafka import get_kafka_manager
-from config.settings import get_settings
+# from config.kafka import get_kafka_manager  # DISABLED - Kafka removed for simplicity
+from config.settings import settings
 
 router = APIRouter()
 
@@ -28,8 +28,6 @@ async def health_check():
 @router.get("/detailed")
 async def detailed_health_check(db: Session = Depends(get_db)):
     """Detailed health check with database and system metrics"""
-    settings = get_settings()
-    
     # Check database connection
     db_status = "healthy"
     try:
@@ -38,13 +36,13 @@ async def detailed_health_check(db: Session = Depends(get_db)):
         db_status = f"unhealthy: {str(e)}"
     
     # Check Kafka connection
-    kafka_status = "healthy"
-    try:
-        kafka_manager = get_kafka_manager()
-        producer = kafka_manager.get_producer()
-        # Simple test - this would need proper error handling in production
-    except Exception as e:
-        kafka_status = f"unhealthy: {str(e)}"
+    kafka_status = "disabled"  # Kafka removed for simplicity
+    # try:
+    #     kafka_manager = get_kafka_manager()
+    #     producer = kafka_manager.get_producer()
+    #     # Simple test - this would need proper error handling in production
+    # except Exception as e:
+    #     kafka_status = f"unhealthy: {str(e)}"
     
     # System metrics
     system_info = {

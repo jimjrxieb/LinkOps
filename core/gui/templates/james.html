@@ -1,27 +1,442 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>🤖 James Link Assistant</h2>
+<h2>🧠 James: AI Task Triage & Resolution</h2>
 
-<form method="get">
-  Ask a question: <input type="text" name="q" size="80" placeholder="e.g. show me kubernetes orbs">
-  <input type="submit" value="Ask">
-</form>
+<div style="margin-bottom: 2rem; padding: 1rem; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3;">
+    <h3>🎯 How James Works</h3>
+    <p><strong>James is the active worker.</strong> He searches existing Orbs/Runes for matches, and when no match is found, he saves tasks to Whis (the student) for overnight training.</p>
+    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+        <li>✅ <strong>Match Found:</strong> Logs usage and returns the matching rune</li>
+        <li>❌ <strong>No Match:</strong> Sends to Whis queue for overnight training</li>
+        <li>🧠 <strong>Night Training:</strong> Whis learns from the queue and updates orbs</li>
+    </ul>
+</div>
 
-{% if results %}
-  <h3>James Found These Orbs:</h3>
-  <ul>
-    {% for orb in results %}
-      <li>
-        <strong>{{ orb.name }}</strong> ({{ orb.category }})<br>
-        {{ orb.description }}
-      </li>
-      <hr>
-    {% endfor %}
-  </ul>
-{% elif query %}
-  <p>No orbs found for: <strong>{{ query }}</strong></p>
-{% endif %}
+<!-- Task Input Form -->
+<div style="margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+    <h3>📝 Task Input</h3>
+    <form id="taskInputForm" onsubmit="handleTaskSubmit(event)">
+        <div style="margin-bottom: 1rem;">
+            <label for="taskId" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Task ID:</label>
+            <input 
+                type="text" 
+                id="taskId" 
+                name="taskId" 
+                placeholder="e.g., kubernetes/pod-creation, mlflow/training" 
+                style="width: 100%; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px;"
+                required
+            />
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <label for="dump" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Content:</label>
+            <textarea 
+                id="dump" 
+                name="dump" 
+                rows="8" 
+                placeholder="Paste logs, YAML, answers, or any content here..." 
+                style="width: 100%; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px; resize: vertical;"
+                required
+            ></textarea>
+        </div>
+        
+        <button 
+            type="submit" 
+            style="background: #007bff; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; font-weight: bold;"
+        >
+            🚀 Submit to James
+        </button>
+    </form>
+    
+    <div id="taskResult" style="margin-top: 1rem; display: none;"></div>
+</div>
 
-<a href="/gui">← Back to GUI</a>
+<!-- Exam-Style Task & Answer Form -->
+<div style="margin-bottom: 2rem; padding: 1.5rem; background: #fff3cd; border-radius: 8px; border: 1px solid #ffeaa7;">
+    <h3>🧪 Exam-Style Task & Answer</h3>
+    <form id="examForm" onsubmit="handleExamSubmit(event)">
+        <div style="margin-bottom: 1rem;">
+            <label for="examTaskId" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Task ID:</label>
+            <input 
+                type="text" 
+                id="examTaskId" 
+                name="examTaskId" 
+                placeholder="e.g., terraform/local-exec, kubernetes/deployment" 
+                style="width: 100%; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px;"
+                required
+            />
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <label for="examQuestion" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Question:</label>
+            <textarea 
+                id="examQuestion" 
+                name="examQuestion" 
+                rows="4" 
+                placeholder="Paste exam question here..." 
+                style="width: 100%; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px; resize: vertical;"
+                required
+            ></textarea>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <label for="examAnswer" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Correct Answer:</label>
+            <textarea 
+                id="examAnswer" 
+                name="examAnswer" 
+                rows="4" 
+                placeholder="Paste correct answer here..." 
+                style="width: 100%; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px; resize: vertical;"
+                required
+            ></textarea>
+        </div>
+        
+        <button 
+            type="submit" 
+            style="background: #ffc107; color: #212529; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; font-weight: bold;"
+        >
+            🎓 Submit for Training
+        </button>
+    </form>
+    
+    <div id="examResult" style="margin-top: 1rem; display: none;"></div>
+</div>
+
+<!-- Image Upload Form -->
+<div style="margin-top: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+    <h3>📸 Image Upload (OCR)</h3>
+    <form id="imageUploadForm" enctype="multipart/form-data">
+        <div style="margin-bottom: 1rem;">
+            <label for="imageTaskId" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Task ID:</label>
+            <input type="text" id="imageTaskId" name="task_id" placeholder="e.g., k8s/ocr-task, mlflow/screenshot" style="width: 100%; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px;">
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <label for="imageFile" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Screenshot:</label>
+            <input type="file" id="imageFile" name="file" accept="image/*" required style="width: 100%; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px;">
+        </div>
+        
+        <button type="submit" style="background: #28a745; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; font-weight: bold;">
+            📸 Upload & Process
+        </button>
+    </form>
+    
+    <div id="imageResult" style="margin-top: 1rem; display: none;"></div>
+    <div id="ocrApproval" style="margin-top: 1rem; display: none;">
+        <h4>📝 Review & Approve OCR Text</h4>
+        <textarea id="ocrTextArea" rows="10" style="width: 100%; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px; margin-bottom: 1rem;"></textarea>
+        <button id="approveOcrBtn" style="background: #007bff; color: white; border: none; padding: 0.5rem 1.5rem; border-radius: 4px; cursor: pointer; font-weight: bold;">Approve & Queue</button>
+        <div id="ocrQueueResult" style="margin-top: 1rem;"></div>
+    </div>
+</div>
+
+<!-- Legacy search form (kept for backward compatibility) -->
+<div style="margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+    <h3>🔍 Legacy Search</h3>
+    <form method="get">
+        Ask a question: <input type="text" name="q" size="80" placeholder="e.g. show me kubernetes orbs">
+        <input type="submit" value="Ask">
+    </form>
+
+    {% if results %}
+        <h4>James Found These Orbs:</h4>
+        <ul>
+            {% for orb in results %}
+                <li>
+                    <strong>{{ orb.name }}</strong> ({{ orb.category }})<br>
+                    {{ orb.description }}
+                </li>
+                <hr>
+            {% endfor %}
+        </ul>
+    {% elif query %}
+        <p>No orbs found for: <strong>{{ query }}</strong></p>
+    {% endif %}
+</div>
+
+<a href="/gui" class="back-link">← Back to Dashboard</a>
+
+<script>
+async function handleTaskSubmit(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const taskId = form.taskId.value;
+    const dump = form.dump.value;
+    const resultDiv = document.getElementById('taskResult');
+    
+    // Show loading
+    resultDiv.innerHTML = '<div style="color: #007bff;">🔄 James is processing your task...</div>';
+    resultDiv.style.display = 'block';
+    
+    try {
+        const response = await fetch('/api/james/complete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ task_id: taskId, dump: dump })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            if (data.match) {
+                // Match found - James found a rune
+                resultDiv.innerHTML = `
+                    <div style="background: #d4edda; color: #155724; padding: 1rem; border-radius: 4px; border: 1px solid #c3e6cb;">
+                        <h4>🎯 Match Found!</h4>
+                        <p><strong>Rune:</strong> ${data.rune}</p>
+                        <p><strong>Orb ID:</strong> ${data.orb_id}</p>
+                        <p><strong>Language:</strong> ${data.language}</p>
+                        <p><strong>Feedback Score:</strong> ${data.feedback_score}</p>
+                        <p><strong>Usage Count:</strong> ${data.feedback_count}</p>
+                        <div style="margin-top: 1rem;">
+                            <button onclick="provideFeedback('${data.rune_id}', 1)" style="background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; margin-right: 0.5rem;">
+                                👍 Good Match
+                            </button>
+                            <button onclick="provideFeedback('${data.rune_id}', -1)" style="background: #dc3545; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">
+                                👎 Bad Match
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // No match - sent to Whis queue
+                resultDiv.innerHTML = `
+                    <div style="background: #fff3cd; color: #856404; padding: 1rem; border-radius: 4px; border: 1px solid #ffeaa7;">
+                        <h4>💬 No Match Found</h4>
+                        <p>James couldn't find a matching rune for this task.</p>
+                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 4px; margin: 1rem 0;">
+                            <h5>OpenAI Fallback Response:</h5>
+                            <pre style="white-space: pre-wrap; font-family: monospace;">${data.fallback}</pre>
+                        </div>
+                        <p><strong>Status:</strong> Task saved to Whis queue for overnight training</p>
+                        <p><strong>Queue ID:</strong> ${data.queue_id || 'N/A'}</p>
+                        <div style="margin-top: 1rem;">
+                            <button onclick="viewWhisQueue()" style="background: #17a2b8; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">
+                                📋 View Whis Queue
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Clear form on success
+            form.reset();
+        } else {
+            resultDiv.innerHTML = `
+                <div style="background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 4px; border: 1px solid #f5c6cb;">
+                    <h4>❌ Error</h4>
+                    <p>${data.detail || 'Unknown error occurred'}</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        resultDiv.innerHTML = `
+            <div style="background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 4px; border: 1px solid #f5c6cb;">
+                <h4>❌ Network Error</h4>
+                <p>${error.message}</p>
+            </div>
+        `;
+    }
+}
+
+async function handleExamSubmit(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const taskId = form.examTaskId.value;
+    const question = form.examQuestion.value;
+    const answer = form.examAnswer.value;
+    const resultDiv = document.getElementById('examResult');
+    
+    // Show loading
+    resultDiv.innerHTML = '<div style="color: #007bff;">🔄 Submitting exam data for training...</div>';
+    resultDiv.style.display = 'block';
+    
+    try {
+        const response = await fetch('/api/james/submit-answer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                task_id: taskId, 
+                question: question, 
+                answer: answer 
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            resultDiv.innerHTML = `
+                <div style="background: #d4edda; color: #155724; padding: 1rem; border-radius: 4px; border: 1px solid #c3e6cb;">
+                    <h4>✅ Exam Data Submitted!</h4>
+                    <p><strong>Task ID:</strong> ${data.task_id}</p>
+                    <p><strong>Assigned Agent:</strong> ${data.agent}</p>
+                    <p><strong>Status:</strong> Queued for Whis training</p>
+                    <p><strong>Source:</strong> exam_data (high confidence)</p>
+                    <div style="margin-top: 1rem;">
+                        <button onclick="viewWhisQueue()" style="background: #17a2b8; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">
+                            📋 View Whis Queue
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Clear form on success
+            form.reset();
+        } else {
+            resultDiv.innerHTML = `
+                <div style="background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 4px; border: 1px solid #f5c6cb;">
+                    <h4>❌ Error</h4>
+                    <p>${data.detail || 'Unknown error occurred'}</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        resultDiv.innerHTML = `
+            <div style="background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 4px; border: 1px solid #f5c6cb;">
+                <h4>❌ Network Error</h4>
+                <p>${error.message}</p>
+            </div>
+        `;
+    }
+}
+
+async function provideFeedback(runeId, score) {
+    try {
+        const response = await fetch(`/api/runes/${runeId}/feedback`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ score: score, comment: "User feedback from James interface" })
+        });
+        
+        if (response.ok) {
+            alert(score > 0 ? '👍 Feedback recorded!' : '👎 Feedback recorded!');
+        } else {
+            alert('❌ Failed to record feedback');
+        }
+    } catch (error) {
+        alert('❌ Network error: ' + error.message);
+    }
+}
+
+function viewWhisQueue() {
+    window.open('/gui/whis/training', '_blank');
+}
+
+// Image upload handling
+const imageResultDiv = document.getElementById('imageResult');
+const ocrApprovalDiv = document.getElementById('ocrApproval');
+const ocrTextArea = document.getElementById('ocrTextArea');
+const approveOcrBtn = document.getElementById('approveOcrBtn');
+const ocrQueueResultDiv = document.getElementById('ocrQueueResult');
+
+document.getElementById('imageUploadForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const taskId = form.task_id.value || 'k8s/ocr-task';
+    const fileInput = form.file;
+    
+    if (!fileInput.files[0]) {
+        alert('Please select an image file');
+        return;
+    }
+    
+    // Show loading
+    imageResultDiv.innerHTML = '<div style="color: #007bff;">🔄 Processing image with OCR...</div>';
+    imageResultDiv.style.display = 'block';
+    ocrApprovalDiv.style.display = 'none';
+    ocrQueueResultDiv.innerHTML = '';
+    
+    try {
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        formData.append('task_id', taskId);
+        
+        const response = await fetch('/api/james/upload-image', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            imageResultDiv.innerHTML = `
+                <div style=\"background: #d4edda; color: #155724; padding: 1rem; border-radius: 4px; border: 1px solid #c3e6cb;\">
+                    <h4>✅ Image Processed!</h4>
+                    <p><strong>Agent:</strong> ${data.agent}</p>
+                    <p><strong>Lines Extracted:</strong> ${data.lines_extracted}</p>
+                    <p><strong>Status:</strong> Preview below. Edit if needed, then Approve & Queue.</p>
+                </div>
+            `;
+            // Show approval UI with preview
+            ocrTextArea.value = data.preview.replace(/\\n/g, '\n');
+            ocrApprovalDiv.style.display = 'block';
+            // Store taskId for approval step
+            ocrApprovalDiv.dataset.taskId = taskId;
+        } else {
+            imageResultDiv.innerHTML = `
+                <div style=\"background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 4px; border: 1px solid #f5c6cb;\">
+                    <h4>❌ Error</h4>
+                    <p>${data.detail || 'Unknown error occurred'}</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        imageResultDiv.innerHTML = `
+            <div style=\"background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 4px; border: 1px solid #f5c6cb;\">
+                <h4>❌ Network Error</h4>
+                <p>${error.message}</p>
+            </div>
+        `;
+    }
+});
+
+approveOcrBtn.onclick = async function() {
+    const taskId = ocrApprovalDiv.dataset.taskId || 'k8s/ocr-task';
+    const rawText = ocrTextArea.value;
+    ocrQueueResultDiv.innerHTML = '<div style="color: #007bff;">🔄 Queuing for Whis...</div>';
+    try {
+        const response = await fetch('/api/james/queue-ocr', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ task_id: taskId, raw_text: rawText })
+        });
+        const data = await response.json();
+        if (response.ok) {
+            ocrQueueResultDiv.innerHTML = `
+                <div style=\"background: #d4edda; color: #155724; padding: 1rem; border-radius: 4px; border: 1px solid #c3e6cb;\">
+                    <h4>✅ Queued for Whis!</h4>
+                    <p><strong>Agent:</strong> ${data.agent}</p>
+                    <p><strong>Lines Queued:</strong> ${data.lines}</p>
+                    <p><strong>Queue ID:</strong> ${data.queue_id}</p>
+                </div>
+            `;
+            ocrApprovalDiv.style.display = 'none';
+        } else {
+            ocrQueueResultDiv.innerHTML = `
+                <div style=\"background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 4px; border: 1px solid #f5c6cb;\">
+                    <h4>❌ Error</h4>
+                    <p>${data.detail || 'Unknown error occurred'}</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        ocrQueueResultDiv.innerHTML = `
+            <div style=\"background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 4px; border: 1px solid #f5c6cb;\">
+                <h4>❌ Network Error</h4>
+                <p>${error.message}</p>
+            </div>
+        `;
+    }
+};
+</script>
 {% endblock %} 

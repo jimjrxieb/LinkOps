@@ -7,15 +7,16 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 import uuid
 from datetime import datetime
+import re
 
 from config.database import get_db
-from config.kafka import get_kafka_manager
-from config.settings import get_settings
-from core.models.schemas import LinkCreate, LinkResponse, LinkUpdate
+# from config.kafka import get_kafka_manager  # DISABLED - Kafka removed for simplicity
+from config.settings import settings
+from core.models.schemas import LinkCreate, LinkResponse, LinkUpdate, WhisMemoryInput, WhisMemoryResponse
 from core.models.entities import Link
+from core.db.models import Orb, Rune
 
 router = APIRouter()
-settings = get_settings()
 
 
 @router.get("/links", response_model=List[LinkResponse])
@@ -57,15 +58,15 @@ async def create_link(
     db.refresh(db_link)
     
     # Send message to Kafka
-    kafka_manager = get_kafka_manager()
-    kafka_manager.send_message(
-        topic=f"{settings.KAFKA_TOPIC_PREFIX}.links.created",
-        message={
-            "link_id": db_link.id,
-            "url": db_link.url,
-            "timestamp": datetime.utcnow().isoformat()
-        }
-    )
+    # kafka_manager = get_kafka_manager()
+    # kafka_manager.send_message(
+    #     topic=f"{settings.KAFKA_TOPIC_PREFIX}.links.created",
+    #     message={
+    #         "link_id": db_link.id,
+    #         "url": db_link.url,
+    #         "timestamp": datetime.utcnow().isoformat()
+    #     }
+    # )
     
     return db_link
 
@@ -90,14 +91,14 @@ async def update_link(
     db.refresh(db_link)
     
     # Send message to Kafka
-    kafka_manager = get_kafka_manager()
-    kafka_manager.send_message(
-        topic=f"{settings.KAFKA_TOPIC_PREFIX}.links.updated",
-        message={
-            "link_id": db_link.id,
-            "timestamp": datetime.utcnow().isoformat()
-        }
-    )
+    # kafka_manager = get_kafka_manager()
+    # kafka_manager.send_message(
+    #     topic=f"{settings.KAFKA_TOPIC_PREFIX}.links.updated",
+    #     message={
+    #         "link_id": db_link.id,
+    #         "timestamp": datetime.utcnow().isoformat()
+    #     }
+    # )
     
     return db_link
 
@@ -113,14 +114,14 @@ async def delete_link(link_id: str, db: Session = Depends(get_db)):
     db.commit()
     
     # Send message to Kafka
-    kafka_manager = get_kafka_manager()
-    kafka_manager.send_message(
-        topic=f"{settings.KAFKA_TOPIC_PREFIX}.links.deleted",
-        message={
-            "link_id": link_id,
-            "timestamp": datetime.utcnow().isoformat()
-        }
-    )
+    # kafka_manager = get_kafka_manager()
+    # kafka_manager.send_message(
+    #     topic=f"{settings.KAFKA_TOPIC_PREFIX}.links.deleted",
+    #     message={
+    #         "link_id": link_id,
+    #         "timestamp": datetime.utcnow().isoformat()
+    #     }
+    # )
     
     return {"message": "Link deleted successfully"}
 
@@ -156,3 +157,71 @@ async def upload_screenshot(
         "filename": screenshot_filename,
         "path": screenshot_path
     }
+
+
+def infer_task_id(task: str) -> str:
+    """Extract a task ID from the task description"""
+    # Simple heuristic: take first few words and clean them
+    words = task.split()[:3]  # Take first 3 words
+    task_id = "_".join(words).lower()
+    # Remove special characters except underscores and hyphens
+    task_id = re.sub(r'[^a-z0-9_-]', '', task_id)
+    return task_id[:50]  # Limit length
+
+
+def generate_orb_tips(task: str, tips: Optional[str] = None) -> str:
+    """Generate orb description with tips"""
+    description = task
+    if tips:
+        description += f"\n\nTips:\n{tips}"
+    return description
+
+
+def extract_rune_template(solution: str) -> str:
+    """Extract rune template from solution"""
+    # For now, just return the solution as-is
+    # This could be enhanced with AI processing later
+    return solution
+
+
+@router.post("/api/whis/tasks", response_model=WhisMemoryResponse)
+async def create_whis_memory(request: WhisMemoryInput, db: Session = Depends(get_db)):
+    """Create Whis memory (Orb + Rune) from task and solution"""
+    try:
+        # Step 1: Sanitize
+        task_id = infer_task_id(request.task)
+        orb_description = generate_orb_tips(request.task, request.tips)
+        rune_content = extract_rune_template(request.solution)
+
+        # Step 2: Save to Orbs and Runes
+        db_orb = Orb(
+            name=f"Whis Task: {task_id}",
+            description=orb_description,
+            category=request.category
+        )
+        db.add(db_orb)
+        db.commit()
+        db.refresh(db_orb)
+
+        # Create the Rune
+        db_rune = Rune(
+            orb_id=db_orb.id,
+            script_path=f"/memory/whis/{task_id}.rune",
+            script_content=rune_content,
+            language="python",
+            version=1
+        )
+        db.add(db_rune)
+        db.commit()
+        db.refresh(db_rune)
+
+        return WhisMemoryResponse(
+            status="stored",
+            orb_id=str(db_orb.id),
+            rune_id=str(db_rune.id),
+            task_id=task_id
+        )
+        
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to create Whis memory: {str(e)}")

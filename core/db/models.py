@@ -2,7 +2,7 @@
 SQLAlchemy models for LinkOps Core
 """
 
-from sqlalchemy import Column, String, Text, Integer, DateTime, UUID, ForeignKey, func
+from sqlalchemy import Column, String, Text, Integer, DateTime, UUID, ForeignKey, func, Boolean, Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -46,10 +46,18 @@ class Rune(Base):
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     orb_id = Column(UUID(as_uuid=True), ForeignKey("orbs.id"), nullable=False, index=True)
-    script_path = Column(String(500), nullable=False)
+    script_path = Column(String(500), nullable=True)  # Made nullable since we'll use script_content
+    script_content = Column(Text, nullable=True)  # Store actual script content
     language = Column(String(50), nullable=False, index=True)
     version = Column(Integer, default=1, nullable=False)
+    task_id = Column(String(255), nullable=True, index=True)  # Task identifier
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    
+    # Feedback fields
+    feedback_score = Column(Float, default=0.0)
+    feedback_count = Column(Integer, default=0)
+    last_feedback = Column(Text)
+    is_flagged = Column(Boolean, default=False)
     
     # Relationship to orb
     orb = relationship("Orb", back_populates="runes")
@@ -63,8 +71,42 @@ class Rune(Base):
             "id": str(self.id),
             "orb_id": str(self.orb_id),
             "script_path": self.script_path,
+            "script_content": self.script_content,
             "language": self.language,
             "version": self.version,
+            "task_id": self.task_id,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "feedback_score": self.feedback_score,
+            "feedback_count": self.feedback_count,
+            "last_feedback": self.last_feedback,
+            "is_flagged": self.is_flagged
+        }
+
+
+class WhisQueue(Base):
+    """Whis Queue model for storing tasks that need training"""
+    __tablename__ = "whis_queue"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    task_id = Column(String(255), nullable=False, index=True)
+    raw_text = Column(Text, nullable=False)
+    source = Column(String(100), default="james")  # e.g., "openai_fallback", "exam_data"
+    status = Column(String(50), default="pending", index=True)  # pending, trained, approved
+    agent = Column(String(100))  # NEW: katie, igris, whis, james
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    
+    def __repr__(self):
+        return f"<WhisQueue(id='{self.id}', task_id='{self.task_id}', source='{self.source}', status='{self.status}')>"
+    
+    def to_dict(self):
+        """Convert model to dictionary"""
+        return {
+            "id": str(self.id),
+            "task_id": self.task_id,
+            "raw_text": self.raw_text,
+            "source": self.source,
+            "status": self.status,
+            "agent": self.agent,
             "created_at": self.created_at.isoformat() if self.created_at else None
         }
 

@@ -3,25 +3,174 @@
 {% block title %}Orbs - LinkOps Core{% endblock %}
 
 {% block content %}
-<h2>🔮 All Orbs</h2>
-
-{% if orbs %}
-    <div style="display: grid; gap: 1rem;">
+<div class="container">
+    <h1>🔮 Orbs</h1>
+    <p>Your AI-generated knowledge orbs with executable runes.</p>
+    
+    <div class="orbs-grid">
         {% for orb in orbs %}
-        <div class="card">
-            <h3>{{ orb.name }}</h3>
-            <p><strong>Category:</strong> {{ orb.category }}</p>
-            <p><strong>Description:</strong> {{ orb.description }}</p>
-            <p><strong>Created:</strong> {{ orb.created_at.strftime('%Y-%m-%d %H:%M:%S') if orb.created_at else 'Unknown' }}</p>
-            <p><strong>Updated:</strong> {{ orb.updated_at.strftime('%Y-%m-%d %H:%M:%S') if orb.updated_at else 'Never' }}</p>
+        <div class="orb-card">
+            <div class="orb-header">
+                <h3>{{ orb.name }}</h3>
+                <span class="category-badge">{{ orb.category }}</span>
+            </div>
+            <p class="orb-description">{{ orb.description }}</p>
+            <div class="orb-meta">
+                <small>Created: {{ orb.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+            </div>
+            
+            <!-- Display associated Runes -->
+            {% if orb.runes %}
+            <div class="runes-section">
+                <h4>✨ Runes ({{ orb.runes|length }})</h4>
+                {% for rune in orb.runes %}
+                <div class="rune-item">
+                    <div class="rune-header">
+                        <span class="language-badge">{{ rune.language }}</span>
+                        <span class="version-badge">v{{ rune.version }}</span>
+                    </div>
+                    {% if rune.script_content %}
+                    <pre class="script-preview"><code>{{ rune.script_content[:200] }}{% if rune.script_content|length > 200 %}...{% endif %}</code></pre>
+                    {% endif %}
+                    <small>Created: {{ rune.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="no-runes">
+                <p>No runes yet for this orb.</p>
+            </div>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="no-orbs">
+            <p>No orbs created yet. Try creating one from the Whis interface!</p>
         </div>
         {% endfor %}
     </div>
-{% else %}
-    <div class="status success">
-        <p>No orbs found. Create your first orb by uploading a screenshot!</p>
-    </div>
-{% endif %}
+</div>
 
-<a href="/gui" class="back-link">← Back to Dashboard</a>
+<style>
+.orbs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.orb-card {
+    background: white;
+    border: 1px solid #e1e5e9;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.orb-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.orb-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.orb-header h3 {
+    margin: 0;
+    color: #2c3e50;
+}
+
+.category-badge {
+    background: #3498db;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.orb-description {
+    color: #555;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.orb-meta {
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.runes-section {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.runes-section h4 {
+    margin: 0 0 1rem 0;
+    color: #2c3e50;
+    font-size: 1.1rem;
+}
+
+.rune-item {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.rune-header {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.language-badge {
+    background: #28a745;
+    color: white;
+    padding: 0.2rem 0.6rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.version-badge {
+    background: #6c757d;
+    color: white;
+    padding: 0.2rem 0.6rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.script-preview {
+    background: #2d3748;
+    color: #e2e8f0;
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    overflow-x: auto;
+    margin: 0.5rem 0;
+}
+
+.script-preview code {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.no-runes, .no-orbs {
+    text-align: center;
+    color: #888;
+    font-style: italic;
+    padding: 2rem;
+}
+
+.no-orbs {
+    grid-column: 1 / -1;
+}
+</style>
 {% endblock %} 

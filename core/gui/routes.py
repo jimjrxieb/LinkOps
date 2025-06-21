@@ -1,17 +1,19 @@
 from fastapi import APIRouter, Request, UploadFile, File, Form, Depends, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import Session
-from core.db.database import get_db
-from core.db.models import Orb, Log
+from sqlalchemy.orm import Session, joinedload
+from db.database import get_db
+from db.models import Orb, Log, Rune
 import shutil
 import os
 from datetime import datetime
 import uuid
-from core.utils.llm import generate_orb_from_text
+from utils.llm import generate_orb_from_text, generate_rune_from_orb
+from pydantic import BaseModel
+from typing import Optional, List
 
 router = APIRouter()
-templates = Jinja2Templates(directory="core/gui/templates")
+templates = Jinja2Templates(directory="gui/templates")
 
 
 @router.get("/gui", response_class=HTMLResponse)
@@ -21,7 +23,9 @@ def gui_home(request: Request):
 
 @router.get("/gui/orbs", response_class=HTMLResponse)
 def gui_orbs(request: Request, db: Session = Depends(get_db)):
-    orbs = db.query(Orb).order_by(Orb.created_at.desc()).all()
+    orbs = db.query(Orb).options(
+        joinedload(Orb.runes)
+    ).order_by(Orb.created_at.desc()).all()
     return templates.TemplateResponse("orbs.html", {"request": request, "orbs": orbs})
 
 
@@ -140,6 +144,30 @@ def gui_james(request: Request, q: str = "", db: Session = Depends(get_db)):
     return templates.TemplateResponse("james.html", {"request": request, "results": results, "query": q})
 
 
+@router.get("/gui/whis/training", response_class=HTMLResponse)
+def gui_whis_training(request: Request):
+    """Whis Training Review Panel"""
+    return templates.TemplateResponse("whis_training.html", {"request": request})
+
+
+@router.get("/gui/whis-training", response_class=HTMLResponse)
+def gui_whis_training_alt(request: Request):
+    """Whis Training Review Panel - Alternative URL"""
+    return templates.TemplateResponse("whis_training.html", {"request": request})
+
+
+@router.get("/gui/task-input", response_class=HTMLResponse)
+def gui_task_input(request: Request):
+    """Task Submission & Evaluation Interface"""
+    return templates.TemplateResponse("task_input.html", {"request": request})
+
+
+@router.get("/gui/digest", response_class=HTMLResponse)
+def gui_digest(request: Request):
+    """Daily Digest & Workflow Audit Interface"""
+    return templates.TemplateResponse("digest.html", {"request": request})
+
+
 @router.post("/gui/whis/text", response_class=HTMLResponse)
 def gui_whis_text(
     request: Request,
@@ -147,19 +175,55 @@ def gui_whis_text(
     text: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    from core.db.models import Log, Orb
-    from core.utils.llm import generate_orb_from_text
+    from db.models import Log, Orb, Rune
+    from utils.llm import generate_orb_from_text, generate_rune_from_orb
 
+    # Create log entry
     log = Log(agent="katie", task_id=task_id, action="Text dump", result=text)
     db.add(log)
     db.commit()
 
+    # Generate Orb
     orb_data = generate_orb_from_text(task_id, text)
     if "error" not in orb_data:
+        # If the result is wrapped in an 'orb' key, extract it
+        if "orb" in orb_data:
+            orb_data = orb_data["orb"]
+        
+        # Create the Orb
         new_orb = Orb(**orb_data)
         db.add(new_orb)
         db.commit()
-        status = "Text logged + Orb generated 🎉"
+        db.refresh(new_orb)
+        
+        # -- Simulate generated solution script (this will later be AI-generated)
+        solution_script = f"""
+apiVersion: v1
+kind: Pod
+metadata:
+  name: testrun
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+"""
+
+        # Optional: Write it to disk (can skip later)
+        script_path = f"/tmp/{new_orb.name.replace(' ', '_').lower()}_solution.yaml"
+        with open(script_path, "w") as f:
+            f.write(solution_script)
+
+        # -- Create the Rune tied to the Orb
+        new_rune = Rune(
+            orb_id=new_orb.id,
+            script_path=script_path,
+            script_content=solution_script,
+            language="yaml",
+            version=1
+        )
+        db.add(new_rune)
+        db.commit()
+        status = "Text logged + Orb generated + Rune created 🎉✨"
     else:
         status = f"Text logged, but Orb failed: {orb_data['error']}"
 
@@ -168,3 +232,73 @@ def gui_whis_text(
         "status": status,
         "task_id": task_id
     })
+
+
+@router.post("/internal/init/core-memory-orb")
+def create_core_memory_orb(db: Session = Depends(get_db)):
+    from db.models import Orb
+
+    core_orb = Orb(
+        name="LinkOps Core Memory",
+        description="This orb contains all foundational knowledge: agent roles, task templates, best practices, and structural schemas used by the LinkOps agents (Whis, Katie, Igris, James).",
+        category="system"
+    )
+
+    db.add(core_orb)
+    db.commit()
+    db.refresh(core_orb)
+
+    return {
+        "status": "created",
+        "orb_id": str(core_orb.id),
+        "name": core_orb.name
+    }
+
+
+class RawInput(BaseModel):
+    agent: str
+    task_id: str
+    task: str
+    tips: Optional[List[str]] = None
+    rune_steps: Optional[List[str]] = None
+
+
+@router.post("/gui/whis/sanitize")
+def sanitize_whis_input(data: RawInput, db: Session = Depends(get_db)):
+    from db.models import Orb, Rune
+    import uuid
+    from datetime import datetime
+
+    # Create the Orb from best practices
+    orb = Orb(
+        name=f"Whis Task: {data.task_id}",
+        description=data.task,
+        category="ai/ml" if data.agent == "whis" else "general"
+    )
+    db.add(orb)
+    db.commit()
+    db.refresh(orb)
+
+    # Create the Rune from placeholder logic
+    rune = None
+    if data.rune_steps:
+        rune = Rune(
+            orb_id=orb.id,
+            script_path=f"/memory/whis/{data.task_id.replace('/', '_')}.rune",
+            script_content="\n".join(data.rune_steps),
+            language="structured",
+            version=1
+        )
+        db.add(rune)
+        db.commit()
+
+    return {
+        "status": "sanitized",
+        "orb_id": str(orb.id),
+        "orb": {
+            "task": data.task,
+            "tips": data.tips,
+            "category": orb.category
+        },
+        "rune": data.rune_steps or []
+    }

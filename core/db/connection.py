@@ -9,9 +9,8 @@ import logging
 from contextlib import contextmanager
 from typing import Generator
 
-from config.settings import get_settings
+from config.settings import settings
 
-settings = get_settings()
 logger = logging.getLogger(__name__)
 
 

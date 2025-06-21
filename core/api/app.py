@@ -45,8 +45,6 @@ def create_app() -> FastAPI:
     async def shutdown_event():
         """Application shutdown event"""
         # Close Kafka connections
-        from config.kafka import get_kafka_manager
-        kafka_manager = get_kafka_manager()
-        kafka_manager.close()
+        # from config.kafka import get_kafka_manager  # DISABLED - Kafka removed for simplicity
     
     return app

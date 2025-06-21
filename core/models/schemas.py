@@ -66,3 +66,19 @@ class PaginatedResponse(BaseModel):
     page: int = Field(..., description="Current page number")
     size: int = Field(..., description="Page size")
     pages: int = Field(..., description="Total number of pages")
+
+
+class WhisMemoryInput(BaseModel):
+    """Schema for Whis memory input"""
+    task: str = Field(..., description="The task description")
+    solution: str = Field(..., description="The solution or execution steps")
+    category: Optional[str] = Field("mlops", description="Category for the task")
+    tips: Optional[str] = Field(None, description="Additional tips or best practices")
+
+
+class WhisMemoryResponse(BaseModel):
+    """Schema for Whis memory response"""
+    status: str = Field(..., description="Operation status")
+    orb_id: str = Field(..., description="ID of the created orb")
+    rune_id: Optional[str] = Field(None, description="ID of the created rune")
+    task_id: str = Field(..., description="Inferred task ID")
