@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-cyan-500/20;
+  }
+  
+  body {
+    @apply bg-cyber-dark text-holo-cyan font-mono;
+  }
+}
+
+@layer components {
+  .holo-card {
+    @apply bg-cyber-gray/50 backdrop-blur-md border border-holo-cyan/30 rounded-lg p-4 shadow-lg;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+  }
+  
+  .holo-button {
+    @apply bg-cyber-gray/80 border border-holo-cyan/50 text-holo-cyan px-4 py-2 rounded-md 
+           hover:bg-holo-cyan/10 hover:border-holo-cyan transition-all duration-300
+           focus:outline-none focus:ring-2 focus:ring-holo-cyan/50;
+  }
+  
+  .holo-button-primary {
+    @apply holo-button bg-holo-cyan/20 border-holo-cyan text-white
+           hover:bg-holo-cyan/30 hover:shadow-lg hover:shadow-holo-cyan/25;
+  }
+  
+  .holo-input {
+    @apply bg-cyber-gray/50 border border-holo-cyan/30 text-holo-cyan px-3 py-2 rounded-md
+           focus:outline-none focus:ring-2 focus:ring-holo-cyan/50 focus:border-holo-cyan
+           placeholder-cyan-400/50;
+  }
+  
+  .holo-nav-link {
+    @apply px-4 py-2 rounded-md transition-all duration-300 hover:bg-holo-cyan/10
+           hover:text-white border border-transparent hover:border-holo-cyan/50;
+  }
+  
+  .holo-nav-link.active {
+    @apply bg-holo-cyan/20 text-white border-holo-cyan shadow-lg shadow-holo-cyan/25;
+  }
+  
+  .status-badge {
+    @apply px-2 py-1 rounded text-xs font-bold;
+  }
+  
+  .status-badge.success {
+    @apply bg-green-500/20 text-holo-green border border-holo-green/50;
+  }
+  
+  .status-badge.warning {
+    @apply bg-yellow-500/20 text-holo-yellow border border-holo-yellow/50;
+  }
+  
+  .status-badge.error {
+    @apply bg-red-500/20 text-holo-red border border-holo-red/50;
+  }
+  
+  .status-badge.info {
+    @apply bg-blue-500/20 text-holo-blue border border-holo-blue/50;
+  }
+  
+  .scan-line {
+    @apply absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-holo-cyan to-transparent;
+    animation: scan 2s linear infinite;
+  }
+  
+  .glow-text {
+    text-shadow: 0 0 10px currentColor;
+  }
+}
+
+@layer utilities {
+  .text-glow {
+    text-shadow: 0 0 10px currentColor;
+  }
+  
+  .border-glow {
+    box-shadow: 0 0 10px currentColor;
+  }
+  
+  .bg-glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+  }
+} 

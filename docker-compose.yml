@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # LinkOps Core Application
+  # LinkOps Core Application (Backend)
   core:
     build:
       context: ./core

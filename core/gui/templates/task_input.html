@@ -26,8 +26,8 @@
         </div>
         <div style="display: flex; gap: 1rem;">
             <button type="submit" style="background: #28a745; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer;">
-                🚀 Submit Task
-            </button>
+            🚀 Submit Task
+        </button>
             <button type="button" onclick="clearForm()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer;">
                 🗑️ Clear
             </button>
@@ -145,8 +145,8 @@ function displayEvaluation(evaluation) {
             <strong>Task ID:</strong> ${evaluation.task_id}<br>
             <strong>Status:</strong> ${evaluation.status}<br>
             <strong>Timestamp:</strong> ${new Date(evaluation.timestamp).toLocaleString()}
-        </div>
-    `;
+                        </div>
+                    `;
     
     // Create action buttons
     const buttonsHtml = evaluation.options.map(option => {
@@ -154,7 +154,7 @@ function displayEvaluation(evaluation) {
             return `<button onclick="completeWithJames()" style="background: #17a2b8; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; margin: 0.25rem;">
                 ✅ ${option}
             </button>`;
-        } else {
+                } else {
             const agent = option.split(': ')[1];
             return `<button onclick="sendToAgent('${agent}')" style="background: #28a745; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; margin: 0.25rem;">
                 🚀 ${option}
@@ -273,5 +273,5 @@ document.addEventListener('DOMContentLoaded', function() {
     
     loadRecentTasks();
 });
-</script>
+</script> 
 {% endblock %} 

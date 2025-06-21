@@ -72,7 +72,7 @@
     <p>Shows task_ids awaiting processing:</p>
     
     <div id="trainingQueue" style="margin-top: 1rem;">
-        <div style="text-align: center; padding: 2rem; color: #6c757d;">
+    <div style="text-align: center; padding: 2rem; color: #6c757d;">
             <div>🔄 Loading training queue...</div>
         </div>
     </div>
@@ -211,14 +211,14 @@ function displayApprovalQueue(items) {
                     </div>
                 </div>
                 
-                <div style="display: flex; gap: 0.5rem;">
+                    <div style="display: flex; gap: 0.5rem;">
                     <button onclick="approveRune('${item.rune_id}')" style="background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">
                         ✅ Approve Rune
-                    </button>
+                        </button>
                     <button onclick="viewRuneDetails('${item.rune_id}')" style="background: #17a2b8; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">
                         👁️ View Details
-                    </button>
-                </div>
+                        </button>
+                    </div>
             </div>
         `;
     }).join('');

@@ -87,34 +87,19 @@ async def get_whis_training_stats():
     return stats
 
 @router.get("/api/whis/digest")
-async def get_whis_digest(db: Session = Depends(get_db)):
+async def get_whis_daily_digest(db: Session = Depends(get_db)):
     """Get daily summary of Whis's learning activity"""
-    since = datetime.utcnow() - timedelta(days=1)
+    since = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
 
-    orb = db.query(Orb).filter(Orb.name == "AI/ML Engineering Best Practices").first()
-    if not orb:
-        return {
-            "orbs_updated": [],
-            "runes_created": 0,
-            "logs_processed": 0,
-            "timestamp": since.isoformat()
-        }
-    
-    runes_created = db.query(Rune).filter(
-        Rune.orb_id == orb.id, 
-        Rune.created_at >= since
-    ).count()
-    
-    logs_processed = db.query(Log).filter(
-        Log.agent == "whis", 
-        Log.created_at >= since
-    ).count()
+    orbs_updated = db.query(Orb).filter(Orb.updated_at >= since).count()
+    runes_created = db.query(Rune).filter(Rune.created_at >= since).count()
+    logs_processed = db.query(Log).filter(Log.created_at >= since).count()
 
     return {
-        "orbs_updated": [orb.name] if runes_created > 0 else [],
+        "timestamp": since.isoformat(),
+        "orbs_created": orbs_updated,
         "runes_created": runes_created,
-        "logs_processed": logs_processed,
-        "timestamp": since.isoformat()
+        "logs_processed": logs_processed
     }
 
 @router.get("/api/whis/stats")

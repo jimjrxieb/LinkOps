@@ -111,6 +111,30 @@ class WhisQueue(Base):
         }
 
 
+class Approval(Base):
+    """Approval model for Whis suggestions"""
+    __tablename__ = "approvals"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    suggestion = Column(Text, nullable=False)
+    approved = Column(Boolean, default=False)
+    reviewed_at = Column(DateTime, default=None, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    
+    def __repr__(self):
+        return f"<Approval(id='{self.id}', approved={self.approved})>"
+    
+    def to_dict(self):
+        """Convert model to dictionary"""
+        return {
+            "id": str(self.id),
+            "suggestion": self.suggestion,
+            "approved": self.approved,
+            "reviewed_at": self.reviewed_at.isoformat() if self.reviewed_at else None,
+            "created_at": self.created_at.isoformat() if self.created_at else None
+        }
+
+
 class Log(Base):
     """Log model for tracking agent actions and results"""
     __tablename__ = "logs"
@@ -195,3 +219,13 @@ class SystemMetric(Base):
     
     def __repr__(self):
         return f"<SystemMetric(id='{self.id}', metric_name='{self.metric_name}', value='{self.metric_value}')>"
+
+
+class Task(Base):
+    __tablename__ = "tasks"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    input_text = Column(Text, nullable=False)
+    agent_rankings = Column(Text)  # Store as JSON string like {"katie": 92, "igris": 15, "whis": 5}
+    assigned_to = Column(String, nullable=True)
+    resolved = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
