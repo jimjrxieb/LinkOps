@@ -216,10 +216,3 @@ kafka-logs/
 prometheus.yml
 grafana/
 
-# Kubernetes/Minikube
-minikube-linux-amd64
-minikube-*
-
-# Kubernetes/Minikube
-minikube-linux-amd64
-minikube-*
