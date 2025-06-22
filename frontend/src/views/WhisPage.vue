@@ -1,69 +1,49 @@
 <template>
-  <div class="whis-page">
-    <h1>🧠 Whis Training Pipeline</h1>
+  <div class="p-6 text-white">
+    <h1 class="text-2xl font-bold mb-6">🧠 Whis Training Queue</h1>
 
-    <section>
-      <h2>📥 Data in Queue</h2>
-      <ul>
-        <li v-for="item in queue" :key="item.id">{{ item.summary }}</li>
-      </ul>
-    </section>
+    <div v-if="runes.length === 0" class="text-green-400">
+      ✅ No pending runes. Whis is fully trained.
+    </div>
 
-    <section>
-      <h2>✅ Approvals Needed</h2>
-      <ul>
-        <li v-for="approval in approvals" :key="approval.id">{{ approval.description }}</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>📦 Whis-Generated Orbs</h2>
-      <ul>
-        <li v-for="orb in orbs" :key="orb.id">{{ orb.name }}</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>📜 Runes Created</h2>
-      <ul>
-        <li v-for="rune in runes" :key="rune.id">{{ rune.title }}</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>📡 Agent Capabilities</h2>
-      <ul>
-        <li v-for="agent in capabilities" :key="agent.name">
-          {{ agent.name }} → {{ agent.abilities.join(', ') }}
-        </li>
-      </ul>
-    </section>
+    <div v-for="rune in runes" :key="rune.id" class="bg-gray-900 p-4 rounded-xl mb-4 shadow border border-gray-700">
+      <p class="text-sm text-gray-400 mb-2">
+        <strong>Agent:</strong> {{ rune.agent }} | 
+        <strong>Origin:</strong> {{ rune.origin }} | 
+        <strong>ID:</strong> #{{ rune.id }}
+      </p>
+      <pre class="bg-gray-800 p-2 rounded text-sm max-h-64 overflow-y-auto">
+{{ JSON.stringify(rune.content, null, 2) }}
+      </pre>
+      <button
+        class="mt-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-white"
+        @click="approve(rune.id)"
+      >
+        ✅ Approve Rune
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 
-const queue = ref([])
-const approvals = ref([])
-const orbs = ref([])
 const runes = ref([])
-const capabilities = ref([])
 
-onMounted(async () => {
-  try {
-    const res = await fetch('/api/gui/whis')
-    const data = await res.json()
-    queue.value = data.queue || []
-    approvals.value = data.approvals || []
-    orbs.value = data.orbs || []
-    runes.value = data.runes || []
-    capabilities.value = data.capabilities || []
-  } catch (error) {
-    console.error('Failed to fetch Whis data:', error)
-    // Fallback to empty arrays if API fails
-  }
-})
+const fetchRunes = async () => {
+  const res = await fetch('/api/whis/approvals')
+  const data = await res.json()
+  runes.value = data
+}
+
+const approve = async (id) => {
+  await fetch(`/api/whis/approve-rune/${id}`, {
+    method: 'POST'
+  })
+  runes.value = runes.value.filter(r => r.id !== id)
+}
+
+onMounted(fetchRunes)
 </script>
 
 <style scoped>

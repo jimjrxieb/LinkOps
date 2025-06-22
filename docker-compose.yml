@@ -1,6 +1,19 @@
 version: "3.8"
 
 services:
+  ### 🗄️ POSTGRESQL
+  postgres:
+    image: postgres:15
+    container_name: linkops-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: linkops
+      POSTGRES_USER: linkops
+      POSTGRES_PASSWORD: secure_db_password_2024
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   ### 🔧 BACKEND (FastAPI)
   backend:
     build:
@@ -10,8 +23,11 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+    environment:
+      - DATABASE_URL=postgresql://linkops:secure_db_password_2024@postgres:5432/linkops
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
+      - postgres
       - kafka
 
   ### 🧠 FRONTEND (Vue Dev Server)
@@ -63,6 +79,7 @@ services:
       - kafka_data:/var/lib/kafka/data
 
 volumes:
+  postgres_data:
   kafka_data:
   zookeeper_data:
   zookeeper_logs:

@@ -3,6 +3,11 @@ FROM python:3.10-slim
 # Set working directory
 WORKDIR /app
 
+# Install system dependencies including tesseract-ocr
+RUN apt-get update && apt-get install -y tesseract-ocr && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 # Copy code into container
 COPY . /app
 

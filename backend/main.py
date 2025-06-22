@@ -12,6 +12,8 @@ import os
 # Import routes
 from core.api.routes.tasks import router as tasks_router
 from core.api.routes.gui import router as gui_router
+from routes.data_collect import router as data_collect_router
+from routes.whis import router as whis_router
 
 # Import stores for initialization
 from core.db.memory import TASK_STORE, QA_STORE, INFO_DUMP_STORE, IMAGE_EXTRACTION_STORE, CHAT_HISTORY
@@ -91,6 +93,8 @@ app.add_middleware(
 # Include routers
 app.include_router(tasks_router, prefix="/api", tags=["tasks"])
 app.include_router(gui_router, prefix="/api/gui", tags=["gui"])
+app.include_router(data_collect_router, tags=["data-collection"])
+app.include_router(whis_router, tags=["whis"])
 
 # Health check endpoint
 @app.get("/health")

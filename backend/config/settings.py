@@ -2,8 +2,8 @@ from pydantic_settings import BaseSettings
 from pydantic import Extra
 
 class Settings(BaseSettings):
-    # OpenAI API Key (required)
-    OPENAI_API_KEY: str
+    # OpenAI API Key (optional for development)
+    OPENAI_API_KEY: str = "dummy-key-for-development"
     
     # Database Settings
     DATABASE_URL: str = "postgresql://linkops:secure_db_password_2024@localhost:5432/linkops"

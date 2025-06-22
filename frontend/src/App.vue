@@ -3,10 +3,11 @@
     <aside class="sidebar">
       <nav>
         <ul>
-          <li><router-link to="/james">👑 James</router-link></li>
+          <li><router-link to="/dashboard">📊 Dashboard</router-link></li>
+          <li><router-link to="/data-collection">📥 Data Collection</router-link></li>
           <li><router-link to="/whis">🧠 Whis</router-link></li>
           <li><router-link to="/agents">🧑‍💻 Agents</router-link></li>
-          <li><router-link to="/dashboard">📊 Dashboard</router-link></li>
+          <li><router-link to="/digest">📒 Digest</router-link></li>
         </ul>
       </nav>
     </aside>

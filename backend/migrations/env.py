@@ -24,7 +24,10 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-from core.db.models import Base
+from backend.config.database import Base
+import backend.models.log  # Ensure LogEntry is registered
+import backend.models.rune  # Ensure RuneCandidate is registered
+
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,

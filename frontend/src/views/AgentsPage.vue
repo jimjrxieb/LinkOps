@@ -1,7 +1,6 @@
 <template>
-  <div class="agents-page">
-    <h1>🧑‍💻 Agent Control Panel</h1>
-    <p>Coming soon: Katie (K8s), Igris (DevSecOps).</p>
+  <div class="p-6 text-white">
+    <h1 class="text-2xl font-bold">Agents</h1>
   </div>
 </template>
 

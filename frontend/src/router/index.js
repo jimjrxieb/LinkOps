@@ -1,18 +1,24 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import JamesPage from '@/views/JamesPage.vue'
+
+// NEW PAGES
+import Dashboard from '@/views/Dashboard.vue'
+import DataCollection from '@/views/DataCollection.vue'
 import WhisPage from '@/views/WhisPage.vue'
 import AgentsPage from '@/views/AgentsPage.vue'
-import Dashboard from '@/views/Dashboard.vue'
+import Digest from '@/views/Digest.vue'
 
 const routes = [
-  { path: '/', redirect: '/james' },
-  { path: '/james', component: JamesPage },
+  { path: '/', redirect: '/dashboard' },
+  { path: '/dashboard', component: Dashboard },
+  { path: '/data-collection', component: DataCollection },
   { path: '/whis', component: WhisPage },
   { path: '/agents', component: AgentsPage },
-  { path: '/dashboard', component: Dashboard }
+  { path: '/digest', component: Digest },
 ]
 
-export default createRouter({
+const router = createRouter({
   history: createWebHistory(),
-  routes
-}) 
+  routes,
+})
+
+export default router 

@@ -15,51 +15,30 @@ router = APIRouter()
 async def get_dashboard():
     """Get dashboard data for the main dashboard view"""
     return {
+        "james": {
+            "orbs": {"current": 8, "desired": 10},
+            "runes": {"current": 6, "desired": 9},
+            "autonomy": 62,
+            "suggestions": [
+                "Add orb for 'systemctl troubleshooting'",
+                "Refactor James router to support multi-agent fallback"
+            ]
+        },
+        "whis": {
+            "last_sync": "2025-06-22 04:13 UTC",
+            "updated_orbs": 3,
+            "created_runes": 2,
+            "unmapped": [
+                "openapi-to-kubectl conversion",
+                "multi-agent runtime feedback"
+            ]
+        },
         "agents": [
-            {
-                "name": "James",
-                "icon": "👑",
-                "purpose": "General logic and task coordination",
-                "orbs": 3,
-                "runes": 5,
-                "status": "active",
-                "tasks_processed": 12
-            },
-            {
-                "name": "Whis",
-                "icon": "🧠",
-                "purpose": "AI/ML model training and Orbs/Rune generation",
-                "orbs": 4,
-                "runes": 6,
-                "status": "active",
-                "tasks_processed": 8
-            },
-            {
-                "name": "Katie",
-                "icon": "☸️",
-                "purpose": "Kubernetes Ops and CKA/CKS logic (Coming Soon)",
-                "orbs": 0,
-                "runes": 0,
-                "status": "inactive",
-                "tasks_processed": 0
-            },
-            {
-                "name": "Igris",
-                "icon": "🛡️",
-                "purpose": "Platform and DevSecOps task execution (Coming Soon)",
-                "orbs": 0,
-                "runes": 0,
-                "status": "inactive",
-                "tasks_processed": 0
-            }
-        ],
-        "stats": {
-            "total_tasks": 20,
-            "completed_tasks": 15,
-            "pending_tasks": 5,
-            "total_orbs": 7,
-            "total_runes": 11
-        }
+            {"name": "Katie", "capabilities": ["K8s troubleshooting", "CKA tasks"]},
+            {"name": "Igris", "capabilities": ["DevSecOps scripts", "Platform bootstrapping"]},
+            {"name": "James", "capabilities": ["Manager Q&A", "Solution path retrieval"]},
+            {"name": "Whis", "capabilities": ["AI learning", "Orbs & Runes training"]}
+        ]
     }
 
 @router.get("/whis")

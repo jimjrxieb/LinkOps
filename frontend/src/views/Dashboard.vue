@@ -1,69 +1,122 @@
 <template>
-  <div class="dashboard-page">
-    <h1>📊 Agent Dashboard</h1>
-    <div class="grid">
-      <div class="agent-card" v-for="agent in agents" :key="agent.name">
-        <h2>{{ agent.icon }} {{ agent.name }}</h2>
-        <p><strong>Purpose:</strong> {{ agent.purpose }}</p>
-        <p><strong>Orbs:</strong> {{ agent.orbs }}</p>
-        <p><strong>Runes:</strong> {{ agent.runes }}</p>
-      </div>
-    </div>
+  <div class="p-6 text-white">
+    <h1 class="text-2xl font-bold mb-4">📊 LinkOps Dashboard</h1>
+
+    <p>Welcome to mission control. Here you'll see today's activity, agent summaries, digest, and approval queues.</p>
+
+    <!-- James Assistant Widget -->
+    <JamesAssistant />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import JamesAssistant from '@/components/JamesAssistant.vue'
+
+const james = ref({
+  orbs: { current: 0, desired: 0 },
+  runes: { current: 0, desired: 0 },
+  autonomy: 0,
+  suggestions: []
+})
+
+const whis = ref({
+  last_sync: '',
+  updated_orbs: 0,
+  created_runes: 0,
+  unmapped: []
+})
 
 const agents = ref([])
 
-const fetchDashboardData = async () => {
+onMounted(async () => {
   try {
     const res = await fetch('/api/gui/dashboard')
     const data = await res.json()
+    james.value = data.james || james.value
+    whis.value = data.whis || whis.value
     agents.value = data.agents || []
   } catch (error) {
     console.error('Failed to fetch dashboard data:', error)
     // Fallback to static data if API fails
+    james.value = {
+      orbs: { current: 3, desired: 10 },
+      runes: { current: 5, desired: 15 },
+      autonomy: 45,
+      suggestions: [
+        'Add more Kubernetes orbs for better container orchestration',
+        'Create runes for security scanning and compliance',
+        'Increase autonomy by training on more edge cases'
+      ]
+    }
+    whis.value = {
+      last_sync: '2024-01-15 14:30:00',
+      updated_orbs: 2,
+      created_runes: 3,
+      unmapped: [
+        'Advanced network policies',
+        'Service mesh configuration',
+        'Multi-cluster management'
+      ]
+    }
     agents.value = [
-      { name: 'James', icon: '👑', purpose: 'General logic and task coordination', orbs: 3, runes: 5 },
-      { name: 'Whis', icon: '🧠', purpose: 'AI/ML model training and Orbs/Rune generation', orbs: 4, runes: 6 },
-      { name: 'Katie', icon: '☸️', purpose: 'Kubernetes Ops and CKA/CKS logic (Coming Soon)', orbs: 0, runes: 0 },
-      { name: 'Igris', icon: '🛡️', purpose: 'Platform and DevSecOps task execution (Coming Soon)', orbs: 0, runes: 0 }
+      { name: 'James', capabilities: ['Task routing', 'Solution generation', 'Agent coordination'] },
+      { name: 'Whis', capabilities: ['ML training', 'Orb generation', 'Rune creation'] },
+      { name: 'Katie', capabilities: ['Kubernetes ops', 'CKA/CKS logic', 'Container orchestration'] },
+      { name: 'Igris', capabilities: ['Platform ops', 'DevSecOps', 'Infrastructure automation'] }
     ]
   }
-}
-
-onMounted(fetchDashboardData)
+})
 </script>
 
 <style scoped>
 .dashboard-page {
-  padding: 2rem;
   max-width: 1200px;
   margin: auto;
+  padding: 2rem;
 }
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-.agent-card {
-  background: #222;
+
+section {
+  margin-bottom: 2.5rem;
+  background: #1c1c1c;
+  padding: 1rem 1.5rem;
   border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 0 8px #0ff4;
-  transition: all 0.3s ease;
+  border: 1px solid #333;
+  box-shadow: 0 4px 8px rgba(0, 255, 255, 0.1);
 }
-.agent-card:hover {
-  box-shadow: 0 0 16px #0ff6;
-  transform: translateY(-2px);
-}
-.agent-card h2 {
-  margin-top: 0;
+
+section h2 {
   color: #0ff;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
 }
-.agent-card p {
-  margin: 0.5rem 0;
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  margin-bottom: 0.4rem;
+  color: #eee;
+}
+
+ul ul {
+  margin-left: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+ul ul li {
+  color: #ccc;
+  font-size: 0.9rem;
+}
+
+.dashboard-page h1 {
+  color: #0ff;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2rem;
 }
 </style> 
