@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, JSON, Boolean, DateTime, func
-from backend.config.database import Base
+from config.database import Base
 
 class RuneCandidate(Base):
     __tablename__ = "runes_pending"

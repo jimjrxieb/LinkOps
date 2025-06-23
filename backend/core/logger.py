@@ -1,5 +1,5 @@
-from backend.models.log import LogEntry
-from backend.config.database import get_db
+from models.log import LogEntry
+from config.database import get_db
 from sqlalchemy.orm import Session
 
 def log_to_whis(entry: dict, db: Session = None):

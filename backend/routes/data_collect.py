@@ -1,12 +1,12 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File, Depends
 from pydantic import BaseModel
 from typing import Union, Dict
-from backend.utils.sanitizer import sanitize_task, sanitize_qna, sanitize_dump, sanitize_image
-from backend.core.logger import log_to_whis
+from utils.sanitizer import sanitize_task, sanitize_qna, sanitize_dump, sanitize_image
+from core.logger import log_to_whis
 from PIL import Image
 import pytesseract
 import io
-from backend.config.database import get_db
+from config.database import get_db
 from sqlalchemy.orm import Session
 
 router = APIRouter()

@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime
-from backend.models.log import LogEntry
-from backend.models.rune import RuneCandidate
-from backend.config.database import get_db
+from models.log import LogEntry
+from models.rune import RuneCandidate
+from config.database import get_db
 
 router = APIRouter()
 
