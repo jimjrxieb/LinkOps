@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, JSON, DateTime, func
-from config.database import Base
+from backend.config.database import Base
 
 class LogEntry(Base):
     __tablename__ = "logs"

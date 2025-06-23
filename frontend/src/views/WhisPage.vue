@@ -2,6 +2,18 @@
   <div class="p-6 text-white">
     <h1 class="text-2xl font-bold mb-6">🧠 Whis Training Queue</h1>
 
+    <!-- Whis Data Lake trigger -->
+    <div class="mb-6 p-4 bg-blue-950 rounded-xl border border-blue-600 shadow">
+      <h2 class="text-lg font-bold text-blue-300">🧠 Whis Data Lake</h2>
+      <p class="text-sm mb-2 text-blue-200">Trigger nightly learning from all sanitized logs.</p>
+      <button
+        @click="trainWhis"
+        class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white font-medium"
+      >
+        🔄 Start Night Training
+      </button>
+    </div>
+
     <div v-if="runes.length === 0" class="text-green-400">
       ✅ No pending runes. Whis is fully trained.
     </div>
@@ -34,6 +46,13 @@ const fetchRunes = async () => {
   const res = await fetch('/api/whis/approvals')
   const data = await res.json()
   runes.value = data
+}
+
+const trainWhis = async () => {
+  const res = await fetch('/api/whis/train-nightly', { method: 'POST' })
+  const data = await res.json()
+  alert(`Whis trained on ${data.count} logs.`)
+  fetchRunes()  // refresh approval queue
 }
 
 const approve = async (id) => {
