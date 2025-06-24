@@ -1,0 +1,23 @@
+# James Voice Response Template
+# Future integration with ElevenLabs or Google TTS
+
+VOICE_SETTINGS = {
+    "voice_id": "giancarlo_esposito_style",
+    "stability": 0.8,
+    "similarity_boost": 0.9,
+    "style": 0.7,
+    "use_speaker_boost": true
+}
+
+RESPONSE_FORMAT = {
+    "text": "{{james_response}}",
+    "voice_settings": VOICE_SETTINGS,
+    "output_format": "mp3",
+    "sample_rate": 44100
+}
+
+# Example usage:
+# 1. Generate text response with OpenAI
+# 2. Apply Giancarlo Esposito voice style
+# 3. Convert to speech using TTS service
+# 4. Return audio file or stream 

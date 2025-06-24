@@ -1,0 +1,200 @@
+name: 🚀 LinkOps Deploy to AKS (Helm)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  BACKEND_IMAGE: ghcr.io/${{ github.repository }}/linkops-backend:${{ github.sha }}
+  FRONTEND_IMAGE: ghcr.io/${{ github.repository }}/linkops-frontend:${{ github.sha }}
+  LATEST_BACKEND_IMAGE: ghcr.io/${{ github.repository }}/linkops-backend:latest
+  LATEST_FRONTEND_IMAGE: ghcr.io/${{ github.repository }}/linkops-frontend:latest
+
+jobs:
+  build-and-push:
+    name: 🐳 Build & Push Containers
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🐳 Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: 🔐 Log in to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: 🏗️ Build & Push Backend Image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend
+        push: true
+        tags: |
+          ${{ env.BACKEND_IMAGE }}
+          ${{ env.LATEST_BACKEND_IMAGE }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: 🎨 Build & Push Frontend Image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./frontend
+        push: true
+        tags: |
+          ${{ env.FRONTEND_IMAGE }}
+          ${{ env.LATEST_FRONTEND_IMAGE }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  deploy-helm:
+    name: 📦 Deploy via Helm
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: ${{ github.ref == 'refs/heads/main' }}
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🔐 Set up Kubeconfig
+      run: |
+        mkdir -p ~/.kube
+        echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+        chmod 600 ~/.kube/config
+
+    - name: 🔧 Set up Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: 'latest'
+
+    - name: 📦 Add Helm Repositories
+      run: |
+        helm repo add bitnami https://charts.bitnami.com/bitnami
+        helm repo update
+
+    - name: 🔧 Update Helm Values
+      run: |
+        # Update backend image in values.yaml
+        sed -i "s|repository: .*|repository: ${{ github.repository }}/linkops-backend|g" infrastructure/helm/linkops/values.yaml
+        sed -i "s|tag: .*|tag: ${{ github.sha }}|g" infrastructure/helm/linkops/values.yaml
+        
+        echo "Updated Helm values with:"
+        echo "Backend Image: ${{ env.BACKEND_IMAGE }}"
+        echo "Frontend Image: ${{ env.FRONTEND_IMAGE }}"
+
+    - name: 📦 Deploy with Helm
+      run: |
+        cd infrastructure/helm/linkops
+        
+        # Install/upgrade LinkOps
+        helm upgrade --install linkops . \
+          --namespace linkops \
+          --create-namespace \
+          --set backend.image.tag=${{ github.sha }} \
+          --set frontend.image.tag=${{ github.sha }} \
+          --set global.imageRegistry=ghcr.io \
+          --set global.imagePullSecrets[0].name=ghcr-secret \
+          --wait \
+          --timeout 10m
+
+    - name: ⏳ Wait for Deployment
+      run: |
+        kubectl wait --for=condition=available --timeout=300s deployment/linkops-backend -n linkops
+        kubectl wait --for=condition=available --timeout=300s deployment/linkops-frontend -n linkops
+
+    - name: ✅ Verify Helm Deployment
+      run: |
+        echo "=== Helm Releases ==="
+        helm list -n linkops
+        echo ""
+        echo "=== Pod Status ==="
+        kubectl get pods -n linkops
+        echo ""
+        echo "=== Services ==="
+        kubectl get services -n linkops
+        echo ""
+        echo "=== Ingress ==="
+        kubectl get ingress -n linkops
+
+  deploy-argocd-helm:
+    name: 🔄 Deploy via ArgoCD (Helm)
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: ${{ github.ref == 'refs/heads/main' }}
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🔐 Set up Kubeconfig
+      run: |
+        mkdir -p ~/.kube
+        echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+        chmod 600 ~/.kube/config
+
+    - name: 🔧 Update Helm Values for ArgoCD
+      run: |
+        # Update backend image in values.yaml
+        sed -i "s|repository: .*|repository: ${{ github.repository }}/linkops-backend|g" infrastructure/helm/linkops/values.yaml
+        sed -i "s|tag: .*|tag: ${{ github.sha }}|g" infrastructure/helm/linkops/values.yaml
+
+    - name: 📝 Commit and Push Changes
+      run: |
+        git config --global user.email "ci@linkops.com"
+        git config --global user.name "LinkOps CI"
+        git add infrastructure/helm/linkops/
+        git commit -m "ci: update helm values to ${{ github.sha }}" || echo "No changes to commit"
+        git push
+
+    - name: 🔄 Trigger ArgoCD Sync
+      run: |
+        # Wait for ArgoCD to detect changes
+        sleep 30
+        
+        # Trigger sync if ArgoCD is available
+        kubectl get applications -n argocd linkops-helm-app && \
+        kubectl patch application linkops-helm-app -n argocd --type='merge' -p='{"spec":{"syncPolicy":{"automated":{"prune":true,"selfHeal":true}}}}' || \
+        echo "ArgoCD Helm application not found, skipping sync"
+
+  notify:
+    name: 📢 Deployment Notification
+    runs-on: ubuntu-latest
+    needs: [deploy-helm, deploy-argocd-helm]
+    if: always()
+    
+    steps:
+    - name: 📋 Deployment Summary
+      run: |
+        echo "## 🚀 LinkOps Helm Deployment Complete!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Deployment Details:**" >> $GITHUB_STEP_SUMMARY
+        echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Backend Image:** ${{ env.BACKEND_IMAGE }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Frontend Image:** ${{ env.FRONTEND_IMAGE }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Deployment Method:** Helm" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Access URLs:**" >> $GITHUB_STEP_SUMMARY
+        echo "- Frontend: http://linkops.local" >> $GITHUB_STEP_SUMMARY
+        echo "- API: http://api.linkops.local" >> $GITHUB_STEP_SUMMARY
+        echo "- ArgoCD: http://argocd.linkops.local" >> $GITHUB_STEP_SUMMARY
+        echo "- Grafana: http://grafana.linkops.local" >> $GITHUB_STEP_SUMMARY
+
+    - name: 🔔 Slack Notification (Optional)
+      if: ${{ secrets.SLACK_WEBHOOK_URL }}
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        text: |
+          🚀 LinkOps Helm deployment ${{ job.status }}!
+          Commit: ${{ github.sha }}
+          Branch: ${{ github.ref_name }}
+          Method: Helm
+        webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }} 

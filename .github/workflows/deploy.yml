@@ -1,0 +1,194 @@
+name: 🚀 LinkOps Deploy to AKS
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # Allow manual triggers
+
+env:
+  BACKEND_IMAGE: ghcr.io/${{ github.repository }}/linkops-backend:${{ github.sha }}
+  FRONTEND_IMAGE: ghcr.io/${{ github.repository }}/linkops-frontend:${{ github.sha }}
+  LATEST_BACKEND_IMAGE: ghcr.io/${{ github.repository }}/linkops-backend:latest
+  LATEST_FRONTEND_IMAGE: ghcr.io/${{ github.repository }}/linkops-frontend:latest
+
+jobs:
+  build-and-push:
+    name: 🐳 Build & Push Containers
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🐳 Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: 🔐 Log in to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: 🏗️ Build & Push Backend Image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend
+        push: true
+        tags: |
+          ${{ env.BACKEND_IMAGE }}
+          ${{ env.LATEST_BACKEND_IMAGE }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: 🎨 Build & Push Frontend Image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./frontend
+        push: true
+        tags: |
+          ${{ env.FRONTEND_IMAGE }}
+          ${{ env.LATEST_FRONTEND_IMAGE }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: 📋 Output Image Info
+      run: |
+        echo "Backend Image: ${{ env.BACKEND_IMAGE }}"
+        echo "Frontend Image: ${{ env.FRONTEND_IMAGE }}"
+
+  deploy-kubectl:
+    name: 📦 Deploy via kubectl
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: ${{ github.ref == 'refs/heads/main' }}
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🔐 Set up Kubeconfig
+      run: |
+        mkdir -p ~/.kube
+        echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+        chmod 600 ~/.kube/config
+
+    - name: 🔧 Update Image Tags in Manifests
+      run: |
+        # Update backend image
+        sed -i "s|image: .*/linkops-backend:.*|image: ${{ env.BACKEND_IMAGE }}|g" infrastructure/k8s/app/backend-deployment.yaml
+        # Update frontend image
+        sed -i "s|image: .*/linkops-frontend:.*|image: ${{ env.FRONTEND_IMAGE }}|g" infrastructure/k8s/app/frontend-deployment.yaml
+        
+        echo "Updated manifests with new image tags:"
+        echo "Backend: ${{ env.BACKEND_IMAGE }}"
+        echo "Frontend: ${{ env.FRONTEND_IMAGE }}"
+
+    - name: 📦 Deploy to AKS
+      run: |
+        kubectl apply -f infrastructure/k8s/app/namespace.yaml
+        kubectl apply -f infrastructure/k8s/app/postgres-deployment.yaml
+        kubectl apply -f infrastructure/k8s/app/backend-deployment.yaml
+        kubectl apply -f infrastructure/k8s/app/frontend-deployment.yaml
+        kubectl apply -f infrastructure/k8s/app/ingress.yaml
+
+    - name: ⏳ Wait for Deployments
+      run: |
+        kubectl wait --for=condition=available --timeout=300s deployment/linkops-backend -n linkops
+        kubectl wait --for=condition=available --timeout=300s deployment/linkops-frontend -n linkops
+        kubectl wait --for=condition=available --timeout=300s deployment/linkops-postgres -n linkops
+
+    - name: ✅ Verify Deployment
+      run: |
+        echo "=== Pod Status ==="
+        kubectl get pods -n linkops
+        echo ""
+        echo "=== Services ==="
+        kubectl get services -n linkops
+        echo ""
+        echo "=== Ingress ==="
+        kubectl get ingress -n linkops
+
+  deploy-argocd:
+    name: 🔄 Deploy via ArgoCD
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: ${{ github.ref == 'refs/heads/main' }}
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🔐 Set up Kubeconfig
+      run: |
+        mkdir -p ~/.kube
+        echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+        chmod 600 ~/.kube/config
+
+    - name: 🔧 Update Image Tags in Manifests
+      run: |
+        # Update backend image
+        sed -i "s|image: .*/linkops-backend:.*|image: ${{ env.BACKEND_IMAGE }}|g" infrastructure/k8s/app/backend-deployment.yaml
+        # Update frontend image
+        sed -i "s|image: .*/linkops-frontend:.*|image: ${{ env.FRONTEND_IMAGE }}|g" infrastructure/k8s/app/frontend-deployment.yaml
+
+    - name: 📝 Commit and Push Changes
+      run: |
+        git config --global user.email "ci@linkops.com"
+        git config --global user.name "LinkOps CI"
+        git add infrastructure/k8s/app/
+        git commit -m "ci: update image tags to ${{ github.sha }}" || echo "No changes to commit"
+        git push
+
+    - name: 🔄 Trigger ArgoCD Sync
+      run: |
+        # Wait for ArgoCD to detect changes
+        sleep 30
+        
+        # Trigger sync if ArgoCD is available
+        kubectl get applications -n argocd linkops-app && \
+        kubectl patch application linkops-app -n argocd --type='merge' -p='{"spec":{"syncPolicy":{"automated":{"prune":true,"selfHeal":true}}}}' || \
+        echo "ArgoCD application not found, skipping sync"
+
+    - name: ✅ Verify ArgoCD Sync
+      run: |
+        echo "=== ArgoCD Applications ==="
+        kubectl get applications -n argocd
+        echo ""
+        echo "=== ArgoCD Application Status ==="
+        kubectl describe application linkops-app -n argocd || echo "Application not found"
+
+  notify:
+    name: 📢 Deployment Notification
+    runs-on: ubuntu-latest
+    needs: [deploy-kubectl, deploy-argocd]
+    if: always()
+    
+    steps:
+    - name: 📋 Deployment Summary
+      run: |
+        echo "## 🚀 LinkOps Deployment Complete!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Deployment Details:**" >> $GITHUB_STEP_SUMMARY
+        echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Backend Image:** ${{ env.BACKEND_IMAGE }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Frontend Image:** ${{ env.FRONTEND_IMAGE }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Access URLs:**" >> $GITHUB_STEP_SUMMARY
+        echo "- Frontend: http://linkops.local" >> $GITHUB_STEP_SUMMARY
+        echo "- API: http://api.linkops.local" >> $GITHUB_STEP_SUMMARY
+        echo "- ArgoCD: http://argocd.linkops.local" >> $GITHUB_STEP_SUMMARY
+        echo "- Grafana: http://grafana.linkops.local" >> $GITHUB_STEP_SUMMARY
+
+    - name: 🔔 Slack Notification (Optional)
+      if: ${{ secrets.SLACK_WEBHOOK_URL }}
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        text: |
+          🚀 LinkOps deployment ${{ job.status }}!
+          Commit: ${{ github.sha }}
+          Branch: ${{ github.ref_name }}
+        webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }} 

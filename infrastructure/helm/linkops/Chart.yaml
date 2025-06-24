@@ -1,0 +1,22 @@
+apiVersion: v2
+name: linkops
+description: A Helm chart for LinkOps MLOps Platform
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - mlops
+  - kubernetes
+  - fastapi
+  - vue
+maintainers:
+  - name: LinkOps Team
+    email: team@linkops.com
+home: https://github.com/yourusername/linkops
+sources:
+  - https://github.com/yourusername/linkops
+dependencies:
+  - name: postgresql
+    version: 12.5.0
+    repository: https://charts.bitnami.com/bitnami
+    condition: postgresql.enabled 

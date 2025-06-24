@@ -124,6 +124,86 @@
           </div>
         </div>
       </div>
+
+      <!-- AUDITGUARD Agent -->
+      <div class="bg-gray-900 p-4 rounded-xl shadow border border-red-600">
+        <div class="flex items-center mb-4">
+          <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-2xl">🛡️</div>
+          <div class="ml-3">
+            <h2 class="text-xl font-bold text-red-400">AuditGuard</h2>
+            <p class="text-sm text-gray-400">Security & Compliance</p>
+          </div>
+        </div>
+        
+        <div class="space-y-3">
+          <div class="bg-gray-800 p-3 rounded">
+            <h3 class="text-sm font-semibold text-red-300 mb-2">🎯 Logic</h3>
+            <ul class="text-xs text-gray-300 space-y-1">
+              <li>• Trivy vulnerability scanning</li>
+              <li>• Bandit security linting</li>
+              <li>• Checkov infrastructure scanning</li>
+              <li>• Repository security audits</li>
+            </ul>
+          </div>
+          
+          <div class="bg-gray-800 p-3 rounded">
+            <h3 class="text-sm font-semibold text-red-300 mb-2">💎 Compliance</h3>
+            <div class="text-xs text-gray-300">
+              <p>• SOC2: {{ auditGuardStats.soc2 || 0 }} scans</p>
+              <p>• GDPR: {{ auditGuardStats.gdpr || 0 }} checks</p>
+              <p>• ISO27001: {{ auditGuardStats.iso27001 || 0 }} audits</p>
+            </div>
+          </div>
+          
+          <div class="bg-gray-800 p-3 rounded">
+            <h3 class="text-sm font-semibold text-red-300 mb-2">⚡ Status</h3>
+            <div class="flex items-center">
+              <div class="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+              <span class="text-xs text-red-400">Active</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FICKNURY Agent -->
+      <div class="bg-gray-900 p-4 rounded-xl shadow border border-purple-600">
+        <div class="flex items-center mb-4">
+          <div class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-2xl">🎭</div>
+          <div class="ml-3">
+            <h2 class="text-xl font-bold text-purple-400">FickNury</h2>
+            <p class="text-sm text-gray-400">Agent Orchestration</p>
+          </div>
+        </div>
+        
+        <div class="space-y-3">
+          <div class="bg-gray-800 p-3 rounded">
+            <h3 class="text-sm font-semibold text-purple-300 mb-2">🎯 Logic</h3>
+            <ul class="text-xs text-gray-300 space-y-1">
+              <li>• Agent creation & deployment</li>
+              <li>• Intelligence-driven decisions</li>
+              <li>• Multi-environment orchestration</li>
+              <li>• Version management</li>
+            </ul>
+          </div>
+          
+          <div class="bg-gray-800 p-3 rounded">
+            <h3 class="text-sm font-semibold text-purple-300 mb-2">💎 Deployments</h3>
+            <div class="text-xs text-gray-300">
+              <p>• Docker: {{ fickNuryStats.docker || 0 }} agents</p>
+              <p>• Kubernetes: {{ fickNuryStats.kubernetes || 0 }} agents</p>
+              <p>• Local: {{ fickNuryStats.local || 0 }} agents</p>
+            </div>
+          </div>
+          
+          <div class="bg-gray-800 p-3 rounded">
+            <h3 class="text-sm font-semibold text-purple-300 mb-2">⚡ Status</h3>
+            <div class="flex items-center">
+              <div class="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
+              <span class="text-xs text-purple-400">Active</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Recent Runes Section -->
@@ -154,6 +234,8 @@ import { ref, onMounted } from 'vue'
 const whisStats = ref({})
 const katieStats = ref({})
 const igrisStats = ref({})
+const auditGuardStats = ref({})
+const fickNuryStats = ref({})
 const recentRunes = ref([])
 
 const getAgentColor = (agent) => {
@@ -161,7 +243,9 @@ const getAgentColor = (agent) => {
     'whis': 'text-blue-400',
     'katie': 'text-green-400', 
     'igris': 'text-purple-400',
-    'james': 'text-yellow-400'
+    'james': 'text-yellow-400',
+    'auditguard': 'text-red-400',
+    'ficknury': 'text-purple-400'
   }
   return colors[agent] || 'text-gray-400'
 }
@@ -176,6 +260,26 @@ const fetchAgentStats = async () => {
       trainingData: digestData.log_count,
       approvedRunes: digestData.runes_approved,
       pendingRunes: digestData.runes_pending
+    }
+    
+    // Fetch compliance stats for AuditGuard
+    const complianceRes = await fetch('/api/compliance/stats')
+    const complianceData = await complianceRes.json()
+    
+    auditGuardStats.value = {
+      soc2: complianceData.compliance_tag_breakdown?.SOC2 || 0,
+      gdpr: complianceData.compliance_tag_breakdown?.GDPR || 0,
+      iso27001: complianceData.compliance_tag_breakdown?.ISO27001 || 0
+    }
+    
+    // Fetch agent status for FickNury
+    const agentStatusRes = await fetch('/api/agents/status')
+    const agentStatusData = await agentStatusRes.json()
+    
+    fickNuryStats.value = {
+      docker: agentStatusData.docker_agents?.length || 0,
+      kubernetes: agentStatusData.kubernetes_agents?.length || 0,
+      local: agentStatusData.local_agents?.length || 0
     }
     
     // Fetch recent runes

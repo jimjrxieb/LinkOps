@@ -1,0 +1,5 @@
+{
+  "task_id": "t1",
+  "question": "task create a pod named test with the image busybox",
+  "correct_answer": "kubectl run test --image=busybox"
+}

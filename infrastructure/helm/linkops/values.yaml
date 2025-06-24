@@ -1,0 +1,198 @@
+# Default values for LinkOps
+# This is a YAML-formatted file.
+
+# Global settings
+global:
+  environment: production
+  imageRegistry: ghcr.io
+  imagePullSecrets: []
+
+# Backend configuration
+backend:
+  enabled: true
+  image:
+    repository: yourusername/linkops-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+  
+  replicaCount: 2
+  
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  
+  env:
+    - name: DATABASE_URL
+      value: "postgresql://postgres:postgres@linkops-postgres:5432/linkops"
+    - name: KAFKA_BOOTSTRAP_SERVERS
+      value: "linkops-kafka:9092"
+    - name: ENVIRONMENT
+      value: "production"
+  
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8000
+  
+  ingress:
+    enabled: true
+    className: nginx
+    hosts:
+      - host: api.linkops.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+  
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 5
+    periodSeconds: 5
+
+# Frontend configuration
+frontend:
+  enabled: true
+  image:
+    repository: yourusername/linkops-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  
+  replicaCount: 2
+  
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  
+  env:
+    - name: VITE_API_URL
+      value: "http://linkops-backend"
+    - name: VITE_ENVIRONMENT
+      value: "production"
+  
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 80
+  
+  ingress:
+    enabled: true
+    className: nginx
+    hosts:
+      - host: linkops.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+  
+  livenessProbe:
+    httpGet:
+      path: /
+      port: 80
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  
+  readinessProbe:
+    httpGet:
+      path: /
+      port: 80
+    initialDelaySeconds: 5
+    periodSeconds: 5
+
+# PostgreSQL configuration
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: "postgres"
+    database: "linkops"
+  
+  primary:
+    persistence:
+      enabled: true
+      storageClass: managed-premium
+      size: 10Gi
+    
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+
+# Kafka configuration (optional)
+kafka:
+  enabled: false
+  # Add Kafka configuration if needed
+
+# Monitoring configuration
+monitoring:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+  
+  prometheusRule:
+    enabled: true
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  
+  hosts:
+    - host: linkops.local
+      paths:
+        - path: /api
+          pathType: Prefix
+          backend:
+            service:
+              name: linkops-backend
+              port:
+                number: 80
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: linkops-frontend
+              port:
+                number: 80
+  
+  tls: []
+
+# Persistence configuration
+persistence:
+  enabled: true
+  storageClass: managed-premium
+  size: 10Gi
+
+# Security configuration
+security:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+# Affinity and tolerations
+affinity: {}
+tolerations: []
+nodeSelector: {} 

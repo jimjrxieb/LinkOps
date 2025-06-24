@@ -1,167 +1,194 @@
 """
-Main FastAPI application for LinkOps James workflow
+LinkOps Core - Streamlined Whis Training Pipeline
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-import uvicorn
-from contextlib import asynccontextmanager
-import os
+from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from typing import Optional, Dict, Any
+import uuid
+from datetime import datetime
 
-# Import routes
-from core.api.routes.tasks import router as tasks_router
-from core.api.routes.gui import router as gui_router
-from routes.data_collect import router as data_collect_router
-from routes.whis import router as whis_router
+# Database
+from db.database import get_db, engine
+from db.models import Log, WhisQueue, Base
 
-# Import stores for initialization
-from core.db.memory import TASK_STORE, QA_STORE, INFO_DUMP_STORE, IMAGE_EXTRACTION_STORE, CHAT_HISTORY
+# Create tables
+Base.metadata.create_all(bind=engine)
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Application lifespan manager"""
-    # Startup
-    print("🚀 Starting LinkOps James workflow system...")
-    print("📊 Initializing in-memory stores...")
-    
-    # Initialize stores with some sample data
-    _initialize_sample_data()
-    
-    print("✅ LinkOps James workflow system ready!")
-    yield
-    
-    # Shutdown
-    print("🛑 Shutting down LinkOps James workflow system...")
+app = FastAPI(title="LinkOps Core", version="1.0.0")
 
-def _initialize_sample_data():
-    """Initialize stores with sample data for testing"""
-    # Sample tasks
-    sample_tasks = [
-        {
-            "id": "sample-task-1",
-            "input": "How do I deploy a Kubernetes pod?",
-            "origin": "manual",
-            "priority": "medium",
-            "tags": ["kubernetes", "deployment"],
-            "status": "received",
-            "created_at": "2024-01-01T00:00:00"
-        },
-        {
-            "id": "sample-task-2", 
-            "input": "Train a machine learning model for image classification",
-            "origin": "manager",
-            "priority": "high",
-            "tags": ["ml", "ai", "training"],
-            "status": "received",
-            "created_at": "2024-01-01T00:00:00"
-        }
-    ]
-    
-    for task in sample_tasks:
-        TASK_STORE[task["id"]] = task
-    
-    # Sample chat history
-    sample_chat = [
-        {
-            "message": "Hello James, can you help me with Kubernetes?",
-            "response": "Of course! I can help you with Kubernetes deployments, troubleshooting, and best practices. What specific issue are you facing?",
-            "context": "general",
-            "timestamp": "2024-01-01T00:00:00"
-        }
-    ]
-    
-    CHAT_HISTORY.extend(sample_chat)
-
-# Create FastAPI app
-app = FastAPI(
-    title="LinkOps James Workflow",
-    description="Complete James workflow system with task management, agent routing, and Whis training integration",
-    version="1.0.0",
-    lifespan=lifespan
-)
-
-# Add CORS middleware
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify actual origins
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(tasks_router, prefix="/api", tags=["tasks"])
-app.include_router(gui_router, prefix="/api/gui", tags=["gui"])
-app.include_router(data_collect_router, tags=["data-collection"])
-app.include_router(whis_router, tags=["whis"])
+# Models
+class LogRequest(BaseModel):
+    source: str
+    task_id: str
+    action: str
+    result: Dict[str, Any]
+    sanitized: bool = True
+    approved: bool = False
+    auto_approved: bool = False
+    compliance_tags: Optional[str] = "[]"
 
-# Health check endpoint
+class ApproveRequest(BaseModel):
+    task_id: str
+
+# Health check
 @app.get("/health")
-async def health_check():
-    """Health check endpoint"""
-    return {
-        "status": "healthy",
-        "service": "LinkOps James Workflow",
-        "version": "1.0.0",
-        "stores": {
-            "tasks": len(TASK_STORE),
-            "qa": len(QA_STORE),
-            "info_dumps": len(INFO_DUMP_STORE),
-            "image_extractions": len(IMAGE_EXTRACTION_STORE),
-            "chat_history": len(CHAT_HISTORY)
+async def health():
+    return {"status": "healthy", "service": "LinkOps Core"}
+
+# Logs endpoint
+@app.post("/api/logs")
+async def create_log(request: LogRequest, db: Session = Depends(get_db)):
+    """Create a new log entry for Whis training"""
+    try:
+        log = Log(
+            agent=request.source,
+            task_id=request.task_id,
+            action=request.action,
+            result=str(request.result),
+            sanitized=request.sanitized,
+            approved=request.approved,
+            auto_approved=request.auto_approved,
+            compliance_tags=request.compliance_tags
+        )
+        db.add(log)
+        db.commit()
+        db.refresh(log)
+        
+        return {
+            "status": "success",
+            "log_id": str(log.id),
+            "task_id": log.task_id,
+            "message": "Log created successfully"
         }
-    }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
-# Root endpoint
-@app.get("/")
-async def root():
-    """Root endpoint with system information"""
-    return {
-        "message": "Welcome to LinkOps James Workflow System",
-        "description": "Complete task management and agent routing system",
-        "sections": {
-            "🥇 Task Section": "Submit, analyze, and route tasks to agents",
-            "🧠 Q&A Training": "Manual reinforcement learning for Whis",
-            "🧑‍💻 AI Assistant": "Chat with James about LinkOps",
-            "🗃️ Info Dump": "Process documents for Whis training",
-            "🖼️ Image Extraction": "OCR and process images for training"
-        },
-        "endpoints": {
-            "tasks": "/api/tasks",
-            "qa": "/api/qa", 
-            "chat": "/api/chat",
-            "info-dump": "/api/info-dump",
-            "image-extraction": "/api/image-extraction",
-            "health": "/health"
+# Whis approvals endpoint
+@app.get("/api/whis/approvals")
+async def get_approvals(db: Session = Depends(get_db)):
+    """Get pending approvals for Whis training"""
+    try:
+        logs = db.query(Log).filter(
+            Log.sanitized == True,
+            Log.approved == False
+        ).all()
+        
+        return [
+            {
+                "id": str(log.id),
+                "task_id": log.task_id,
+                "agent": log.agent,
+                "action": log.action,
+                "result": log.result,
+                "created_at": log.created_at.isoformat() if log.created_at else None
+            }
+            for log in logs
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Approve rune endpoint
+@app.post("/api/whis/approve-rune")
+async def approve_rune(request: ApproveRequest, db: Session = Depends(get_db)):
+    """Approve a log entry for Whis training"""
+    try:
+        log = db.query(Log).filter(Log.task_id == request.task_id).first()
+        if not log:
+            raise HTTPException(status_code=404, detail="Log not found")
+        
+        log.approved = True
+        db.commit()
+        
+        return {
+            "status": "success",
+            "task_id": request.task_id,
+            "message": "Log approved for Whis training"
         }
-    }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
-# Error handlers
-@app.exception_handler(404)
-async def not_found_handler(request, exc):
-    return JSONResponse(
-        status_code=404,
-        content={"error": "Endpoint not found", "message": "The requested endpoint does not exist"}
-    )
+# Whis digest endpoint
+@app.get("/api/whis/digest")
+async def get_digest(db: Session = Depends(get_db)):
+    """Get Whis training digest"""
+    try:
+        # Get today's approved logs
+        today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+        approved_logs = db.query(Log).filter(
+            Log.approved == True,
+            Log.created_at >= today
+        ).all()
+        
+        # Get queue stats
+        pending = db.query(Log).filter(
+            Log.sanitized == True,
+            Log.approved == False
+        ).count()
+        
+        return {
+            "date": today.isoformat(),
+            "approved_today": len(approved_logs),
+            "pending_approvals": pending,
+            "recent_approved": [
+                {
+                    "task_id": log.task_id,
+                    "agent": log.agent,
+                    "action": log.action,
+                    "result": log.result[:100] + "..." if len(log.result) > 100 else log.result
+                }
+                for log in approved_logs[-5:]  # Last 5 approved
+            ]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-@app.exception_handler(500)
-async def internal_error_handler(request, exc):
-    return JSONResponse(
-        status_code=500,
-        content={"error": "Internal server error", "message": "An unexpected error occurred"}
-    )
+# Train nightly endpoint
+@app.post("/api/whis/train-nightly")
+async def train_nightly(db: Session = Depends(get_db)):
+    """Process approved logs for Whis training"""
+    try:
+        # Get all approved logs
+        approved_logs = db.query(Log).filter(
+            Log.sanitized == True,
+            Log.approved == True
+        ).all()
+        
+        # Add to WhisQueue for processing
+        for log in approved_logs:
+            queue_entry = WhisQueue(
+                task_id=log.task_id,
+                raw_text=log.result,
+                source=log.agent,
+                status="pending",
+                agent=log.agent
+            )
+            db.add(queue_entry)
+        
+        db.commit()
+        
+        return {
+            "status": "success",
+            "processed": len(approved_logs),
+            "message": f"Added {len(approved_logs)} approved logs to Whis training queue"
+        }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
-    # Get port from environment or default to 8000
-    port = int(os.getenv("PORT", 8000))
-    host = os.getenv("HOST", "0.0.0.0")
-    
-    print(f"🌐 Starting server on {host}:{port}")
-    uvicorn.run(
-        "main:app",
-        host=host,
-        port=port,
-        reload=False,  # Disable reload in production/Docker
-        log_level="info"
-    )
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

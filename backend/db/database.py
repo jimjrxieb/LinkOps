@@ -1,21 +1,20 @@
 """
-Database configuration and session management
+LinkOps Core - Database Connection
 """
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import os
-from dotenv import load_dotenv
+from sqlalchemy.ext.declarative import declarative_base
 
-load_dotenv()
+# SQLite database for simplicity
+SQLALCHEMY_DATABASE_URL = "sqlite:///./linkops.db"
 
-# Database URL should be set via DATABASE_URL environment variable
-# Default is a placeholder - replace with actual credentials in .env file
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/linkops")
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
-
+Base = declarative_base()
 
 def get_db():
     """Database session dependency"""

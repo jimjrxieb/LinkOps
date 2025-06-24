@@ -1,0 +1,5 @@
+{
+  "error": "connection timeout at <IP_ADDR>",
+  "solution": "check /etc/network/interfaces",
+  "guide": "sudo vi /etc/network/interfaces"
+}

@@ -1,86 +1,111 @@
 <template>
-  <div class="p-6 text-white">
-    <h1 class="text-2xl font-bold mb-6">🧠 Whis Training Queue</h1>
+  <div class="p-6 space-y-6">
 
-    <!-- Whis Data Lake trigger -->
-    <div class="mb-6 p-4 bg-blue-950 rounded-xl border border-blue-600 shadow">
-      <h2 class="text-lg font-bold text-blue-300">🧠 Whis Data Lake</h2>
-      <p class="text-sm mb-2 text-blue-200">Trigger nightly learning from all sanitized logs.</p>
-      <button
-        @click="trainWhis"
-        class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white font-medium"
-      >
-        🔄 Start Night Training
-      </button>
+    <!-- 🔹 Data Collection Input -->
+    <div class="bg-white shadow rounded-2xl p-4">
+      <h2 class="text-xl font-bold mb-2">🧠 Data Collection</h2>
+      <form @submit.prevent="submitData">
+        <input v-model="task" placeholder="Enter task/question..." class="w-full p-2 border rounded mb-2" />
+        <input v-model="answer" placeholder="Enter correct answer..." class="w-full p-2 border rounded mb-2" />
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Submit</button>
+      </form>
     </div>
 
-    <div v-if="runes.length === 0" class="text-green-400">
-      ✅ No pending runes. Whis is fully trained.
+    <!-- 🔸 Log Preview -->
+    <div v-if="logPreview" class="bg-gray-100 p-4 rounded">
+      <h3 class="font-semibold">Sanitized Preview:</h3>
+      <pre>{{ logPreview }}</pre>
     </div>
 
-    <div v-for="rune in runes" :key="rune.id" class="bg-gray-900 p-4 rounded-xl mb-4 shadow border border-gray-700">
-      <p class="text-sm text-gray-400 mb-2">
-        <strong>Agent:</strong> {{ rune.agent }} | 
-        <strong>Origin:</strong> {{ rune.origin }} | 
-        <strong>ID:</strong> #{{ rune.id }}
-      </p>
-      <pre class="bg-gray-800 p-2 rounded text-sm max-h-64 overflow-y-auto">
-{{ JSON.stringify(rune.content, null, 2) }}
-      </pre>
-      <button
-        class="mt-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-white"
-        @click="approve(rune.id)"
-      >
-        ✅ Approve Rune
-      </button>
+    <!-- 🔍 Approval Queue -->
+    <div class="bg-white shadow rounded-2xl p-4">
+      <h2 class="text-lg font-bold mb-2">⚖️ Rune Approval Queue</h2>
+      <div v-for="entry in approvalQueue" :key="entry.task_id" class="border-b py-2">
+        <div class="text-sm">{{ entry.result.question }}</div>
+        <button @click="approveRune(entry.task_id)" class="mt-1 text-green-700">✅ Approve</button>
+      </div>
+    </div>
+
+    <!-- 🌙 Digest Section -->
+    <div class="bg-white shadow rounded-2xl p-4">
+      <h2 class="text-lg font-bold mb-2">🌙 Whis Training Digest</h2>
+      <div v-if="digest">
+        <pre>{{ digest }}</pre>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import axios from 'axios'
 
-const runes = ref([])
+const task = ref('')
+const answer = ref('')
+const logPreview = ref(null)
+const approvalQueue = ref([])
+const digest = ref(null)
 
-const fetchRunes = async () => {
-  const res = await fetch('/api/whis/approvals')
-  const data = await res.json()
-  runes.value = data
+async function submitData() {
+  const payload = {
+    task_id: Date.now().toString(),
+    question: task.value,
+    correct_answer: answer.value
+  }
+  
+  try {
+    const res = await axios.post('http://localhost:8001/api/collect/qna', payload)
+    logPreview.value = res.data || payload
+    console.log('Data queued:', res.data)
+    
+    // Clear form
+    task.value = ''
+    answer.value = ''
+  } catch (error) {
+    console.error('Error submitting data:', error)
+    logPreview.value = { error: 'Failed to submit data' }
+  }
 }
 
-const trainWhis = async () => {
-  const res = await fetch('/api/whis/train-nightly', { method: 'POST' })
-  const data = await res.json()
-  alert(`Whis trained on ${data.count} logs.`)
-  fetchRunes()  // refresh approval queue
+async function approveRune(taskId) {
+  try {
+    await axios.post('/api/whis/approve-rune', { task_id: taskId })
+    loadQueue()
+  } catch (error) {
+    console.error('Error approving rune:', error)
+  }
 }
 
-const approve = async (id) => {
-  await fetch(`/api/whis/approve-rune/${id}`, {
-    method: 'POST'
-  })
-  runes.value = runes.value.filter(r => r.id !== id)
+async function loadQueue() {
+  try {
+    const res = await axios.get('/api/whis/approvals')
+    approvalQueue.value = res.data || []
+  } catch (error) {
+    console.error('Error loading queue:', error)
+  }
 }
 
-onMounted(fetchRunes)
+async function loadDigest() {
+  try {
+    const res = await axios.get('/api/whis/digest')
+    digest.value = res.data || {}
+  } catch (error) {
+    console.error('Error loading digest:', error)
+  }
+}
+
+onMounted(() => {
+  loadQueue()
+  loadDigest()
+})
 </script>
 
 <style scoped>
-.whis-page {
-  max-width: 1000px;
-  margin: auto;
-  padding: 2rem;
-}
-section {
-  margin-bottom: 2rem;
-}
-ul {
-  background: #222;
+pre {
+  background-color: #f7fafc;
   padding: 1rem;
-  border-radius: 10px;
-  list-style: none;
-}
-li {
-  margin-bottom: 0.5rem;
+  border-radius: 0.5rem;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 </style> 

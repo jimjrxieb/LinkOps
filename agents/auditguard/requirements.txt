@@ -1,0 +1,14 @@
+fastapi==0.104.1
+uvicorn==0.24.0
+pydantic==2.5.0
+requests==2.31.0
+python-multipart==0.0.6
+aiofiles==23.2.1
+pyyaml==6.0.1
+jinja2==3.1.2
+gitpython==3.1.40
+bandit==1.7.5
+safety==2.3.5
+checkov==3.1.0
+snyk==0.8.0
+semgrep==1.50.0 

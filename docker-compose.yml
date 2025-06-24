@@ -78,6 +78,77 @@ services:
     volumes:
       - kafka_data:/var/lib/kafka/data
 
+  ### 📥 DATA COLLECTOR SERVICE
+  data-collector:
+    build: ./services/data_collector
+    container_name: linkops-data-collector
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./services/data_collector:/app
+    environment:
+      - KAFKA_BROKERS=kafka:9092
+    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+    depends_on:
+      - kafka
+
+  ### 🧹 SANITIZER SERVICE
+  sanitizer:
+    build: ./services/sanitizer
+    container_name: linkops-sanitizer
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./services/sanitizer:/app
+      - ./data_lake:/app/data_lake
+    command: uvicorn main:app --host 0.0.0.0 --port 8002 --reload
+
+  ### 🧠 WHIS AI AGENT SERVICE
+  whis:
+    build: ./services/whis
+    container_name: linkops-whis
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./services/whis:/app
+      - ./data_lake:/app/data_lake
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    command: uvicorn main:app --host 0.0.0.0 --port 8003 --reload
+
+  ### 🤖 FICKNURY AGENT COMMANDER SERVICE
+  ficknury:
+    build: ./services/ficknury
+    container_name: linkops-ficknury
+    ports:
+      - "8004:8004"
+    volumes:
+      - ./services/ficknury:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8004 --reload
+
+  ### 📊 SCRAPERDASH INTELLIGENCE SERVICE
+  scraperdash:
+    build: ./services/scraperdash
+    container_name: linkops-scraperdash
+    ports:
+      - "8005:8005"
+    volumes:
+      - ./services/scraperdash:/app
+      - ./data_lake:/app/data_lake
+    command: uvicorn main:app --host 0.0.0.0 --port 8005 --reload
+
+  ### 🧑‍💻 JAMES AI ASSISTANT SERVICE
+  james:
+    build: ./services/james
+    container_name: linkops-james
+    ports:
+      - "8006:8006"
+    volumes:
+      - ./services/james:/app
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    command: uvicorn main:app --host 0.0.0.0 --port 8006 --reload
+
 volumes:
   postgres_data:
   kafka_data:
