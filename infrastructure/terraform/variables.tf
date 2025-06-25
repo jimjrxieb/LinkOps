@@ -25,20 +25,13 @@ variable "node_count" {
 variable "vm_size" {
   description = "Size of AKS nodes"
   type        = string
-  default     = "Standard_D2s_v3"
+  default     = "Standard_DS2_v2"
 }
 
-variable "monitoring_vm_size" {
-  description = "Size of monitoring VM"
+variable "acr_name" {
+  description = "Name of the Azure Container Registry"
   type        = string
-  default     = "Standard_B2s"
-}
-
-variable "grafana_admin_password" {
-  description = "Admin password for Grafana"
-  type        = string
-  sensitive   = true
-  default     = "LinkOps2024!"
+  default     = "linkopsacr"
 }
 
 variable "environment" {

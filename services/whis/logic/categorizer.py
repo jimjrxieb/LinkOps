@@ -29,5 +29,13 @@ def categorize_input(input_type: str, payload: dict) -> str:
     elif input_type == "fixlog":
         # Fix logs might indicate issues
         return "audit"
+    elif input_type == "solution_entry":
+        # Solution entries are categorized based on the problem they solve
+        task_desc = payload.get("task_description", "")
+        solution_path = payload.get("solution_path", [])
+        
+        # Combine task description and solution steps for better categorization
+        combined_text = f"{task_desc} {' '.join(solution_path)}".lower()
+        return categorize_task(combined_text)
     else:
         return "links" 

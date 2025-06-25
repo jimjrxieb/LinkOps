@@ -21,239 +21,147 @@ This directory contains the complete infrastructure setup for the LinkOps MLOps 
 
 ## 📁 Directory Structure
 
-```
-infrastructure/
-├── terraform/                 # Terraform configuration
-│   ├── main.tf               # Main infrastructure
-│   ├── variables.tf          # Variable definitions
-│   ├── outputs.tf            # Output values
-│   └── monitoring-setup.sh   # Monitoring VM setup script
-├── k8s/                      # Kubernetes manifests
-│   ├── argocd/              # ArgoCD installation
-│   └── app/                 # LinkOps application manifests
-├── deploy.sh                 # Automated deployment script
-└── README.md                # This file
-```
+# ☸️ LinkOps Kubernetes Deployment (AKS)
 
-## 🚀 Quick Start
+This directory contains raw Kubernetes manifests and configuration for deploying LinkOps microservices into Azure Kubernetes Service (AKS). It is GitOps-ready and synced by ArgoCD.
 
-### Prerequisites
+---
 
-1. **Azure CLI** - [Install Guide](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
-2. **Terraform** - [Install Guide](https://www.terraform.io/downloads.html)
-3. **kubectl** - [Install Guide](https://kubernetes.io/docs/tasks/tools/)
-4. **Helm** - [Install Guide](https://helm.sh/docs/intro/install/)
+## 🧠 ArgoCD Setup (One-time)
 
-### Automated Deployment
+ArgoCD will watch this folder and apply updates to the AKS cluster when it detects changes.
+
+Install ArgoCD into AKS:
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/linkops.git
-cd linkops
-
-# Run the deployment script
-chmod +x infrastructure/deploy.sh
-./infrastructure/deploy.sh
+helm repo add argo https://argoproj.github.io/argo-helm
+helm install argocd argo/argo-cd --namespace argocd --create-namespace
 ```
 
-### Manual Deployment
+Then apply the application config:
 
 ```bash
-# 1. Login to Azure
-az login
-
-# 2. Navigate to Terraform directory
-cd infrastructure/terraform
-
-# 3. Initialize Terraform
-terraform init
-
-# 4. Plan deployment
-terraform plan -out=tfplan
-
-# 5. Apply configuration
-terraform apply tfplan
-
-# 6. Get kubeconfig
-terraform output -raw aks_kube_config > ~/.kube/config
-
-# 7. Install ArgoCD
-helm install argocd argo/argo-cd \
-    --namespace argocd \
-    --create-namespace \
-    --set server.extraArgs[0]=--insecure
-
-# 8. Install monitoring stack
-helm install monitoring prometheus-community/kube-prometheus-stack \
-    --namespace monitoring \
-    --create-namespace
+kubectl apply -f argocd-apps/linkops-app.yaml
 ```
 
-## 🏛️ Infrastructure Components
+---
 
-### 1. Azure Kubernetes Service (AKS)
-- **Cluster Name**: `aks-linkops`
-- **Node Count**: 2 (auto-scaling 1-5)
-- **VM Size**: Standard_DS2_v2
-- **Region**: East US
-- **Network Plugin**: Azure CNI
-- **Network Policy**: Azure
+## 🧱 Directory Structure
 
-### 2. Azure Container Registry (ACR)
-- **Name**: `linkopsacr`
-- **SKU**: Basic
-- **Admin Enabled**: Yes
-
-### 3. ArgoCD (GitOps)
-- **Namespace**: `argocd`
-- **Access**: http://argocd.linkops.local
-- **Admin Password**: Generated during deployment
-
-### 4. Monitoring Stack
-- **Prometheus**: Metrics collection
-- **Grafana**: Visualization (http://grafana.linkops.local)
-- **Loki**: Log aggregation
-- **Namespace**: `monitoring`
-
-### 5. LinkOps Applications
-- **Backend**: FastAPI application
-- **Frontend**: Vue.js application
-- **PostgreSQL**: Database
-- **Namespace**: `linkops`
-
-## 🔧 Configuration
-
-### Environment Variables
-
-Create a `terraform.tfvars` file to customize the deployment:
-
-```hcl
-resource_group_name = "rg-linkops-demo"
-location            = "East US"
-cluster_name        = "aks-linkops"
-node_count          = 2
-vm_size             = "Standard_DS2_v2"
-environment         = "demo"
-project             = "linkops"
+```
+k8s/
+├── base/                # Core manifests for all services
+│   ├── james/
+│   │   ├── deployment.yaml
+│   │   └── service.yaml
+│   ├── whis/
+│   ├── katie/
+│   ├── igris/
+│   ├── ingress.yaml
+│   └── namespace.yaml
+├── overlays/            # Environment-specific customizations
+│   ├── dev/
+│   └── prod/
+└── argocd-apps/
+    └── linkops-app.yaml
 ```
 
-### GitHub Actions Secrets
+---
 
-Set these secrets in your GitHub repository:
+## 🔧 Manual Customizations (CKA-Style)
 
-- `ACR_LOGIN_SERVER`: Azure Container Registry login server
-- `ACR_USERNAME`: ACR admin username
-- `ACR_PASSWORD`: ACR admin password
-- `KUBECONFIG`: Base64-encoded kubeconfig
+You can modify the base YAMLs manually for common exam-level tasks:
 
-## 📊 Monitoring & Observability
+### ✅ Change Replicas
 
-### Grafana Dashboards
-- **Kubernetes Cluster Overview**
-- **LinkOps Application Metrics**
-- **Prometheus Targets**
-- **Loki Logs**
+Edit `deployment.yaml` for any service:
 
-### Prometheus Targets
-- Kubernetes API servers
-- Node metrics
-- Pod metrics
-- Custom LinkOps metrics
+```yaml
+spec:
+  replicas: 3  # change this value
+```
 
-### Log Aggregation
-- **Loki**: Centralized log storage
-- **Promtail**: Log collection agent
-- **Grafana**: Log visualization
+### ✅ Add a Sidecar Container
 
-## 🔐 Security
+```yaml
+containers:
+  - name: main-app
+    image: your-image
+  - name: sidecar-logger
+    image: busybox
+    command: ["sh", "-c", "tail -f /var/log/app.log"]
+```
 
-### Network Security
-- Azure Network Security Groups
-- Kubernetes Network Policies
-- Ingress TLS termination
+### ✅ Add a Service Account
 
-### Secrets Management
-- Kubernetes Secrets
-- Azure Key Vault integration (optional)
-- HashiCorp Vault (optional)
+Create:
 
-## 🚨 Troubleshooting
+```yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: whis-sa
+  namespace: linkops
+```
 
-### Common Issues
+Then reference it in your deployment:
 
-1. **AKS Cluster Not Ready**
-   ```bash
-   kubectl get nodes
-   kubectl describe node <node-name>
-   ```
+```yaml
+spec:
+  serviceAccountName: whis-sa
+```
 
-2. **ArgoCD Not Accessible**
-   ```bash
-   kubectl get pods -n argocd
-   kubectl port-forward svc/argocd-server -n argocd 8080:443
-   ```
+### ✅ Add RBAC for the Agent
 
-3. **Monitoring Stack Issues**
-   ```bash
-   kubectl get pods -n monitoring
-   kubectl logs -n monitoring deployment/prometheus-operator
-   ```
+```yaml
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: linkops
+  name: whis-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services"]
+  verbs: ["get", "list", "watch"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: whis-rolebinding
+  namespace: linkops
+subjects:
+- kind: ServiceAccount
+  name: whis-sa
+  namespace: linkops
+roleRef:
+  kind: Role
+  name: whis-role
+  apiGroup: rbac.authorization.k8s.io
+```
 
-4. **Application Deployment Issues**
-   ```bash
-   kubectl get pods -n linkops
-   kubectl describe pod <pod-name> -n linkops
-   ```
+---
 
-### Useful Commands
+## 🛠 Helm Installs You'll Likely Need
+
+| Tool                     | Helm Install Command                                           |
+| ------------------------ | -------------------------------------------------------------- |
+| ArgoCD                   | `helm install argocd argo/argo-cd ...`                         |
+| Prometheus               | `helm install monitoring prometheus/kube-prometheus-stack ...` |
+| GitHub Runner (optional) | `helm install gha actions-runner-controller/...`               |
+
+---
+
+## 🧪 Validate Your Setup
 
 ```bash
-# Get cluster info
-kubectl cluster-info
-
-# View all namespaces
-kubectl get namespaces
-
-# View ArgoCD applications
-kubectl get applications -n argocd
-
-# View LinkOps pods
 kubectl get pods -n linkops
-
-# View monitoring pods
-kubectl get pods -n monitoring
-
-# Port forward services
-kubectl port-forward svc/argocd-server -n argocd 8080:443
-kubectl port-forward svc/monitoring-grafana -n monitoring 3000:80
+kubectl describe deployment james -n linkops
+kubectl logs -f deployment/james -n linkops
 ```
 
-## 📈 Scaling
+---
 
-### Horizontal Pod Autoscaling
-```bash
-kubectl autoscale deployment linkops-backend -n linkops --cpu-percent=70 --min=2 --max=10
-kubectl autoscale deployment linkops-frontend -n linkops --cpu-percent=70 --min=2 --max=10
-```
+## ✅ Best Practice
 
-### Cluster Autoscaling
-The AKS cluster is configured with auto-scaling enabled (1-5 nodes).
-
-## 🧹 Cleanup
-
-To destroy the infrastructure:
-
-```bash
-cd infrastructure/terraform
-terraform destroy
-```
-
-**Warning**: This will delete all resources including the AKS cluster and all data.
-
-## 📚 Additional Resources
-
-- [Azure AKS Documentation](https://docs.microsoft.com/en-us/azure/aks/)
-- [ArgoCD Documentation](https://argo-cd.readthedocs.io/)
-- [Prometheus Documentation](https://prometheus.io/docs/)
-- [Grafana Documentation](https://grafana.com/docs/)
-- [Terraform Azure Provider](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs) 
+Use `base/` for core manifests.
+Use `overlays/dev/` for environment-specific tweaks via Kustomize.

@@ -1,188 +1,339 @@
-# 🧠 LinkOps HoloCore - Elite AI Command Center
+# LinkOps Frontend Microservice
 
-Vue 3 holographic interface for the LinkOps Core AI Training & Learning System.
+A Vue 3-based frontend microservice for the LinkOps AI Command Center, featuring a holographic sci-fi interface.
 
 ## 🚀 Features
 
-- **👑 James Tab**: Task evaluation, routing, and conversation history
-- **🧠 Whis Tab**: Training queue, approval queue, and daily digest
-- **🎨 Holographic UI**: Cyberpunk-inspired design with glass effects and neon colors
-- **📊 Real-time Updates**: Live data from the backend API
-- **🔄 State Management**: Pinia store for centralized state
-- **📱 Responsive**: Works perfectly on all devices
-
-## 🛠 Tech Stack
-
-- **Vue 3** with Composition API
-- **Vue Router** for navigation
-- **Pinia** for state management
-- **Tailwind CSS** with custom holographic theme
-- **Axios** for API communication
-- **Vite** for fast development
-
-## 🎨 Design System
-
-### Colors
-- **Holo Cyan**: `#00ffff` - Primary accent
-- **Holo Green**: `#00ff80` - Success states
-- **Holo Blue**: `#0080ff` - Info states
-- **Holo Yellow**: `#ffff00` - Warning states
-- **Holo Red**: `#ff0000` - Error states
-
-### Components
-- **Holo Cards**: Glassy panels with backdrop blur
-- **Holo Buttons**: Neon-styled interactive elements
-- **Holo Inputs**: Cyber-styled form controls
-- **Status Badges**: Color-coded status indicators
-
-## 🚀 Quick Start
-
-### Prerequisites
-- Node.js 18+
-- npm or yarn
-- Backend running on localhost:8000
-
-### Development Setup
-
-1. **Install dependencies:**
-   ```bash
-   cd frontend
-   npm install
-   ```
-
-2. **Start development server:**
-   ```bash
-   npm run dev
-   ```
-
-3. **Access the app:**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8000
-
-### Production Build
-
-```bash
-npm run build
-npm run preview
-```
+- **Holographic UI Design** - Sci-fi themed interface with glowing effects
+- **Vue 3 + Composition API** - Modern reactive framework
+- **Tailwind CSS** - Utility-first styling
+- **GSAP Animations** - Smooth, professional animations
+- **Microservice Architecture** - Independent deployment
+- **Kubernetes Ready** - Full K8s deployment support
+- **ArgoCD Compatible** - GitOps deployment workflow
 
 ## 📁 Project Structure
 
 ```
 frontend/
-├── public/
-│   └── index.html              # HTML template
+├── Dockerfile              # Multi-stage production build
+├── nginx.conf              # Nginx configuration for serving
+├── vite.config.js          # Vite build configuration
+├── package.json            # Dependencies and scripts
+├── public/                 # Static assets
 ├── src/
-│   ├── agents/
-│   │   ├── JamesTab.vue        # James task interface
-│   │   └── WhisTab.vue         # Whis training interface
-│   ├── stores/
-│   │   └── agents.js           # Pinia store
-│   ├── assets/
-│   │   └── tailwind.css        # Custom styles
-│   ├── App.vue                 # Main app component
-│   ├── main.js                 # Vue entry point
-│   └── router.js               # Vue Router config
-├── package.json                # Dependencies
-├── vite.config.js              # Vite configuration
-├── tailwind.config.js          # Tailwind theme
-└── postcss.config.js           # PostCSS config
+│   ├── assets/             # Images, fonts, styles
+│   ├── components/         # Reusable Vue components
+│   ├── views/              # Page components
+│   ├── router/             # Vue Router configuration
+│   ├── stores/             # Pinia state management
+│   ├── services/           # API service layer
+│   └── App.vue             # Root component
+└── README.md               # This file
 ```
 
-## 🧠 Agent Tabs
+## 🛠 Development
 
-### 👑 James Tab
-- **Task Input**: Submit new tasks for evaluation
-- **Evaluation Results**: View detected category and options
-- **Action Buttons**: Complete with James or send to agents
-- **Conversation History**: Real-time log of all interactions
+### Prerequisites
 
-### 🧠 Whis Tab
-- **Training Queue**: Monitor pending, trained, matches, and fallbacks
-- **Approval Queue**: Review and approve flagged runes
-- **Daily Digest**: View daily statistics and metrics
-- **Night Training**: Trigger AI training processes
+- Node.js 18+
+- npm 8+
 
-## 🔧 Configuration
+### Local Development
 
-### Environment Variables
-- `VITE_API_URL`: Backend API URL (default: http://localhost:8000)
-
-### API Proxy
-The development server automatically proxies `/api/*` requests to the backend.
-
-## 🎯 API Integration
-
-The frontend integrates with these backend endpoints:
-
-### James Endpoints
-- `POST /api/james/evaluate` - Task evaluation
-- `POST /api/tasks/complete-with-james` - Complete task
-- `POST /api/tasks/send-to-agent` - Route to agent
-
-### Whis Endpoints
-- `GET /api/whis/queue` - Training queue status
-- `GET /api/whis/approvals` - Pending approvals
-- `POST /api/whis/approve-rune` - Approve rune
-- `POST /api/whis/train-nightly` - Trigger training
-- `GET /api/whis/digest` - Daily summary
-
-## 🎨 Customization
-
-### Adding New Colors
-Edit `tailwind.config.js`:
-```js
-colors: {
-  'holo': {
-    'new-color': '#your-hex-code'
-  }
-}
-```
-
-### Adding New Components
-Create reusable components in `src/components/`:
-```vue
-<template>
-  <div class="holo-card">
-    <!-- Your component content -->
-  </div>
-</template>
-```
-
-## 🚀 Deployment
-
-### Docker Deployment
 ```bash
-# Build the image
-docker build -t linkops-holocore .
+# Install dependencies
+npm install
 
-# Run the container
-docker run -p 3000:3000 linkops-holocore
-```
+# Start development server
+npm run dev
 
-### Static Deployment
-```bash
 # Build for production
 npm run build
 
-# Deploy dist/ folder to your hosting service
+# Preview production build
+npm run preview
+
+# Run linting
+npm run lint
+
+# Run tests
+npm run test
 ```
 
-## 🔗 Integration
+### Environment Variables
 
-The frontend seamlessly integrates with the LinkOps Core backend:
+Create `.env.local` for local development:
 
-1. **Real-time Updates**: Automatic refresh of data
-2. **Error Handling**: Graceful error display and recovery
-3. **Loading States**: Visual feedback during operations
-4. **State Management**: Centralized state with Pinia
+```env
+VITE_API_BASE_URL=http://localhost:8000
+VITE_WHIS_URL=http://localhost:8001
+VITE_JAMES_URL=http://localhost:8002
+VITE_SANITIZER_URL=http://localhost:8003
+VITE_DATA_COLLECTOR_URL=http://localhost:8004
+```
 
-## 📱 Browser Support
+## 🐳 Docker Deployment
 
-- Chrome 90+
-- Firefox 88+
-- Safari 14+
-- Edge 90+
+### Build Image
+
+```bash
+# Build production image
+docker build -t linkopsacr.azurecr.io/frontend:latest .
+
+# Run locally
+docker run -p 80:80 linkopsacr.azurecr.io/frontend:latest
+```
+
+### Multi-stage Build
+
+The Dockerfile uses a multi-stage build:
+1. **Builder stage** - Compiles Vue.js application
+2. **Production stage** - Nginx serves static files
+
+## ☸️ Kubernetes Deployment
+
+### Prerequisites
+
+- AKS cluster with NGINX ingress controller
+- Azure Container Registry (ACR)
+- ArgoCD (optional)
+
+### Deploy to Kubernetes
+
+```bash
+# Apply all resources
+kubectl apply -k infrastructure/k8s/base/
+
+# Check deployment status
+kubectl get pods -n linkops
+kubectl get services -n linkops
+kubectl get ingress -n linkops
+```
+
+### Access the Application
+
+After deployment, access via:
+- **Primary**: `http://linkops.local`
+- **Alternative**: `http://www.linkops.local`
+
+## 🔧 Configuration
+
+### Nginx Configuration
+
+The `nginx.conf` includes:
+- Gzip compression
+- Security headers
+- Static asset caching
+- Vue Router history mode support
+- Health check endpoint
+- API proxy configuration
+
+### Vite Configuration
+
+Optimized for production:
+- Code splitting
+- Tree shaking
+- Minification
+- Source map generation (disabled in prod)
+- Manual chunks for vendor libraries
+
+## 📊 Monitoring & Health Checks
+
+### Health Endpoints
+
+- **Application Health**: `GET /health`
+- **Readiness Probe**: `GET /`
+- **Liveness Probe**: `GET /`
+
+### Kubernetes Probes
+
+```yaml
+livenessProbe:
+  httpGet:
+    path: /
+    port: 80
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: 80
+  initialDelaySeconds: 5
+  periodSeconds: 5
+```
+
+## 🔄 CI/CD Pipeline
+
+### GitHub Actions
+
+The `.github/workflows/frontend-build.yml` workflow:
+1. Builds Docker image on push/PR
+2. Pushes to Azure Container Registry
+3. Deploys to AKS (main branch only)
+
+### ArgoCD Integration
+
+The frontend is included in the ArgoCD application:
+- **Path**: `infrastructure/k8s/base/frontend/`
+- **Auto-sync**: Enabled
+- **Self-heal**: Enabled
+
+## 🎨 UI Components
+
+### Core Pages
+
+- **Dashboard** - System overview and monitoring
+- **James** - AI assistant interface
+- **Whis** - Training system management
+- **Agents** - Agent profiles and performance
+- **Login** - Authentication interface
+- **About** - System information and profiles
+
+### Design System
+
+- **Color Palette**: Cyberpunk theme with neon cyan (#00ffff)
+- **Typography**: Futuristic fonts with glowing effects
+- **Animations**: GSAP-powered smooth transitions
+- **Layout**: Responsive grid system with glassmorphism
+
+## 🔌 API Integration
+
+### Service Layer
+
+The `src/services/api.js` provides:
+- Centralized API client configuration
+- Service-specific API functions
+- Error handling and retry logic
+- Health check utilities
+
+### Microservice Communication
+
+- **Backend**: Core API endpoints
+- **Whis**: Training and approval workflows
+- **James**: Task submission and AI assistance
+- **Sanitizer**: Data processing
+- **Data Collector**: Data ingestion
+
+## 🚀 Performance Optimization
+
+### Build Optimizations
+
+- **Code Splitting**: Automatic vendor chunk separation
+- **Tree Shaking**: Unused code elimination
+- **Minification**: Terser for JavaScript compression
+- **Asset Optimization**: Image and font optimization
+
+### Runtime Optimizations
+
+- **Lazy Loading**: Route-based code splitting
+- **Caching**: Static asset caching with nginx
+- **Compression**: Gzip compression enabled
+- **CDN Ready**: Static assets optimized for CDN
+
+## 🔒 Security
+
+### Security Headers
+
+```nginx
+add_header X-Frame-Options "SAMEORIGIN" always;
+add_header X-XSS-Protection "1; mode=block" always;
+add_header X-Content-Type-Options "nosniff" always;
+add_header Referrer-Policy "no-referrer-when-downgrade" always;
+add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
+```
+
+### Best Practices
+
+- Non-root container execution
+- Minimal attack surface
+- Regular security updates
+- Environment variable management
+
+## 🧪 Testing
+
+### Test Commands
+
+```bash
+# Unit tests
+npm run test
+
+# UI tests
+npm run test:ui
+
+# Coverage report
+npm run test:coverage
+
+# Type checking
+npm run type-check
+```
+
+### Test Coverage
+
+- Component unit tests
+- API service tests
+- Integration tests
+- E2E tests (planned)
+
+## 📈 Scaling
+
+### Horizontal Scaling
+
+```bash
+# Scale frontend deployment
+kubectl scale deployment frontend --replicas=5 -n linkops
+
+# Auto-scaling (HPA)
+kubectl apply -f infrastructure/k8s/base/frontend/hpa.yaml
+```
+
+### Load Balancing
+
+- Kubernetes Service load balancing
+- NGINX ingress controller
+- Session affinity support
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **Build Failures**
+   ```bash
+   # Clear node_modules and reinstall
+   rm -rf node_modules package-lock.json
+   npm install
+   ```
+
+2. **Docker Build Issues**
+   ```bash
+   # Clear Docker cache
+   docker system prune -a
+   ```
+
+3. **Kubernetes Deployment Issues**
+   ```bash
+   # Check pod logs
+   kubectl logs deployment/frontend -n linkops
+   
+   # Check pod status
+   kubectl describe pod -l app=frontend -n linkops
+   ```
+
+### Debug Mode
+
+Enable debug mode in development:
+```env
+VITE_ENABLE_DEBUG=true
+```
+
+## 📚 Resources
+
+- [Vue 3 Documentation](https://vuejs.org/)
+- [Vite Documentation](https://vitejs.dev/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [GSAP Documentation](https://greensock.com/docs/)
+- [Kubernetes Documentation](https://kubernetes.io/docs/)
 
 ## 🤝 Contributing
 
@@ -194,8 +345,4 @@ The frontend seamlessly integrates with the LinkOps Core backend:
 
 ## 📄 License
 
-This project is part of LinkOps Core and follows the same license terms.
-
----
-
-**Ready to command your AI army with elite precision!** 🚀 
+This project is part of the LinkOps platform and follows the same licensing terms. 

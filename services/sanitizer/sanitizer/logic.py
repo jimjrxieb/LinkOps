@@ -15,5 +15,41 @@ def scrub_values(data: dict) -> dict:
             text = re.sub(pat, repl, text)
         return text
 
-    # Apply replacement to all string fields
+    def _clean_str(s):
+        """Enhanced string cleaning for solution entries"""
+        if not isinstance(s, str):
+            return s
+        
+        # Basic redaction patterns
+        s = s.replace("prod", "[redacted]")
+        s = s.replace("password", "[redacted]")
+        s = s.replace("secret", "[redacted]")
+        s = s.replace("token", "[redacted]")
+        s = s.replace("key", "[redacted]")
+        
+        # Apply regex patterns
+        s = replace_all(s)
+        
+        return s
+
+    def _sanitize_solution_entry(payload: dict) -> dict:
+        """Special handling for solution_entry type"""
+        if isinstance(payload, dict):
+            # Clean all string values
+            payload = {
+                k: _clean_str(v) if isinstance(v, str) else v
+                for k, v in payload.items()
+            }
+
+            # Handle solution path entries specifically
+            if "solution_path" in payload and isinstance(payload["solution_path"], list):
+                payload["solution_path"] = [_clean_str(step) for step in payload["solution_path"]]
+
+        return payload
+
+    # Check if this is a solution entry
+    if isinstance(data, dict) and data.get("input_type") == "solution_entry":
+        return _sanitize_solution_entry(data.get("payload", data))
+    
+    # Apply replacement to all string fields for other types
     return {k: replace_all(str(v)) if isinstance(v, str) else v for k, v in data.items()} 

@@ -1,0 +1,71 @@
+name: James CI/CD
+
+on:
+  push:
+    paths:
+      - 'services/james/**'
+      - '.github/workflows/james.yml'
+
+jobs:
+  sast:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Bandit Scan
+        run: |
+          pip install bandit
+          bandit -r services/james -ll
+
+      - name: TruffleHog Secrets Scan
+        uses: trufflesecurity/TruffleHog-Enterprise-Github-Action@main
+        with:
+          args: --fail-verified ${{ github.event.repository.default_branch }} HEAD
+
+  docker:
+    needs: sast
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build Docker Image
+        run: docker build -t linksrobot/james:latest ./services/james
+
+      - name: Trivy Image Scan
+        run: trivy image linksrobot/james:latest
+
+      - name: Docker Login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_CRED }}
+
+      - name: Push Docker Image
+        run: docker push linksrobot/james:latest
+
+  sonarcloud:
+    needs: docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Java (required for SonarCloud)
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        with:
+          projectBaseDir: services/james
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+          SONAR_ORG: ${{ secrets.SONAR_ORG }} 

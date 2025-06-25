@@ -5,23 +5,18 @@ output "resource_group_name" {
 
 output "aks_cluster_name" {
   description = "Name of the AKS cluster"
-  value       = azurerm_kubernetes_cluster.main.name
+  value       = azurerm_kubernetes_cluster.aks.name
 }
 
 output "aks_cluster_id" {
   description = "ID of the AKS cluster"
-  value       = azurerm_kubernetes_cluster.main.id
+  value       = azurerm_kubernetes_cluster.aks.id
 }
 
 output "aks_kube_config" {
   description = "Kubeconfig for the AKS cluster"
-  value       = azurerm_kubernetes_cluster.main.kube_config_raw
+  value       = azurerm_kubernetes_cluster.aks.kube_config_raw
   sensitive   = true
-}
-
-output "monitoring_vm_public_ip" {
-  description = "Public IP of the monitoring VM"
-  value       = azurerm_public_ip.monitoring.ip_address
 }
 
 output "acr_login_server" {
@@ -40,18 +35,17 @@ output "acr_admin_password" {
   sensitive   = true
 }
 
-output "grafana_url" {
-  description = "Grafana URL"
-  value       = "http://${azurerm_public_ip.monitoring.ip_address}:3000"
+output "vnet_name" {
+  description = "Name of the virtual network"
+  value       = azurerm_virtual_network.main.name
 }
 
-output "prometheus_url" {
-  description = "Prometheus URL"
-  value       = "http://${azurerm_public_ip.monitoring.ip_address}:9090"
+output "vnet_id" {
+  description = "ID of the virtual network"
+  value       = azurerm_virtual_network.main.id
 }
 
-output "grafana_credentials" {
-  description = "Grafana admin credentials"
-  value       = "admin / ${var.grafana_admin_password}"
-  sensitive   = true
+output "aks_subnet_id" {
+  description = "ID of the AKS subnet"
+  value       = azurerm_subnet.aks.id
 } 
