@@ -156,7 +156,7 @@ print_status "Installing Prometheus Stack..."
 helm install monitoring prometheus-community/kube-prometheus-stack \
     --namespace monitoring \
     --create-namespace \
-    --set grafana.adminPassword=LinkOps2024! \
+    --set grafana.adminPassword=${GRAFANA_ADMIN_PASSWORD:-LinkOps2024!} \
     --set grafana.ingress.enabled=true \
     --set grafana.ingress.annotations."kubernetes\.io/ingress\.class"=nginx \
     --set grafana.ingress.hosts[0]=grafana.linkops.local
@@ -211,7 +211,7 @@ echo "  • Ingress External IP: $INGRESS_IP"
 echo
 echo "🔗 Access URLs:"
 echo "  • ArgoCD: http://argocd.linkops.local (admin / $ARGOCD_PASSWORD)"
-echo "  • Grafana: http://grafana.linkops.local (admin / LinkOps2024!)"
+echo "  • Grafana: http://grafana.linkops.local (admin / ${GRAFANA_ADMIN_PASSWORD:-LinkOps2024!})"
 echo "  • LinkOps Frontend: http://linkops.local"
 echo "  • LinkOps API: http://api.linkops.local"
 echo

@@ -81,6 +81,13 @@ variable "acr_name" {
   default     = "linkopsacr"
 }
 
+variable "grafana_admin_password" {
+  description = "Admin password for Grafana"
+  type        = string
+  default     = "LinkOps2024!"
+  sensitive   = true
+}
+
 # Resource Group
 resource "azurerm_resource_group" "main" {
   name     = var.resource_group_name
@@ -314,7 +321,7 @@ module "kube_prometheus_stack" {
   values = [
     <<-EOT
     grafana:
-      adminPassword: "LinkOps2024!"
+      adminPassword: "${var.grafana_admin_password}"
       ingress:
         enabled: true
         annotations:
