@@ -12,18 +12,37 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Install Bandit
+        run: pip install bandit
+
       - name: Bandit Scan
+        run: bandit -r services/james -ll
+
+      - name: Install Trivy
         run: |
-          pip install bandit
-          bandit -r services/james -ll
+          curl -sfL https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.48.5_Linux-64bit.deb -o trivy.deb
+          sudo dpkg -i trivy.deb
+
+      - name: Trivy Filesystem Scan
+        run: trivy fs services/james --exit-code 1 --severity CRITICAL
 
       - name: TruffleHog Secrets Scan
         uses: trufflesecurity/TruffleHog-Enterprise-Github-Action@main
         with:
           args: --fail-verified ${{ github.event.repository.default_branch }} HEAD
 
+  gitguardian_scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: GitGuardian Secrets Scan
+        uses: GitGuardian/ggshield-action@v1
+        env:
+          GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+
   docker:
-    needs: sast
+    needs: [sast, gitguardian_scan]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -32,7 +51,7 @@ jobs:
         run: docker build -t linksrobot/james:latest ./services/james
 
       - name: Trivy Image Scan
-        run: trivy image linksrobot/james:latest
+        run: trivy image linksrobot/james:latest --exit-code 1 --severity CRITICAL
 
       - name: Docker Login
         uses: docker/login-action@v3

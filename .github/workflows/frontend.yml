@@ -7,7 +7,18 @@ on:
       - '.github/workflows/frontend.yml'
 
 jobs:
+  gitguardian_scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: GitGuardian Secrets Scan
+        uses: GitGuardian/ggshield-action@v1
+        env:
+          GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+
   docker:
+    needs: gitguardian_scan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -16,7 +27,7 @@ jobs:
         run: docker build -t linksrobot/frontend:latest ./frontend
 
       - name: Trivy Image Scan
-        run: trivy image linksrobot/frontend:latest
+        run: trivy image linksrobot/frontend:latest --exit-code 1 --severity CRITICAL
 
       - name: Docker Login
         uses: docker/login-action@v3
