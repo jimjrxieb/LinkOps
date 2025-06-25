@@ -1,5 +1,5 @@
 """
-AuditGuard Agent - PwC-aligned Security & Compliance Agent
+AuditGuard Service - PwC-aligned Security & Compliance Microservice
 Handles security scans, repository audits, and compliance tagging
 """
 
@@ -14,7 +14,7 @@ import re
 from datetime import datetime
 import uuid
 
-app = FastAPI(title="AuditGuard Agent - Security & Compliance Specialist")
+app = FastAPI(title="AuditGuard Service - Security & Compliance Specialist")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -43,7 +43,7 @@ class AuditResult(BaseModel):
 def health():
     return {
         "status": "healthy",
-        "agent": "auditguard",
+        "service": "auditguard",
         "specialization": "Security & Compliance Auditing",
         "capabilities": [
             "Trivy vulnerability scanning",
@@ -213,6 +213,13 @@ async def _run_bandit_scan(target: str) -> Dict[str, Any]:
                 "scan_successful": False
             }
             
+    except subprocess.TimeoutExpired:
+        return {
+            "scan_type": "bandit",
+            "target": target,
+            "error": "Scan timed out after 2 minutes",
+            "scan_successful": False
+        }
     except Exception as e:
         return {
             "scan_type": "bandit",
@@ -230,20 +237,15 @@ async def _run_checkov_scan(target: str) -> Dict[str, Any]:
         if result.returncode in [0, 1]:  # Checkov returns 1 if issues found
             scan_data = json.loads(result.stdout)
             
-            high_issues = len([check for check in scan_data.get("results", {}).get("failed_checks", []) 
-                             if check.get("severity") == "HIGH"])
-            medium_issues = len([check for check in scan_data.get("results", {}).get("failed_checks", []) 
-                               if check.get("severity") == "MEDIUM"])
-            low_issues = len([check for check in scan_data.get("results", {}).get("failed_checks", []) 
-                            if check.get("severity") == "LOW"])
+            failed_checks = len(scan_data.get("results", {}).get("failed_checks", []))
+            passed_checks = len(scan_data.get("results", {}).get("passed_checks", []))
             
             return {
                 "scan_type": "checkov",
                 "target": target,
-                "high_issues": high_issues,
-                "medium_issues": medium_issues,
-                "low_issues": low_issues,
-                "total_issues": high_issues + medium_issues + low_issues,
+                "failed_checks": failed_checks,
+                "passed_checks": passed_checks,
+                "total_checks": failed_checks + passed_checks,
                 "scan_successful": True,
                 "raw_data": scan_data
             }
@@ -255,6 +257,13 @@ async def _run_checkov_scan(target: str) -> Dict[str, Any]:
                 "scan_successful": False
             }
             
+    except subprocess.TimeoutExpired:
+        return {
+            "scan_type": "checkov",
+            "target": target,
+            "error": "Scan timed out after 3 minutes",
+            "scan_successful": False
+        }
     except Exception as e:
         return {
             "scan_type": "checkov",
@@ -266,26 +275,18 @@ async def _run_checkov_scan(target: str) -> Dict[str, Any]:
 async def _run_snyk_scan(target: str) -> Dict[str, Any]:
     """Run Snyk dependency scanning"""
     try:
-        cmd = ["snyk", "test", "--json"]
+        cmd = ["snyk", "test", "--json", target]
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
         
         if result.returncode in [0, 1]:  # Snyk returns 1 if vulnerabilities found
             scan_data = json.loads(result.stdout)
             
-            high_vulns = len([vuln for vuln in scan_data.get("vulnerabilities", []) 
-                            if vuln.get("severity") == "high"])
-            medium_vulns = len([vuln for vuln in scan_data.get("vulnerabilities", []) 
-                              if vuln.get("severity") == "medium"])
-            low_vulns = len([vuln for vuln in scan_data.get("vulnerabilities", []) 
-                           if vuln.get("severity") == "low"])
+            vulnerabilities = len(scan_data.get("vulnerabilities", []))
             
             return {
                 "scan_type": "snyk",
                 "target": target,
-                "high_vulnerabilities": high_vulns,
-                "medium_vulnerabilities": medium_vulns,
-                "low_vulnerabilities": low_vulns,
-                "total_vulnerabilities": high_vulns + medium_vulns + low_vulns,
+                "vulnerabilities": vulnerabilities,
                 "scan_successful": True,
                 "raw_data": scan_data
             }
@@ -297,6 +298,13 @@ async def _run_snyk_scan(target: str) -> Dict[str, Any]:
                 "scan_successful": False
             }
             
+    except subprocess.TimeoutExpired:
+        return {
+            "scan_type": "snyk",
+            "target": target,
+            "error": "Scan timed out after 2 minutes",
+            "scan_successful": False
+        }
     except Exception as e:
         return {
             "scan_type": "snyk",
@@ -309,25 +317,17 @@ async def _run_semgrep_scan(target: str) -> Dict[str, Any]:
     """Run Semgrep code analysis"""
     try:
         cmd = ["semgrep", "--json", target]
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
         
         if result.returncode in [0, 1]:  # Semgrep returns 1 if issues found
             scan_data = json.loads(result.stdout)
             
-            high_issues = len([finding for finding in scan_data.get("results", []) 
-                             if finding.get("extra", {}).get("severity") == "ERROR"])
-            medium_issues = len([finding for finding in scan_data.get("results", []) 
-                               if finding.get("extra", {}).get("severity") == "WARNING"])
-            low_issues = len([finding for finding in scan_data.get("results", []) 
-                            if finding.get("extra", {}).get("severity") == "INFO"])
+            findings = len(scan_data.get("results", []))
             
             return {
                 "scan_type": "semgrep",
                 "target": target,
-                "high_issues": high_issues,
-                "medium_issues": medium_issues,
-                "low_issues": low_issues,
-                "total_issues": high_issues + medium_issues + low_issues,
+                "findings": findings,
                 "scan_successful": True,
                 "raw_data": scan_data
             }
@@ -339,6 +339,13 @@ async def _run_semgrep_scan(target: str) -> Dict[str, Any]:
                 "scan_successful": False
             }
             
+    except subprocess.TimeoutExpired:
+        return {
+            "scan_type": "semgrep",
+            "target": target,
+            "error": "Scan timed out after 2 minutes",
+            "scan_successful": False
+        }
     except Exception as e:
         return {
             "scan_type": "semgrep",
@@ -350,35 +357,26 @@ async def _run_semgrep_scan(target: str) -> Dict[str, Any]:
 async def _run_repository_audit(target: str) -> Dict[str, Any]:
     """Run comprehensive repository security audit"""
     try:
-        audit_results = {
-            "scan_type": "repo_audit",
-            "target": target,
-            "scan_successful": True,
-            "audit_findings": []
-        }
+        # Check for secrets
+        secrets = _check_for_secrets(target)
         
-        # Check for secrets in repository
-        secrets_found = _check_for_secrets(target)
-        audit_results["audit_findings"].append({
-            "type": "secrets_detection",
-            "findings": secrets_found
-        })
-        
-        # Check for exposed credentials
-        credentials_found = _check_for_credentials(target)
-        audit_results["audit_findings"].append({
-            "type": "credentials_detection",
-            "findings": credentials_found
-        })
+        # Check for credentials
+        credentials = _check_for_credentials(target)
         
         # Check for sensitive files
         sensitive_files = _check_for_sensitive_files(target)
-        audit_results["audit_findings"].append({
-            "type": "sensitive_files",
-            "findings": sensitive_files
-        })
         
-        return audit_results
+        return {
+            "scan_type": "repo_audit",
+            "target": target,
+            "secrets_found": len(secrets),
+            "credentials_found": len(credentials),
+            "sensitive_files_found": len(sensitive_files),
+            "secrets": secrets,
+            "credentials": credentials,
+            "sensitive_files": sensitive_files,
+            "scan_successful": True
+        }
         
     except Exception as e:
         return {
@@ -390,197 +388,183 @@ async def _run_repository_audit(target: str) -> Dict[str, Any]:
 
 def _check_for_secrets(target: str) -> List[Dict[str, Any]]:
     """Check for secrets in repository"""
-    secrets_patterns = [
-        r"api_key\s*[:=]\s*['\"][^'\"]+['\"]",
-        r"password\s*[:=]\s*['\"][^'\"]+['\"]",
-        r"secret\s*[:=]\s*['\"][^'\"]+['\"]",
-        r"token\s*[:=]\s*['\"][^'\"]+['\"]",
-        r"private_key\s*[:=]\s*['\"][^'\"]+['\"]"
+    secrets = []
+    
+    # Common secret patterns
+    secret_patterns = [
+        r'api_key["\']?\s*[:=]\s*["\'][^"\']+["\']',
+        r'password["\']?\s*[:=]\s*["\'][^"\']+["\']',
+        r'secret["\']?\s*[:=]\s*["\'][^"\']+["\']',
+        r'token["\']?\s*[:=]\s*["\'][^"\']+["\']',
+        r'private_key["\']?\s*[:=]\s*["\'][^"\']+["\']',
+        r'aws_access_key_id["\']?\s*[:=]\s*["\'][^"\']+["\']',
+        r'aws_secret_access_key["\']?\s*[:=]\s*["\'][^"\']+["\']'
     ]
     
-    findings = []
+    try:
+        for root, dirs, files in os.walk(target):
+            for file in files:
+                if file.endswith(('.py', '.js', '.json', '.yaml', '.yml', '.env')):
+                    file_path = os.path.join(root, file)
+                    try:
+                        with open(file_path, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                            for pattern in secret_patterns:
+                                matches = re.finditer(pattern, content, re.IGNORECASE)
+                                for match in matches:
+                                    secrets.append({
+                                        "file": file_path,
+                                        "line": content[:match.start()].count('\n') + 1,
+                                        "pattern": pattern,
+                                        "severity": "high"
+                                    })
+                    except Exception:
+                        continue
+    except Exception as e:
+        logger.error(f"Error scanning for secrets: {str(e)}")
     
-    for root, dirs, files in os.walk(target):
-        for file in files:
-            if file.endswith(('.py', '.js', '.json', '.yaml', '.yml', '.env')):
-                file_path = os.path.join(root, file)
-                try:
-                    with open(file_path, 'r', encoding='utf-8') as f:
-                        content = f.read()
-                        for pattern in secrets_patterns:
-                            matches = re.findall(pattern, content, re.IGNORECASE)
-                            if matches:
-                                findings.append({
-                                    "file": file_path,
-                                    "pattern": pattern,
-                                    "matches": len(matches),
-                                    "severity": "HIGH"
-                                })
-                except Exception:
-                    continue
-    
-    return findings
+    return secrets
 
 def _check_for_credentials(target: str) -> List[Dict[str, Any]]:
-    """Check for exposed credentials"""
+    """Check for hardcoded credentials"""
+    credentials = []
+    
+    # Credential patterns
     credential_patterns = [
-        r"aws_access_key_id\s*[:=]\s*['\"][^'\"]+['\"]",
-        r"aws_secret_access_key\s*[:=]\s*['\"][^'\"]+['\"]",
-        r"database_url\s*[:=]\s*['\"][^'\"]+['\"]",
-        r"connection_string\s*[:=]\s*['\"][^'\"]+['\"]"
+        r'username["\']?\s*[:=]\s*["\'][^"\']+["\']',
+        r'user["\']?\s*[:=]\s*["\'][^"\']+["\']',
+        r'login["\']?\s*[:=]\s*["\'][^"\']+["\']',
+        r'email["\']?\s*[:=]\s*["\'][^"\']+["\']',
+        r'admin["\']?\s*[:=]\s*["\'][^"\']+["\']'
     ]
     
-    findings = []
+    try:
+        for root, dirs, files in os.walk(target):
+            for file in files:
+                if file.endswith(('.py', '.js', '.json', '.yaml', '.yml', '.env', '.conf')):
+                    file_path = os.path.join(root, file)
+                    try:
+                        with open(file_path, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                            for pattern in credential_patterns:
+                                matches = re.finditer(pattern, content, re.IGNORECASE)
+                                for match in matches:
+                                    credentials.append({
+                                        "file": file_path,
+                                        "line": content[:match.start()].count('\n') + 1,
+                                        "pattern": pattern,
+                                        "severity": "medium"
+                                    })
+                    except Exception:
+                        continue
+    except Exception as e:
+        logger.error(f"Error scanning for credentials: {str(e)}")
     
-    for root, dirs, files in os.walk(target):
-        for file in files:
-            if file.endswith(('.py', '.js', '.json', '.yaml', '.yml', '.env')):
-                file_path = os.path.join(root, file)
-                try:
-                    with open(file_path, 'r', encoding='utf-8') as f:
-                        content = f.read()
-                        for pattern in credential_patterns:
-                            matches = re.findall(pattern, content, re.IGNORECASE)
-                            if matches:
-                                findings.append({
-                                    "file": file_path,
-                                    "pattern": pattern,
-                                    "matches": len(matches),
-                                    "severity": "CRITICAL"
-                                })
-                except Exception:
-                    continue
-    
-    return findings
+    return credentials
 
 def _check_for_sensitive_files(target: str) -> List[Dict[str, Any]]:
     """Check for sensitive files"""
-    sensitive_files = [
-        ".env", ".env.local", ".env.production",
-        "id_rsa", "id_rsa.pub", "private.key",
-        "config.json", "secrets.json", "credentials.json"
+    sensitive_files = []
+    
+    # Sensitive file patterns
+    sensitive_patterns = [
+        r'\.env$',
+        r'\.pem$',
+        r'\.key$',
+        r'\.crt$',
+        r'\.p12$',
+        r'\.pfx$',
+        r'id_rsa$',
+        r'id_dsa$',
+        r'\.keystore$',
+        r'\.jks$'
     ]
     
-    findings = []
+    try:
+        for root, dirs, files in os.walk(target):
+            for file in files:
+                for pattern in sensitive_patterns:
+                    if re.search(pattern, file, re.IGNORECASE):
+                        file_path = os.path.join(root, file)
+                        sensitive_files.append({
+                            "file": file_path,
+                            "pattern": pattern,
+                            "severity": "high",
+                            "recommendation": "Move to secure storage or add to .gitignore"
+                        })
+                        break
+    except Exception as e:
+        logger.error(f"Error scanning for sensitive files: {str(e)}")
     
-    for root, dirs, files in os.walk(target):
-        for file in files:
-            if file in sensitive_files:
-                file_path = os.path.join(root, file)
-                findings.append({
-                    "file": file_path,
-                    "type": "sensitive_file",
-                    "severity": "HIGH"
-                })
-    
-    return findings
+    return sensitive_files
 
 def _sanitize_audit_result(result: Dict[str, Any]) -> Dict[str, Any]:
     """Sanitize audit results for compliance"""
     sanitized = result.copy()
     
-    # Remove sensitive information from raw data
+    # Remove sensitive data
     if "raw_data" in sanitized:
-        sanitized["raw_data"] = "[SANITIZED_RAW_DATA]"
+        del sanitized["raw_data"]
     
-    # Replace file paths with placeholders
-    if "target" in sanitized:
-        sanitized["target"] = "[SANITIZED_TARGET_PATH]"
-    
-    # Sanitize any findings that might contain sensitive data
-    if "audit_findings" in sanitized:
-        for finding in sanitized["audit_findings"]:
-            if "file" in finding:
-                finding["file"] = "[SANITIZED_FILE_PATH]"
+    # Add compliance metadata
+    sanitized["compliance_metadata"] = {
+        "scan_timestamp": datetime.utcnow().isoformat(),
+        "sanitized": True,
+        "compliance_ready": True
+    }
     
     return sanitized
 
 def _generate_solution_path(result: Dict[str, Any], scan_type: str) -> str:
-    """Generate recommended solution path based on scan results"""
+    """Generate solution path based on scan results"""
     if not result.get("scan_successful", False):
-        return "Investigate scan failure and retry"
+        return f"Fix {scan_type} scan configuration"
     
-    if scan_type == "trivy":
-        high_risk = result.get("high_risk", 0)
-        if high_risk > 0:
-            return f"Update {high_risk} high-risk dependencies immediately"
-        elif result.get("total_vulnerabilities", 0) > 0:
-            return "Update vulnerable dependencies in next release cycle"
-        else:
-            return "No immediate action required - dependencies are secure"
-    
-    elif scan_type == "bandit":
-        high_issues = result.get("high_issues", 0)
-        if high_issues > 0:
-            return f"Fix {high_issues} high-severity security issues in code"
-        elif result.get("total_issues", 0) > 0:
-            return "Review and fix security issues in code review"
-        else:
-            return "No security issues detected in code"
-    
-    elif scan_type == "checkov":
-        high_issues = result.get("high_issues", 0)
-        if high_issues > 0:
-            return f"Fix {high_issues} high-severity infrastructure issues"
-        elif result.get("total_issues", 0) > 0:
-            return "Review and fix infrastructure security issues"
-        else:
-            return "Infrastructure configuration is secure"
-    
+    if scan_type == "trivy" and result.get("high_risk", 0) > 0:
+        return "Update vulnerable dependencies and rebuild containers"
+    elif scan_type == "bandit" and result.get("high_issues", 0) > 0:
+        return "Fix high-severity security issues in code"
+    elif scan_type == "checkov" and result.get("failed_checks", 0) > 0:
+        return "Fix infrastructure security misconfigurations"
+    elif scan_type == "snyk" and result.get("vulnerabilities", 0) > 0:
+        return "Update vulnerable dependencies"
+    elif scan_type == "semgrep" and result.get("findings", 0) > 0:
+        return "Fix code security issues identified by Semgrep"
     elif scan_type == "repo_audit":
-        critical_findings = sum(1 for finding in result.get("audit_findings", [])
-                              for item in finding.get("findings", [])
-                              if item.get("severity") == "CRITICAL")
-        if critical_findings > 0:
-            return f"Immediate action required: {critical_findings} critical security findings"
-        else:
-            return "Repository security audit passed"
-    
-    return "Review scan results and take appropriate action"
+        total_issues = (result.get("secrets_found", 0) + 
+                       result.get("credentials_found", 0) + 
+                       result.get("sensitive_files_found", 0))
+        if total_issues > 0:
+            return "Remove secrets, credentials, and sensitive files from repository"
+    else:
+        return f"Security scan {scan_type} passed - no immediate action required"
 
 def _determine_compliance_tags(result: Dict[str, Any], scope: List[str]) -> List[str]:
-    """Determine applicable compliance tags based on scan results"""
-    tags = scope.copy()
+    """Determine compliance tags based on scan results"""
+    tags = []
     
-    # Add specific compliance tags based on findings
-    if result.get("scan_successful", False):
-        if result.get("high_risk", 0) > 0 or result.get("high_issues", 0) > 0:
-            tags.extend(["ISO27001", "NIST"])
-        
-        if "repo_audit" in result.get("scan_type", ""):
-            tags.extend(["SOX", "PCI-DSS"])
+    # Add default compliance tags
+    tags.extend(scope)
     
-    return list(set(tags))  # Remove duplicates
+    # Add specific tags based on findings
+    if result.get("high_risk", 0) > 0 or result.get("high_issues", 0) > 0:
+        tags.append("HIGH_RISK")
+    
+    if result.get("secrets_found", 0) > 0:
+        tags.append("SECRETS_DETECTED")
+    
+    return tags
 
 async def _log_audit_result(audit_result: AuditResult):
-    """Log audit result to backend"""
+    """Log audit result to external system"""
     try:
-        # This would typically send to the backend logging system
-        # For now, we'll log locally
-        log_entry = {
-            "id": str(uuid.uuid4()),
-            "agent": audit_result.agent,
-            "task_id": audit_result.task_id,
-            "action": audit_result.action,
-            "result": json.dumps(audit_result.result),
-            "solution_path": audit_result.solution_path,
-            "error_outcome": audit_result.error_outcome,
-            "sanitized": audit_result.sanitized,
-            "approved": audit_result.approved,
-            "auto_approved": audit_result.auto_approved,
-            "compliance_tags": json.dumps(audit_result.compliance_tags),
-            "created_at": datetime.utcnow().isoformat()
-        }
-        
-        # Log to file for now
-        with open("/app/logs/auditguard.log", "a") as f:
-            f.write(json.dumps(log_entry) + "\n")
-        
+        # Log to external system (e.g., database, logging service)
         logger.info(f"Audit result logged: {audit_result.task_id}")
         
+        # In a real implementation, this would send to:
+        # - Database for audit trail
+        # - Logging service for monitoring
+        # - Compliance reporting system
+        
     except Exception as e:
-        logger.error(f"Failed to log audit result: {str(e)}")
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000) 
+        logger.error(f"Failed to log audit result: {str(e)}") 

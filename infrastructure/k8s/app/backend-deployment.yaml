@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: linkops-backend
+  name: backend-deployment
   namespace: linkops
   labels:
     app: linkops-backend
@@ -17,18 +17,33 @@ spec:
       labels:
         app: linkops-backend
     spec:
+      serviceAccountName: linkops-backend-sa
       containers:
       - name: backend
-        image: linkopsacr.azurecr.io/linkops-backend:latest
+        image: ACR_NAME.azurecr.io/linkops-backend:IMAGE_TAG
         ports:
         - containerPort: 8000
         env:
         - name: DATABASE_URL
-          value: "postgresql://postgres:postgres@linkops-postgres:5432/linkops"
-        - name: KAFKA_BOOTSTRAP_SERVERS
-          value: "linkops-kafka:9092"
-        - name: ENVIRONMENT
-          value: "production"
+          valueFrom:
+            secretKeyRef:
+              name: linkops-secrets
+              key: DATABASE_URL
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: linkops-secrets
+              key: OPENAI_API_KEY
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: linkops-secrets
+              key: SECRET_KEY
+        - name: AZURE_APPINSIGHTS_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: linkops-secrets
+              key: AZURE_APPINSIGHTS_CONNECTION_STRING
         resources:
           requests:
             memory: "256Mi"
@@ -50,9 +65,17 @@ spec:
           periodSeconds: 5
 ---
 apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: linkops-backend-sa
+  namespace: linkops
+  annotations:
+    azure.workload.identity/client-id: "${AZURE_CLIENT_ID}"
+---
+apiVersion: v1
 kind: Service
 metadata:
-  name: linkops-backend
+  name: backend-service
   namespace: linkops
   labels:
     app: linkops-backend

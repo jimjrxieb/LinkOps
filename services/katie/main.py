@@ -1,10 +1,15 @@
+"""
+Katie Service - Kubernetes Specialist Microservice
+Handles Kubernetes operations, security, and K8sGPT integration
+"""
+
 from fastapi import FastAPI, Body, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any, List, Optional
 import json
 import logging
 
-app = FastAPI(title="Katie Agent - Kubernetes Specialist")
+app = FastAPI(title="Katie Service - Kubernetes Specialist")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -28,7 +33,7 @@ class KatieResponse(BaseModel):
 def health():
     return {
         "status": "healthy",
-        "agent": "katie",
+        "service": "katie",
         "specialization": "Kubernetes Operations & Security",
         "capabilities": [
             "Kubernetes Cluster Management",
@@ -203,30 +208,30 @@ spec:
       labels:
         app: secure-app
     spec:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
       containers:
       - name: app
         image: secure-app:latest
         ports:
         - containerPort: 8080
-        resources:
-          requests:
-            memory: "64Mi"
-            cpu: "250m"
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8080
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 8080
-        """)
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+""")
+    
+    if k8s_components.get("service"):
+        manifests.append("""
+apiVersion: v1
+kind: Service
+metadata:
+  name: secure-app-service
+spec:
+  selector:
+    app: secure-app
+  ports:
+  - port: 80
+    targetPort: 8080
+  type: ClusterIP
+""")
     
     if k8s_components.get("security"):
         manifests.append("""
@@ -245,77 +250,78 @@ spec:
   - from:
     - namespaceSelector:
         matchLabels:
-          name: frontend
+          name: allowed-namespace
     ports:
     - protocol: TCP
       port: 8080
-  egress:
-  - to:
-    - namespaceSelector:
-        matchLabels:
-          name: database
-    ports:
-    - protocol: TCP
-      port: 5432
-        """)
+""")
     
     return manifests
 
 def _generate_security_recommendations(task_text: str, k8s_components: Dict[str, Any]) -> List[str]:
     """Generate security recommendations"""
-    recommendations = [
-        "Enable Pod Security Standards (PSS)",
-        "Implement Network Policies for pod-to-pod communication",
-        "Use RBAC with least privilege principle",
-        "Enable audit logging for security monitoring",
-        "Regular security scanning with tools like Trivy"
-    ]
+    recommendations = []
+    
+    if k8s_components.get("deployment"):
+        recommendations.extend([
+            "Use non-root containers",
+            "Implement resource limits",
+            "Enable pod security policies",
+            "Use image scanning"
+        ])
     
     if k8s_components.get("security"):
         recommendations.extend([
-            "Implement mTLS for service-to-service communication",
-            "Use security contexts to run containers as non-root",
-            "Enable seccomp profiles for additional security"
+            "Implement RBAC",
+            "Use network policies",
+            "Enable audit logging",
+            "Implement secrets management"
         ])
+    
+    if not recommendations:
+        recommendations.append("Follow Kubernetes security best practices")
     
     return recommendations
 
 def _generate_k8s_response(task_text: str, k8s_components: Dict[str, Any]) -> str:
-    """Generate Kubernetes-focused response"""
+    """Generate Kubernetes response"""
     if k8s_components.get("deployment"):
-        return "I'll help you create a secure Kubernetes deployment with proper resource limits and health checks."
-    elif k8s_components.get("security"):
-        return "I'll implement security best practices including RBAC, network policies, and pod security standards."
+        return "Kubernetes deployment solution generated with security best practices"
     elif k8s_components.get("service"):
-        return "I'll set up proper service networking with load balancing and ingress configuration."
+        return "Kubernetes service configuration created with proper networking"
+    elif k8s_components.get("security"):
+        return "Security policies and RBAC configuration implemented"
     else:
-        return "I'm here to help with Kubernetes operations. What specific K8s challenge are you facing?"
+        return "Kubernetes solution prepared with standard best practices"
 
 def _calculate_confidence(k8s_components: Dict[str, Any]) -> float:
-    """Calculate confidence score based on K8s components"""
-    confidence = 0.6  # Base confidence for K8s specialist
+    """Calculate confidence score based on components"""
+    if not k8s_components:
+        return 0.5
     
+    # Higher confidence for more specific components
+    confidence = 0.6
     if k8s_components.get("deployment"):
-        confidence += 0.15
-    if k8s_components.get("security"):
         confidence += 0.2
+    if k8s_components.get("security"):
+        confidence += 0.15
     if k8s_components.get("service"):
         confidence += 0.1
     
     return min(confidence, 1.0)
 
 def _simulate_k8sgpt_analysis(cluster_info: Dict[str, Any]) -> Dict[str, Any]:
-    """Simulate K8sGPT cluster analysis"""
+    """Simulate K8sGPT analysis"""
     return {
         "insights": [
-            "Cluster has 3 nodes with good resource distribution",
+            "Cluster has good resource utilization",
             "Security policies are properly configured",
-            "Network policies need improvement"
+            "Network policies need review"
         ],
         "recommendations": [
-            "Implement stricter network policies",
-            "Enable pod security standards",
-            "Add resource quotas for namespaces"
+            "Update to latest Kubernetes version",
+            "Implement pod security standards",
+            "Enable network policies for all namespaces"
         ],
         "security_issues": [
             "Some pods running as root",
@@ -323,6 +329,7 @@ def _simulate_k8sgpt_analysis(cluster_info: Dict[str, Any]) -> Dict[str, Any]:
         ],
         "performance_optimizations": [
             "Consider horizontal pod autoscaling",
-            "Optimize resource requests and limits"
+            "Optimize resource requests and limits",
+            "Implement proper monitoring"
         ]
     } 

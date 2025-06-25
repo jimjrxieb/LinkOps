@@ -10,7 +10,7 @@ services:
     environment:
       POSTGRES_DB: linkops
       POSTGRES_USER: linkops
-      POSTGRES_PASSWORD: secure_db_password_2024
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-linkops_password}
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -24,7 +24,8 @@ services:
     volumes:
       - ./backend:/app
     environment:
-      - DATABASE_URL=postgresql://linkops:secure_db_password_2024@postgres:5432/linkops
+      - DATABASE_URL=postgresql://linkops:${POSTGRES_PASSWORD:-linkops_password}@postgres:5432/linkops
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
       - postgres
@@ -88,6 +89,7 @@ services:
       - ./services/data_collector:/app
     environment:
       - KAFKA_BROKERS=kafka:9092
+      - SANITIZER_URL=http://sanitizer:8002/api/sanitize
     command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
     depends_on:
       - kafka
@@ -101,6 +103,8 @@ services:
     volumes:
       - ./services/sanitizer:/app
       - ./data_lake:/app/data_lake
+    environment:
+      - WHIS_URL=http://whis:8003/api/whis/train
     command: uvicorn main:app --host 0.0.0.0 --port 8002 --reload
 
   ### 🧠 WHIS AI AGENT SERVICE
@@ -148,6 +152,45 @@ services:
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     command: uvicorn main:app --host 0.0.0.0 --port 8006 --reload
+
+  ### 🛡️ AUDITGUARD SECURITY & COMPLIANCE SERVICE
+  auditguard:
+    build: ./services/auditguard
+    container_name: linkops-auditguard
+    ports:
+      - "8007:8007"
+    volumes:
+      - ./services/auditguard:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: uvicorn main:app --host 0.0.0.0 --port 8007 --reload
+
+  ### ☸️ KATIE KUBERNETES SPECIALIST SERVICE
+  katie:
+    build: ./services/katie
+    container_name: linkops-katie
+    ports:
+      - "8008:8008"
+    volumes:
+      - ./services/katie:/app
+      - ~/.kube:/root/.kube
+    environment:
+      - KUBECONFIG=/root/.kube/config
+    command: uvicorn main:app --host 0.0.0.0 --port 8008 --reload
+
+  ### 🏗️ IGRIS PLATFORM ENGINEER SERVICE
+  igris:
+    build: ./services/igris
+    container_name: linkops-igris
+    ports:
+      - "8009:8009"
+    volumes:
+      - ./services/igris:/app
+      - ~/.aws:/root/.aws
+      - ~/.azure:/root/.azure
+    environment:
+      - AWS_PROFILE=default
+      - AZURE_PROFILE=default
+    command: uvicorn main:app --host 0.0.0.0 --port 8009 --reload
 
 volumes:
   postgres_data:

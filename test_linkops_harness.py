@@ -24,7 +24,7 @@ SERVICES = {
     'db': 'localhost:5432'
 }
 
-DB_URL = "postgresql://linkops:secret@localhost:5432/linkops_core"
+DB_URL = os.getenv("DATABASE_URL", "postgresql://linkops:linkops_password@localhost:5432/linkops_core")
 
 class TestResult:
     def __init__(self, test_name: str, success: bool, message: str = "", data: dict = None):

@@ -20,12 +20,12 @@ RUN wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | apt-ke
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy agent code
-COPY src/ ./src/
+# Copy service code
+COPY . .
 
 # Create logs directory
 RUN mkdir -p /app/logs
 
-EXPOSE 8000
+EXPOSE 8007
 
-CMD ["python", "src/main.py"] 
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8007"] 

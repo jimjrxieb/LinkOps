@@ -15,7 +15,7 @@ load_dotenv()
 config = context.config
 
 # Override the sqlalchemy.url with environment variable
-config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/linkops"))
+config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL", "postgresql://linkops:linkops_password@localhost:5432/linkops"))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

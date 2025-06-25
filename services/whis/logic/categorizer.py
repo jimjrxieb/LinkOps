@@ -8,4 +8,26 @@ def categorize_task(text: str) -> str:
         return "igris"
     elif "ml" in text or "fine-tune" in text:
         return "whis"
-    return "links" 
+    return "links"
+
+def categorize_input(input_type: str, payload: dict) -> str:
+    """Categorize input based on type and content"""
+    if input_type == "task":
+        # Extract task description from payload
+        task_desc = payload.get("task_description", "") or payload.get("description", "")
+        return categorize_task(task_desc)
+    elif input_type == "qna":
+        # Categorize based on question content
+        question = payload.get("question", "")
+        return categorize_task(question)
+    elif input_type == "info":
+        # Information dumps might be general
+        return "links"
+    elif input_type == "image":
+        # Image inputs might need special handling
+        return "whis"
+    elif input_type == "fixlog":
+        # Fix logs might indicate issues
+        return "audit"
+    else:
+        return "links" 

@@ -1,7 +1,7 @@
 import psycopg
 import os
 
-DB_URL = os.getenv("DB_URL", "postgresql://linkops:secret@db:5432/linkops_core")
+DB_URL = os.getenv("DB_URL", "postgresql://linkops:linkops_password@db:5432/linkops_core")
 
 def get_conn():
     return psycopg.connect(DB_URL)
