@@ -20,9 +20,7 @@ jobs:
 
       - name: Install Trivy
         run: |
-          TRIVY_VERSION=0.58.2
-          curl -sfL https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.deb -o trivy.deb
-          sudo dpkg -i trivy.deb
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
 
       - name: Trivy Filesystem Scan
         run: trivy fs services/igris --exit-code 1 --severity CRITICAL
