@@ -40,29 +40,8 @@ jobs:
         env:
           GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
 
-  docker:
-    needs: [sast, gitguardian_scan]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Build Docker Image
-        run: docker build -t linksrobot/data_collector:latest ./services/data_collector
-
-      - name: Trivy Image Scan
-        run: trivy image linksrobot/data_collector:latest --exit-code 1 --severity CRITICAL
-
-      - name: Docker Login
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_CRED }}
-
-      - name: Push Docker Image
-        run: docker push linksrobot/data_collector:latest
-
   sonarcloud:
-    needs: docker
+    needs: [sast, gitguardian_scan]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -86,4 +65,29 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
-          SONAR_ORG: ${{ secrets.SONAR_ORG }} 
+          SONAR_ORG: ${{ secrets.SONAR_ORG }}
+
+  docker:
+    needs: [sast, gitguardian_scan, sonarcloud]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Build Docker Image
+        run: docker build -t linksrobot/data_collector:latest ./services/data_collector
+
+      - name: Trivy Image Scan
+        run: trivy image linksrobot/data_collector:latest --exit-code 1 --severity CRITICAL
+
+      - name: Docker Login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_CRED }}
+
+      - name: Push Docker Image
+        run: docker push linksrobot/data_collector:latest 
