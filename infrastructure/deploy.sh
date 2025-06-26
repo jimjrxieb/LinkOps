@@ -1,5 +1,18 @@
 #!/bin/bash
 
+# LinkOps Platform Engineering Stack Deployment Script
+# This script deploys the complete LinkOps infrastructure on Azure
+
+# =============================================================================
+# 🔐 SECURITY: Environment Variable Validation
+# =============================================================================
+: "${GRAFANA_ADMIN_PASSWORD:?Environment variable GRAFANA_ADMIN_PASSWORD not set}"
+: "${POSTGRES_PASSWORD:?Environment variable POSTGRES_PASSWORD not set}"
+
+# =============================================================================
+# 🎨 Color Functions for Output
+# =============================================================================
+
 set -e
 
 echo "🚀 LinkOps Platform Engineering Stack Deployment"
@@ -156,7 +169,7 @@ print_status "Installing Prometheus Stack..."
 helm install monitoring prometheus-community/kube-prometheus-stack \
     --namespace monitoring \
     --create-namespace \
-    --set grafana.adminPassword=${GRAFANA_ADMIN_PASSWORD:-LinkOps2024!} \
+    --set grafana.adminPassword=${GRAFANA_ADMIN_PASSWORD} \
     --set grafana.ingress.enabled=true \
     --set grafana.ingress.annotations."kubernetes\.io/ingress\.class"=nginx \
     --set grafana.ingress.hosts[0]=grafana.linkops.local
@@ -211,7 +224,7 @@ echo "  • Ingress External IP: $INGRESS_IP"
 echo
 echo "🔗 Access URLs:"
 echo "  • ArgoCD: http://argocd.linkops.local (admin / $ARGOCD_PASSWORD)"
-echo "  • Grafana: http://grafana.linkops.local (admin / ${GRAFANA_ADMIN_PASSWORD:-LinkOps2024!})"
+echo "  • Grafana: http://grafana.linkops.local (admin / ${GRAFANA_ADMIN_PASSWORD})"
 echo "  • LinkOps Frontend: http://linkops.local"
 echo "  • LinkOps API: http://api.linkops.local"
 echo

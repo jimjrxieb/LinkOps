@@ -84,7 +84,6 @@ variable "acr_name" {
 variable "grafana_admin_password" {
   description = "Admin password for Grafana"
   type        = string
-  default     = "LinkOps2024!"
   sensitive   = true
 }
 

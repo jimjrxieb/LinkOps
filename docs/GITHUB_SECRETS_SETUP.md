@@ -17,7 +17,7 @@ This guide explains how to set up the required GitHub secrets for the LinkOps CI
 - **GITGUARDIAN_API_KEY**: Your GitGuardian API key
 
 ### 4. Infrastructure Secrets (Optional - for deployment)
-- **GRAFANA_ADMIN_PASSWORD**: Admin password for Grafana (default: LinkOps2024!)
+- **GRAFANA_ADMIN_PASSWORD**: Admin password for Grafana
 - **POSTGRES_PASSWORD**: PostgreSQL database password
 - **ACR_LOGIN_SERVER**: Azure Container Registry login server
 - **ACR_USERNAME**: Azure Container Registry username

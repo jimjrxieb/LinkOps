@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# LinkOps Monitoring Stack Setup Script
+# This script sets up Prometheus and Grafana for monitoring
+
+# =============================================================================
+# 🔐 SECURITY: Environment Variable Validation
+# =============================================================================
+: "${GRAFANA_ADMIN_PASSWORD:?Environment variable GRAFANA_ADMIN_PASSWORD not set}"
+
+# =============================================================================
+# 🎨 Color Functions for Output
+# =============================================================================
+
 # Update system
 apt-get update
 apt-get upgrade -y
@@ -168,7 +180,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-LinkOps2024!}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - grafana_data:/var/lib/grafana
@@ -257,7 +269,7 @@ cat > grafana/provisioning/dashboards/kubernetes-cluster.json << 'EOF'
 EOF
 
 # Set environment variable for Grafana
-export GRAFANA_ADMIN_PASSWORD="${grafana_admin_password}"
+export GRAFANA_ADMIN_PASSWORD="${GRAFANA_ADMIN_PASSWORD}"
 
 # Start monitoring stack
 docker-compose up -d
@@ -310,4 +322,4 @@ EOF
 echo "Monitoring setup complete!"
 echo "Grafana available at: http://$(curl -s ifconfig.me):3000"
 echo "Prometheus available at: http://$(curl -s ifconfig.me):9090"
-echo "Default Grafana credentials: admin / ${grafana_admin_password}" 
+echo "Default Grafana credentials: admin / ${GRAFANA_ADMIN_PASSWORD}" 

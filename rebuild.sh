@@ -1,14 +1,9 @@
 #!/bin/bash
 
-echo "🔁 Stopping containers..."
-docker-compose down --remove-orphans
+echo "🧹 Tearing everything down (including volumes)..."
+docker compose down -v --remove-orphans
 
-echo "🧼 Pruning unused Docker resources..."
-docker system prune -f
+echo "🗑️ Pruning unused Docker data (be careful!)"
+docker system prune -af --volumes
 
-echo "♻️ Rebuilding all containers..."
-docker-compose up --build -d
-
-echo "✅ Done! Containers rebuilt and running:"
-docker ps
-
+echo "✅ Clean slate. You can now run ./build.sh to restart."

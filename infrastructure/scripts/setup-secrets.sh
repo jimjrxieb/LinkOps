@@ -49,8 +49,11 @@ create_postgres_secret() {
     print_status "Setting up PostgreSQL secret..."
     
     # Prompt for PostgreSQL credentials
-    read -p "Enter PostgreSQL username (default: postgres): " POSTGRES_USER
-    POSTGRES_USER=${POSTGRES_USER:-postgres}
+    read -p "Enter PostgreSQL username: " POSTGRES_USER
+    if [[ -z "$POSTGRES_USER" ]]; then
+        print_error "PostgreSQL username cannot be empty"
+        exit 1
+    fi
     
     read -s -p "Enter PostgreSQL password: " POSTGRES_PASSWORD
     echo
@@ -78,10 +81,17 @@ create_postgres_secret() {
 create_grafana_secret() {
     print_status "Setting up Grafana secret..."
     
-    # Prompt for Grafana admin password
-    read -s -p "Enter Grafana admin password (default: LinkOps2024!): " GRAFANA_PASSWORD
-    echo
-    GRAFANA_PASSWORD=${GRAFANA_PASSWORD:-LinkOps2024!}
+    # Check if password is provided via environment variable
+    if [[ -z "$GRAFANA_ADMIN_PASSWORD" ]]; then
+        read -s -p "Enter Grafana admin password: " GRAFANA_PASSWORD
+        echo
+        if [[ -z "$GRAFANA_PASSWORD" ]]; then
+            print_error "Grafana admin password cannot be empty"
+            exit 1
+        fi
+    else
+        GRAFANA_PASSWORD="$GRAFANA_ADMIN_PASSWORD"
+    fi
     
     # Create secret
     kubectl create secret generic grafana-secret \
