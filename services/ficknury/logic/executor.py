@@ -1,4 +1,5 @@
 import subprocess
+import shlex
 import json
 from datetime import datetime
 
@@ -8,7 +9,9 @@ def deploy_agent(task):
     task_id = task.get("task_id", "unknown")
     
     try:
-        output = subprocess.check_output(script, shell=True, stderr=subprocess.STDOUT)
+        # Safely parse the script command using shlex.split
+        cmd = shlex.split(script)
+        output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
         
         # Log the successful execution
         log_execution(task_id, agent, script, output.decode(), "success")
@@ -19,6 +22,11 @@ def deploy_agent(task):
         log_execution(task_id, agent, script, e.output.decode(), "failed")
         
         return {"status": "failed", "error": e.output.decode()}
+    except ValueError as e:
+        # Handle invalid command string
+        error_msg = f"Invalid command format: {str(e)}"
+        log_execution(task_id, agent, script, error_msg, "failed")
+        return {"status": "failed", "error": error_msg}
 
 def log_execution(task_id, agent, script, output, status):
     log_entry = {
