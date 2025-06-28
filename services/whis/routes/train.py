@@ -50,17 +50,11 @@ def receive_training_data(data: TrainingPayload):
                 "task_id": task_id,
                 "solution_steps": len(solution_path),
                 "result": result,
-                "message": (
-                    f"Solution rune created and auto-trained: {rune_id}"
-                ),
+                "message": (f"Solution rune created and auto-trained: {rune_id}"),
             }
         except Exception as e:
             print(f"[WHIS] Error processing solution entry: {str(e)}")
-            return {
-                "status": "error",
-                "type": data.input_type,
-                "error": str(e)
-            }
+            return {"status": "error", "type": data.input_type, "error": str(e)}
 
     # Regular training logic for other input types
     try:
