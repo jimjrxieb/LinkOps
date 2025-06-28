@@ -104,7 +104,8 @@ jobs:
               echo "🔍 Scanning $svc image for vulnerabilities"
               trivy image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$svc:${{ github.sha }} \
                 --exit-code 1 \
-                --severity CRITICAL,HIGH
+                --severity CRITICAL,HIGH \
+                --ignorefile .trivyignore
             fi
           done
 

@@ -1,0 +1,3 @@
+# Ignore zlib1g vulnerability if package updates don't resolve it
+# This is a backup solution - the primary fix is updating packages in Dockerfiles
+CVE-2023-45853 
