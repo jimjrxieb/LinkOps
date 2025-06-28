@@ -1,0 +1,233 @@
+name: Deploy to AKS
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'services/**'
+      - 'helm/**'
+      - '.github/workflows/deploy-aks.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'demo'
+        type: choice
+        options:
+          - demo
+          - personal
+      service:
+        description: 'Service to deploy (leave empty for all)'
+        required: false
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Trivy Filesystem Scan
+        run: |
+          trivy fs . --exit-code 1 --severity CRITICAL,HIGH
+          trivy config . --exit-code 1 --severity CRITICAL,HIGH
+
+      - name: TruffleHog Secrets Scan
+        uses: trufflesecurity/TruffleHog-Enterprise-Github-Action@main
+        with:
+          args: --fail-verified ${{ github.event.repository.default_branch }} HEAD
+
+  build-and-push:
+    needs: security-scan
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [whis, james, katie, igris, auditguard, sanitizer, scraperdash, data_collector, ficknury]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.service }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/${{ matrix.service }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Trivy Image Scan
+        run: |
+          trivy image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.service }}:${{ github.sha }} --exit-code 1 --severity CRITICAL,HIGH
+
+  deploy-demo:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.event.inputs.environment == 'demo' || (github.event.inputs.environment == '' && github.ref == 'refs/heads/main')
+    environment: demo
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Azure (OIDC)
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get AKS Credentials
+        run: |
+          az aks get-credentials \
+            --resource-group linkops-demo-rg \
+            --name linkops-demo-aks \
+            --overwrite-existing
+
+      - name: Install Kubectl and Helm
+        run: |
+          az aks install-cli
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+      - name: Deploy Services to Demo
+        run: |
+          # Deploy all services or specific service based on input
+          if [ -n "${{ github.event.inputs.service }}" ]; then
+            SERVICE="${{ github.event.inputs.service }}"
+            helm upgrade --install $SERVICE-demo ./helm/$SERVICE \
+              --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$SERVICE \
+              --set image.tag=${{ github.sha }} \
+              --namespace default \
+              --create-namespace \
+              --wait
+          else
+            # Deploy all services
+            for service in whis james katie igris auditguard sanitizer scraperdash data_collector ficknury; do
+              if [ -d "./helm/$service" ]; then
+                helm upgrade --install $service-demo ./helm/$service \
+                  --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$service \
+                  --set image.tag=${{ github.sha }} \
+                  --namespace default \
+                  --create-namespace \
+                  --wait
+              fi
+            done
+          fi
+
+      - name: Verify Deployment
+        run: |
+          kubectl get pods -n default
+          kubectl get services -n default
+
+  deploy-personal:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.event.inputs.environment == 'personal'
+    environment: personal
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Azure (OIDC)
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get AKS Credentials
+        run: |
+          az aks get-credentials \
+            --resource-group linkops-personal-rg \
+            --name linkops-personal-aks \
+            --overwrite-existing
+
+      - name: Install Kubectl and Helm
+        run: |
+          az aks install-cli
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+      - name: Deploy Services to Personal
+        run: |
+          # Deploy all services or specific service based on input
+          if [ -n "${{ github.event.inputs.service }}" ]; then
+            SERVICE="${{ github.event.inputs.service }}"
+            helm upgrade --install $SERVICE-personal ./helm/$SERVICE \
+              --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$SERVICE \
+              --set image.tag=${{ github.sha }} \
+              --namespace default \
+              --create-namespace \
+              --wait
+          else
+            # Deploy all services
+            for service in whis james katie igris auditguard sanitizer scraperdash data_collector ficknury; do
+              if [ -d "./helm/$service" ]; then
+                helm upgrade --install $service-personal ./helm/$service \
+                  --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$service \
+                  --set image.tag=${{ github.sha }} \
+                  --namespace default \
+                  --create-namespace \
+                  --wait
+              fi
+            done
+          fi
+
+      - name: Verify Deployment
+        run: |
+          kubectl get pods -n default
+          kubectl get services -n default
+
+  notify:
+    needs: [deploy-demo, deploy-personal]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Notify on Success
+        if: success()
+        run: |
+          echo "✅ Deployment completed successfully!"
+          echo "Demo environment: https://linkops-demo-aks.eastus.cloudapp.azure.com"
+          echo "Personal environment: https://linkops-personal-aks.eastus.cloudapp.azure.com"
+
+      - name: Notify on Failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed!"
+          echo "Check the workflow logs for details." 

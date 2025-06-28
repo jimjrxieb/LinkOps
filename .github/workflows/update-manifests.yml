@@ -1,0 +1,50 @@
+name: Update Manifests for ArgoCD (Personal AKS)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'services/**'
+      - '.github/workflows/update-manifests.yml'
+
+jobs:
+  build-and-update:
+    runs-on: ubuntu-latest
+
+    env:
+      DOCKER_IMAGE: ${{ secrets.DOCKER_USER }}/linkops-app
+      MANIFEST_REPO: https://x-access-token:${{ secrets.GH_PAT }}@github.com/jimjrxieb/LinkOps-Manifests.git
+      IMAGE_TAG: latest  # or use `IMAGE_TAG: ${{ github.sha }}` for versioned tags
+
+    steps:
+    - name: Checkout app code
+      uses: actions/checkout@v3
+
+    - name: Log in to DockerHub
+      run: echo "${{ secrets.DOCKER_CRED }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
+
+    - name: Build & Push Docker image
+      run: |
+        docker build -t $DOCKER_IMAGE:$IMAGE_TAG .
+        docker push $DOCKER_IMAGE:$IMAGE_TAG
+
+    - name: Clone LinkOps-Manifests
+      run: |
+        git config --global user.name "ci-bot"
+        git config --global user.email "ci@linkops.local"
+
+        git clone $MANIFEST_REPO
+        cd LinkOps-Manifests/helm/linkops-app
+
+    - name: Update Helm values.yaml with new image tag
+      run: |
+        cd LinkOps-Manifests/helm/linkops-app
+
+        # Update Helm values.yaml
+        yq -i '.image.repository = "${{ secrets.DOCKER_USER }}/linkops-app"' values.yaml
+        yq -i '.image.tag = "${{ env.IMAGE_TAG }}"' values.yaml
+
+        git add values.yaml
+        git commit -m "🔄 Update image tag to $IMAGE_TAG from CI"
+        git push 

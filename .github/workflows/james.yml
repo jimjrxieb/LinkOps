@@ -5,6 +5,8 @@ on:
     paths:
       - 'services/james/**'
       - '.github/workflows/james.yml'
+    branches:
+      - main
 
 jobs:
   sast:
@@ -67,10 +69,10 @@ jobs:
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
 
       - name: Build Docker Image
-        run: docker build -t linksrobot/james:latest ./services/james
+        run: docker build -t linksrobot/james:${{ github.sha }} ./services/james
 
       - name: Trivy Image Scan
-        run: trivy image linksrobot/james:latest --exit-code 1 --severity CRITICAL
+        run: trivy image linksrobot/james:${{ github.sha }} --exit-code 1 --severity CRITICAL
 
       - name: Docker Login
         uses: docker/login-action@v3
@@ -79,4 +81,24 @@ jobs:
           password: ${{ secrets.DOCKER_CRED }}
 
       - name: Push Docker Image
-        run: docker push linksrobot/james:latest 
+        run: docker push linksrobot/james:${{ github.sha }}
+
+  deploy:
+    needs: [docker]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Azure CLI
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Get AKS credentials
+        run: az aks get-credentials --resource-group linkops-rg --name linkops-aks --overwrite-existing
+
+      - name: Update image on AKS
+        run: |
+          kubectl set image deployment/james james=linksrobot/james:${{ github.sha }} -n linkops
+          kubectl rollout status deployment/james -n linkops 
