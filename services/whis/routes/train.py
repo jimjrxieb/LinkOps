@@ -30,7 +30,9 @@ def receive_training_data(data: TrainingPayload):
         try:
             # Extract solution information
             task_id = data.payload.get("task_id", str(uuid.uuid4()))
-            task_description = data.payload.get("task_description", "")
+            # task_description = data.payload.get(
+            #     "task_description", ""
+            # )  # unused
             solution_path = data.payload.get("solution_path", [])
             result = data.payload.get("result", "Success")
 
@@ -48,17 +50,24 @@ def receive_training_data(data: TrainingPayload):
                 "task_id": task_id,
                 "solution_steps": len(solution_path),
                 "result": result,
-                "message": f"Solution rune created and auto-trained: {rune_id}",
+                "message": (
+                    f"Solution rune created and auto-trained: {rune_id}"
+                ),
             }
         except Exception as e:
             print(f"[WHIS] Error processing solution entry: {str(e)}")
-            return {"status": "error", "type": data.input_type, "error": str(e)}
+            return {
+                "status": "error",
+                "type": data.input_type,
+                "error": str(e)
+            }
 
     # Regular training logic for other input types
     try:
         # Extract task information
         task_id = data.payload.get("task_id", str(uuid.uuid4()))
-        description = data.payload.get("task_description", "")
+        # description = data.payload.get("task_description", "")  # unused
+        # variable
 
         # Categorize the input
         category = categorize_input(data.input_type, data.payload)
