@@ -55,9 +55,6 @@ jobs:
   build-and-push:
     needs: security-scan
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        service: [whis, james, katie, igris, auditguard, sanitizer, scraperdash, data_collector, ficknury]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -72,31 +69,44 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.service }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./services/${{ matrix.service }}
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Trivy Image Scan
+      - name: Build and Push All Microservices
         run: |
-          trivy image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.service }}:${{ github.sha }} --exit-code 1 --severity CRITICAL,HIGH
+          # Loop through all service directories
+          for dir in services/*; do
+            svc=$(basename "$dir")
+            
+            # Check if Dockerfile exists
+            if [ -f "$dir/Dockerfile" ]; then
+              echo "📦 Building $svc"
+              
+              # Extract metadata for this service
+              docker buildx build \
+                --platform linux/amd64,linux/arm64 \
+                --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$svc:${{ github.sha }} \
+                --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$svc:latest \
+                --cache-from type=gha \
+                --cache-to type=gha,mode=max \
+                --push \
+                "$dir"
+              
+              echo "✅ Successfully built and pushed $svc"
+            else
+              echo "⚠️ Skipping $svc — no Dockerfile found"
+            fi
+          done
+
+      - name: Scan Built Images
+        run: |
+          # Scan all built images for vulnerabilities
+          for dir in services/*; do
+            svc=$(basename "$dir")
+            if [ -f "$dir/Dockerfile" ]; then
+              echo "🔍 Scanning $svc image for vulnerabilities"
+              trivy image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$svc:${{ github.sha }} \
+                --exit-code 1 \
+                --severity CRITICAL,HIGH
+            fi
+          done
 
   deploy-demo:
     needs: build-and-push
@@ -131,22 +141,30 @@ jobs:
           # Deploy all services or specific service based on input
           if [ -n "${{ github.event.inputs.service }}" ]; then
             SERVICE="${{ github.event.inputs.service }}"
-            helm upgrade --install $SERVICE-demo ./helm/$SERVICE \
-              --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$SERVICE \
-              --set image.tag=${{ github.sha }} \
-              --namespace default \
-              --create-namespace \
-              --wait
+            if [ -d "./helm/$SERVICE" ]; then
+              helm upgrade --install $SERVICE-demo ./helm/$SERVICE \
+                --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$SERVICE \
+                --set image.tag=${{ github.sha }} \
+                --namespace default \
+                --create-namespace \
+                --wait
+            else
+              echo "⚠️ Helm chart not found for $SERVICE"
+            fi
           else
-            # Deploy all services
-            for service in whis james katie igris auditguard sanitizer scraperdash data_collector ficknury; do
-              if [ -d "./helm/$service" ]; then
-                helm upgrade --install $service-demo ./helm/$service \
-                  --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$service \
+            # Deploy all services that have both Dockerfile and Helm chart
+            for dir in services/*; do
+              svc=$(basename "$dir")
+              if [ -f "$dir/Dockerfile" ] && [ -d "./helm/$svc" ]; then
+                echo "🚀 Deploying $svc to demo environment"
+                helm upgrade --install $svc-demo ./helm/$svc \
+                  --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$svc \
                   --set image.tag=${{ github.sha }} \
                   --namespace default \
                   --create-namespace \
                   --wait
+              elif [ -f "$dir/Dockerfile" ]; then
+                echo "⚠️ Skipping $svc — no Helm chart found"
               fi
             done
           fi
@@ -189,22 +207,30 @@ jobs:
           # Deploy all services or specific service based on input
           if [ -n "${{ github.event.inputs.service }}" ]; then
             SERVICE="${{ github.event.inputs.service }}"
-            helm upgrade --install $SERVICE-personal ./helm/$SERVICE \
-              --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$SERVICE \
-              --set image.tag=${{ github.sha }} \
-              --namespace default \
-              --create-namespace \
-              --wait
+            if [ -d "./helm/$SERVICE" ]; then
+              helm upgrade --install $SERVICE-personal ./helm/$SERVICE \
+                --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$SERVICE \
+                --set image.tag=${{ github.sha }} \
+                --namespace default \
+                --create-namespace \
+                --wait
+            else
+              echo "⚠️ Helm chart not found for $SERVICE"
+            fi
           else
-            # Deploy all services
-            for service in whis james katie igris auditguard sanitizer scraperdash data_collector ficknury; do
-              if [ -d "./helm/$service" ]; then
-                helm upgrade --install $service-personal ./helm/$service \
-                  --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$service \
+            # Deploy all services that have both Dockerfile and Helm chart
+            for dir in services/*; do
+              svc=$(basename "$dir")
+              if [ -f "$dir/Dockerfile" ] && [ -d "./helm/$svc" ]; then
+                echo "🚀 Deploying $svc to personal environment"
+                helm upgrade --install $svc-personal ./helm/$svc \
+                  --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$svc \
                   --set image.tag=${{ github.sha }} \
                   --namespace default \
                   --create-namespace \
                   --wait
+              elif [ -f "$dir/Dockerfile" ]; then
+                echo "⚠️ Skipping $svc — no Helm chart found"
               fi
             done
           fi
