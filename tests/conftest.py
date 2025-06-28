@@ -28,13 +28,13 @@ def test_db():
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
-    
+
     # Create tables
     Base.metadata.create_all(bind=engine)
-    
+
     # Create session factory
     TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-    
+
     return engine, TestingSessionLocal
 
 
@@ -42,14 +42,14 @@ def test_db():
 def db_session(test_db):
     """Get database session for testing"""
     engine, TestingSessionLocal = test_db
-    
+
     def override_get_db():
         try:
             db = TestingSessionLocal()
             yield db
         finally:
             db.close()
-    
+
     return override_get_db
 
 
@@ -57,10 +57,10 @@ def db_session(test_db):
 def client(db_session):
     """Create test client"""
     app = create_app()
-    
+
     # Override database dependency
     app.dependency_overrides[get_db] = db_session
-    
+
     with TestClient(app) as test_client:
         yield test_client
 
@@ -71,7 +71,7 @@ def sample_link_data():
     return {
         "url": "https://example.com",
         "title": "Example Website",
-        "description": "A sample website for testing"
+        "description": "A sample website for testing",
     }
 
 
@@ -85,5 +85,5 @@ def sample_link_response():
         "description": "A sample website for testing",
         "screenshot_path": None,
         "created_at": "2023-01-01T00:00:00",
-        "updated_at": None
+        "updated_at": None,
     }

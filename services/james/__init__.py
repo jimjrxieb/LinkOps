@@ -1,1 +1,1 @@
-# James – LinkOps AI Assistant 
+# James – LinkOps AI Assistant

@@ -1,14 +1,16 @@
 """
 Seed script to populate the database with preloaded Whis MLOps templates
 """
+
 from core.db.models import Orb, Rune
 from core.db.database import get_db
 from datetime import datetime
 import uuid
 
+
 def seed_whis_templates():
     """Seed the database with preloaded Whis MLOps templates"""
-    
+
     preloaded_templates = [
         {
             "task_id": "mlflow/train/pipeline",
@@ -21,7 +23,7 @@ from sklearn.pipeline import Pipeline
 mlflow.sklearn.autolog()
 pipeline = Pipeline({{steps}})
 pipeline.fit({{X_train}}, {{y_train}})""",
-            "category": "mlops"
+            "category": "mlops",
         },
         {
             "task_id": "model/serve/fastapi",
@@ -36,7 +38,7 @@ model = joblib.load("{{model_path}}")
 @app.post("/predict")
 def predict(data: dict):
     return {"prediction": model.predict([[data['value']]])[0]}""",
-            "category": "mlops"
+            "category": "mlops",
         },
         {
             "task_id": "docker/build/deploy",
@@ -56,7 +58,7 @@ COPY app.py .
 
 EXPOSE {{port}}
 CMD ["python", "app.py"]""",
-            "category": "mlops"
+            "category": "mlops",
         },
         {
             "task_id": "k8s/deploy/model",
@@ -107,7 +109,7 @@ spec:
       target:
         type: Utilization
         averageUtilization: {{cpu_target}}""",
-            "category": "mlops"
+            "category": "mlops",
         },
         {
             "task_id": "monitoring/prometheus/metrics",
@@ -140,54 +142,57 @@ def predict(data: dict):
 @app.get("/metrics")
 def metrics():
     return Response(generate_latest(), media_type="text/plain")""",
-            "category": "mlops"
-        }
+            "category": "mlops",
+        },
     ]
-    
+
     # Get database session
     db = next(get_db())
-    
+
     try:
         for template in preloaded_templates:
             # Check if Orb already exists
-            existing_orb = db.query(Orb).filter(
-                Orb.name == f"Whis Task: {template['task_id']}"
-            ).first()
-            
+            existing_orb = (
+                db.query(Orb)
+                .filter(Orb.name == f"Whis Task: {template['task_id']}")
+                .first()
+            )
+
             if existing_orb:
                 print(f"Orb already exists for {template['task_id']}, skipping...")
                 continue
-            
+
             # Create Orb
             orb = Orb(
                 name=f"Whis Task: {template['task_id']}",
-                description=template['orb_description'],
-                category=template['category']
+                description=template["orb_description"],
+                category=template["category"],
             )
             db.add(orb)
             db.commit()
             db.refresh(orb)
-            
+
             # Create Rune
             rune = Rune(
                 orb_id=orb.id,
                 script_path=f"/memory/whis/{template['task_id'].replace('/', '_')}.rune",
-                script_content=template['rune_content'],
+                script_content=template["rune_content"],
                 language="python",
-                version=1
+                version=1,
             )
             db.add(rune)
             db.commit()
-            
+
             print(f"✅ Created Whis template: {template['task_id']}")
-            
+
     except Exception as e:
         print(f"❌ Error seeding Whis templates: {e}")
         db.rollback()
     finally:
         db.close()
 
+
 if __name__ == "__main__":
     print("🌱 Seeding Whis MLOps templates...")
     seed_whis_templates()
-    print("✅ Whis seeding complete!") 
+    print("✅ Whis seeding complete!")

@@ -4,6 +4,7 @@ from typing import Dict, Any
 
 router = APIRouter()
 
+
 class LogRequest(BaseModel):
     source: str
     task_id: str
@@ -14,6 +15,7 @@ class LogRequest(BaseModel):
     auto_approved: bool = False
     compliance_tags: str = "[]"
 
+
 @router.post("/api/logs")
 async def create_log(request: LogRequest):
     """Stub: Create a new log entry (no DB)"""
@@ -21,5 +23,5 @@ async def create_log(request: LogRequest):
         "status": "success",
         "log_id": "stub-123",
         "task_id": request.task_id,
-        "message": "Log created (stub)"
-    } 
+        "message": "Log created (stub)",
+    }

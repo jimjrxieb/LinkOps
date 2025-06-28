@@ -13,17 +13,21 @@ from recurrence import check_recurrence
 
 router = APIRouter()
 
+
 class RuneRequest(BaseModel):
     input_data: Dict[str, Any]
     rune_type: str = "standard"
+
 
 class MergeRequest(BaseModel):
     runes: List[Dict[str, Any]]
     merge_strategy: str = "standard"
 
+
 class RecurrenceRequest(BaseModel):
     rune_data: Dict[str, Any]
     threshold: float = 0.8
+
 
 @router.post("/generate-rune")
 async def generate_rune_endpoint(request: RuneRequest):
@@ -33,10 +37,11 @@ async def generate_rune_endpoint(request: RuneRequest):
         return {
             "status": "success",
             "rune": result,
-            "message": "Rune generated successfully"
+            "message": "Rune generated successfully",
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Rune generation failed: {str(e)}")
+
 
 @router.post("/merge-runes")
 async def merge_runes_endpoint(request: MergeRequest):
@@ -46,10 +51,11 @@ async def merge_runes_endpoint(request: MergeRequest):
         return {
             "status": "success",
             "merged_rune": result,
-            "message": "Runes merged successfully"
+            "message": "Runes merged successfully",
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Rune merging failed: {str(e)}")
+
 
 @router.post("/check-recurrence")
 async def check_recurrence_endpoint(request: RecurrenceRequest):
@@ -59,10 +65,13 @@ async def check_recurrence_endpoint(request: RecurrenceRequest):
         return {
             "status": "success",
             "recurrence_detected": result,
-            "message": "Recurrence check completed"
+            "message": "Recurrence check completed",
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Recurrence check failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Recurrence check failed: {str(e)}"
+        )
+
 
 @router.get("/smithing-status")
 async def smithing_status():
@@ -70,5 +79,5 @@ async def smithing_status():
     return {
         "status": "operational",
         "service": "whis_smithing",
-        "capabilities": ["rune_generation", "rune_merging", "recurrence_detection"]
-    } 
+        "capabilities": ["rune_generation", "rune_merging", "recurrence_detection"],
+    }

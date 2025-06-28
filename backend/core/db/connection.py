@@ -16,12 +16,12 @@ logger = logging.getLogger(__name__)
 
 class DatabaseManager:
     """Database connection manager with connection pooling"""
-    
+
     def __init__(self):
         self.engine = None
         self.SessionLocal = None
         self._setup_engine()
-    
+
     def _setup_engine(self):
         """Setup SQLAlchemy engine with connection pooling"""
         self.engine = create_engine(
@@ -31,22 +31,20 @@ class DatabaseManager:
             max_overflow=settings.DATABASE_MAX_OVERFLOW,
             pool_pre_ping=True,
             pool_recycle=3600,  # Recycle connections after 1 hour
-            echo=settings.DEBUG
+            echo=settings.DEBUG,
         )
-        
+
         # Create session factory
         self.SessionLocal = sessionmaker(
-            autocommit=False,
-            autoflush=False,
-            bind=self.engine
+            autocommit=False, autoflush=False, bind=self.engine
         )
-        
+
         # Add engine event listeners
         self._setup_engine_events()
-    
+
     def _setup_engine_events(self):
         """Setup engine event listeners for logging and monitoring"""
-        
+
         @event.listens_for(self.engine, "connect")
         def set_sqlite_pragma(dbapi_connection, connection_record):
             """Set SQLite pragmas for better performance"""
@@ -57,17 +55,19 @@ class DatabaseManager:
                 cursor.execute("PRAGMA cache_size=10000")
                 cursor.execute("PRAGMA temp_store=MEMORY")
                 cursor.close()
-        
+
         @event.listens_for(self.engine, "before_cursor_execute")
-        def before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+        def before_cursor_execute(
+            conn, cursor, statement, parameters, context, executemany
+        ):
             """Log SQL queries in debug mode"""
             if settings.DEBUG:
                 logger.debug(f"Executing SQL: {statement}")
-    
+
     def get_session(self) -> Session:
         """Get a new database session"""
         return self.SessionLocal()
-    
+
     @contextmanager
     def get_session_context(self) -> Generator[Session, None, None]:
         """Context manager for database sessions"""
@@ -80,7 +80,7 @@ class DatabaseManager:
             raise
         finally:
             session.close()
-    
+
     def test_connection(self) -> bool:
         """Test database connection"""
         try:
@@ -90,7 +90,7 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Database connection test failed: {e}")
             return False
-    
+
     def close(self):
         """Close all database connections"""
         if self.engine:

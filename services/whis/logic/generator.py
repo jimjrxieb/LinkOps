@@ -7,6 +7,7 @@ from utils.io import save_orb, save_rune
 
 SANITIZED_DIR = "data_lake/sanitized_inputs/"
 
+
 def process_batch():
     processed = []
     for fname in os.listdir(SANITIZED_DIR):
@@ -37,19 +38,20 @@ def process_batch():
 
     return processed
 
+
 def generate_orb_and_rune(data):
     # TODO: Replace with OpenAI/Claude call
     orb = {
         "id": f"orb_{len(data)}",
         "title": f"Generated Orb for {data.get('input_type', 'unknown')}",
         "description": "Auto-generated best practices",
-        "category": "auto"
+        "category": "auto",
     }
-    
+
     rune = {
         "id": f"rune_{len(data)}",
         "script": f"# Auto-generated script\n# Based on: {data}",
-        "language": "bash"
+        "language": "bash",
     }
-    
-    return orb, rune 
+
+    return orb, rune

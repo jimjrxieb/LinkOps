@@ -4,6 +4,7 @@ import os
 
 router = APIRouter(prefix="/api/scraper", tags=["Agents"])
 
+
 @router.get("/agents")
 def get_agent_profiles():
     agent_file = "storage/agents/capabilities.json"
@@ -14,11 +15,11 @@ def get_agent_profiles():
             "igris": ["create terraform", "provision infrastructure"],
             "whis": ["train model", "fine-tune", "generate runes"],
             "audit": ["security scan", "compliance check"],
-            "ficknury": ["evaluate tasks", "deploy agents", "verify completion"]
+            "ficknury": ["evaluate tasks", "deploy agents", "verify completion"],
         }
         os.makedirs("storage/agents", exist_ok=True)
         with open(agent_file, "w") as f:
             json.dump(default_capabilities, f, indent=2)
-    
+
     with open(agent_file) as f:
-        return json.load(f) 
+        return json.load(f)

@@ -1,1 +1,1 @@
-# FickNury Utils Module 
+# FickNury Utils Module

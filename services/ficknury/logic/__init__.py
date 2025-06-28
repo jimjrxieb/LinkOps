@@ -1,1 +1,1 @@
-# FickNury Logic Module 
+# FickNury Logic Module

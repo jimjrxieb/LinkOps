@@ -1,1 +1,1 @@
-# ScraperDash Logic Module 
+# ScraperDash Logic Module

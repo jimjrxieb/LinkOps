@@ -11,13 +11,13 @@
 
 # class KafkaManager:
 #     """Kafka manager for LinkOps Core"""
-#     
+#
 #     def __init__(self):
 #         self.bootstrap_servers = settings.KAFKA_BOOTSTRAP_SERVERS.split(',')
 #         self.producer = None
 #         self.consumer = None
 #         self.logger = logging.getLogger(__name__)
-#     
+#
 #     def get_producer(self) -> KafkaProducer:
 #         """Get or create Kafka producer"""
 #         if self.producer is None:
@@ -27,12 +27,12 @@
 #                 key_serializer=lambda k: k.encode('utf-8') if k else None
 #             )
 #         return self.producer
-#     
+#
 #     def get_consumer(self, topic: str, group_id: str = None) -> KafkaConsumer:
 #         """Get or create Kafka consumer"""
 #         if group_id is None:
 #             group_id = settings.KAFKA_CONSUMER_GROUP
-#         
+#
 #         self.consumer = KafkaConsumer(
 #             topic,
 #             bootstrap_servers=self.bootstrap_servers,
@@ -42,7 +42,7 @@
 #             value_deserializer=lambda x: json.loads(x.decode('utf-8'))
 #         )
 #         return self.consumer
-#     
+#
 #     def send_message(self, topic: str, message: Dict[str, Any], key: str = None) -> bool:
 #         """Send message to Kafka topic"""
 #         try:
@@ -54,7 +54,7 @@
 #         except KafkaError as e:
 #             self.logger.error(f"Failed to send message to Kafka: {e}")
 #             return False
-#     
+#
 #     def close(self):
 #         """Close Kafka connections"""
 #         if self.producer:

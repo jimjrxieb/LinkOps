@@ -9,10 +9,12 @@ import uuid
 
 Base = declarative_base()
 
+
 class Log(Base):
     """Log model for storing sanitized training data"""
+
     __tablename__ = "logs"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     agent = Column(String(100), nullable=False)
     task_id = Column(String(255), nullable=False, index=True)
@@ -23,21 +25,25 @@ class Log(Base):
     auto_approved = Column(Boolean, default=False)
     compliance_tags = Column(Text, default="[]")
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    
+
     def __repr__(self):
         return f"<Log(id='{self.id}', task_id='{self.task_id}', agent='{self.agent}')>"
 
+
 class WhisQueue(Base):
     """Whis Queue model for storing tasks that need training"""
+
     __tablename__ = "whis_queue"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     task_id = Column(String(255), nullable=False, index=True)
     raw_text = Column(Text, nullable=False)
     source = Column(String(100), default="data-collection")
-    status = Column(String(50), default="pending", index=True)  # pending, trained, approved
+    status = Column(
+        String(50), default="pending", index=True
+    )  # pending, trained, approved
     agent = Column(String(100))
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    
+
     def __repr__(self):
         return f"<WhisQueue(id='{self.id}', task_id='{self.task_id}', source='{self.source}', status='{self.status}')>"

@@ -1,1 +1,1 @@
-# ScraperDash Intelligence Gathering Microservice 
+# ScraperDash Intelligence Gathering Microservice

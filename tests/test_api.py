@@ -70,7 +70,7 @@ def test_create_link_invalid_url(client: TestClient):
     invalid_data = {
         "url": "not-a-valid-url",
         "title": "Invalid URL",
-        "description": "This should fail"
+        "description": "This should fail",
     }
     response = client.post("/api/v1/links", json=invalid_data)
     assert response.status_code == 422  # Validation error
@@ -104,22 +104,22 @@ def test_link_crud_operations(client: TestClient, sample_link_data):
     assert create_response.status_code == 200
     link_data = create_response.json()
     link_id = link_data["id"]
-    
+
     # Read
     get_response = client.get(f"/api/v1/links/{link_id}")
     assert get_response.status_code == 200
     assert get_response.json()["id"] == link_id
-    
+
     # Update
     update_data = {"title": "Updated Title"}
     update_response = client.put(f"/api/v1/links/{link_id}", json=update_data)
     assert update_response.status_code == 200
     assert update_response.json()["title"] == "Updated Title"
-    
+
     # Delete
     delete_response = client.delete(f"/api/v1/links/{link_id}")
     assert delete_response.status_code == 200
-    
+
     # Verify deletion
     get_after_delete = client.get(f"/api/v1/links/{link_id}")
     assert get_after_delete.status_code == 404

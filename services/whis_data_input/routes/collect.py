@@ -10,10 +10,12 @@ router = APIRouter(prefix="/api/collect", tags=["Collector"])
 
 SANITIZER_URL = os.getenv("SANITIZER_URL", "http://whis_sanitize:8002/api/sanitize")
 
+
 class CollectedInput(BaseModel):
     input_type: str
     content: Dict[str, Any]
     metadata: Optional[Dict[str, Any]] = None
+
 
 @router.post("/collect")
 async def collect_data(data: CollectedInput):
@@ -23,20 +25,26 @@ async def collect_data(data: CollectedInput):
     else:
         return _forward_to_sanitizer(data)
 
+
 def _forward_to_sanitizer(data: CollectedInput):
     """Helper function to forward data to sanitizer"""
     try:
-        response = requests.post(SANITIZER_URL, json={
-            "input_type": data.input_type,
-            "content": data.content,
-            "metadata": data.metadata
-        })
-        
+        response = requests.post(
+            SANITIZER_URL,
+            json={
+                "input_type": data.input_type,
+                "content": data.content,
+                "metadata": data.metadata,
+            },
+        )
+
         return {
             "status": "success",
             "collected_data": data.dict(),
             "sent_to_sanitizer": True,
-            "sanitizer_response": response.json() if response.status_code == 200 else None
+            "sanitizer_response": (
+                response.json() if response.status_code == 200 else None
+            ),
         }
     except Exception as e:
         return {
@@ -45,8 +53,9 @@ def _forward_to_sanitizer(data: CollectedInput):
             "sent_to_sanitizer": False,
         }
 
+
 @router.post("/task")
 def collect_task(task: TaskInput):
     """Legacy endpoint - still sends to Kafka for backward compatibility"""
     send_to_kafka("raw-tasks", task.dict())
-    return {"status": "queued", "source": "task"} 
+    return {"status": "queued", "source": "task"}

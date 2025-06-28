@@ -10,11 +10,14 @@ def categorize_task(text: str) -> str:
         return "whis"
     return "links"
 
+
 def categorize_input(input_type: str, payload: dict) -> str:
     """Categorize input based on type and content"""
     if input_type == "task":
         # Extract task description from payload
-        task_desc = payload.get("task_description", "") or payload.get("description", "")
+        task_desc = payload.get("task_description", "") or payload.get(
+            "description", ""
+        )
         return categorize_task(task_desc)
     elif input_type == "qna":
         # Categorize based on question content
@@ -33,9 +36,9 @@ def categorize_input(input_type: str, payload: dict) -> str:
         # Solution entries are categorized based on the problem they solve
         task_desc = payload.get("task_description", "")
         solution_path = payload.get("solution_path", [])
-        
+
         # Combine task description and solution steps for better categorization
         combined_text = f"{task_desc} {' '.join(solution_path)}".lower()
         return categorize_task(combined_text)
     else:
-        return "links" 
+        return "links"
