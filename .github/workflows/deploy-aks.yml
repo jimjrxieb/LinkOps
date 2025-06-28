@@ -69,7 +69,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and Push All Microservices
+      - name: Build, Scan, and Push All Microservices
         run: |
           # Loop through all service directories
           for dir in services/*; do
@@ -79,33 +79,31 @@ jobs:
             if [ -f "$dir/Dockerfile" ]; then
               echo "📦 Building $svc"
               
-              # Extract metadata for this service
+              # Build image locally first (without pushing)
               docker buildx build \
                 --platform linux/amd64,linux/arm64 \
                 --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$svc:${{ github.sha }} \
                 --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$svc:latest \
                 --cache-from type=gha \
                 --cache-to type=gha,mode=max \
-                --push \
+                --load \
                 "$dir"
               
-              echo "✅ Successfully built and pushed $svc"
-            else
-              echo "⚠️ Skipping $svc — no Dockerfile found"
-            fi
-          done
-
-      - name: Scan Built Images
-        run: |
-          # Scan all built images for vulnerabilities
-          for dir in services/*; do
-            svc=$(basename "$dir")
-            if [ -f "$dir/Dockerfile" ]; then
               echo "🔍 Scanning $svc image for vulnerabilities"
+              # Scan the locally built image
               trivy image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$svc:${{ github.sha }} \
                 --exit-code 1 \
                 --severity CRITICAL,HIGH \
                 --ignorefile .trivyignore
+              
+              echo "🚀 Pushing $svc image"
+              # Push the image after successful scan
+              docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$svc:${{ github.sha }}
+              docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$svc:latest
+              
+              echo "✅ Successfully built, scanned, and pushed $svc"
+            else
+              echo "⚠️ Skipping $svc — no Dockerfile found"
             fi
           done
 
