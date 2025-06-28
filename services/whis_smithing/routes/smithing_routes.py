@@ -1,15 +1,14 @@
+import sys
+import os
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any, List
-import sys
-import os
-
-# Add parent directory to path for imports
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from generator import generate_rune
 from merger import merge_runes
 from recurrence import check_recurrence
+
+# Add parent directory to path for imports
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 router = APIRouter()
 
@@ -40,7 +39,10 @@ async def generate_rune_endpoint(request: RuneRequest):
             "message": "Rune generated successfully",
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Rune generation failed: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Rune generation failed: {str(e)}"
+        )
 
 
 @router.post("/merge-runes")
@@ -54,7 +56,10 @@ async def merge_runes_endpoint(request: MergeRequest):
             "message": "Runes merged successfully",
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Rune merging failed: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Rune merging failed: {str(e)}"
+        )
 
 
 @router.post("/check-recurrence")
@@ -69,7 +74,8 @@ async def check_recurrence_endpoint(request: RecurrenceRequest):
         }
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Recurrence check failed: {str(e)}"
+            status_code=500,
+            detail=f"Recurrence check failed: {str(e)}"
         )
 
 
@@ -79,5 +85,8 @@ async def smithing_status():
     return {
         "status": "operational",
         "service": "whis_smithing",
-        "capabilities": ["rune_generation", "rune_merging", "recurrence_detection"],
+        "capabilities": [
+            "rune_generation",
+            "rune_merging",
+            "recurrence_detection"],
     }

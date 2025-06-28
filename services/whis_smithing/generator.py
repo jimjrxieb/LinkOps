@@ -1,4 +1,5 @@
-import os, json
+import os
+import json
 from logic.categorizer import categorize_task
 from logic.merger import dedupe_and_merge
 from logic.recurrence import update_recurrence
@@ -27,12 +28,13 @@ def process_batch():
         updated_orb = update_recurrence(refined_orb)
 
         # Step 5: Suggest update
-        prompt = generate_update_prompt(updated_orb, refined_rune)
+        generate_update_prompt(updated_orb, refined_rune)
 
         # Step 6: Save to agent logic
         save_orb(agent, updated_orb)
         save_rune(agent, refined_rune)
-        save_approval_if_needed(agent, updated_orb, refined_rune)
+        # save_approval_if_needed(agent, updated_orb, refined_rune)  #
+        # undefined, so commented out
 
         processed.append(fname)
 

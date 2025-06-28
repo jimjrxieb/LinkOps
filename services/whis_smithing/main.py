@@ -1,9 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from routes.smithing_routes import router as smithing_router
 
 app = FastAPI(
     title="Whis Smithing Service",
-    description="Handles rune/orb generation, merging, and recurrence logic for Whis AI training",
+    description=(
+        "Handles rune/orb generation, merging, and recurrence logic for "
+        "Whis AI training"
+    ),
     version="1.0.0",
 )
 
@@ -16,6 +20,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(smithing_router, prefix="/smithing")
+
 
 @app.get("/")
 async def root():
@@ -24,7 +30,10 @@ async def root():
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy", "service": "whis_smithing"}
+    return {
+        "status": "healthy",
+        "service": "whis_smithing"
+    }
 
 
 # Import routes (commented until routes are properly set up)
