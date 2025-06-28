@@ -44,8 +44,8 @@ jobs:
 
       - name: Trivy Filesystem Scan
         run: |
-          trivy fs . --exit-code 1 --severity CRITICAL,HIGH
-          trivy config . --exit-code 1 --severity CRITICAL,HIGH
+          trivy fs . --exit-code 1 --severity CRITICAL,HIGH --ignorefile .trivyignore
+          trivy config . --exit-code 1 --severity CRITICAL,HIGH --ignorefile .trivyignore
 
       - name: TruffleHog Secrets Scan
         uses: trufflesecurity/TruffleHog-Enterprise-Github-Action@main
