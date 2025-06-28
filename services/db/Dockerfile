@@ -1,4 +1,4 @@
-FROM postgres:15
+FROM postgres:16
 ENV POSTGRES_USER=linkops
 ENV POSTGRES_PASSWORD=secret
 ENV POSTGRES_DB=linkops_core
