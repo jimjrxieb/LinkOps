@@ -9,6 +9,8 @@ RUN apt-get update && apt-get install -y \
     git \
     unzip \
     gnupg \
+    nodejs \
+    npm \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Trivy for vulnerability scanning
@@ -16,6 +18,9 @@ RUN wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | apt-ke
     && echo deb https://aquasecurity.github.io/trivy-repo/deb buster main | tee -a /etc/apt/sources.list.d/trivy.list \
     && apt-get update \
     && apt-get install -y trivy
+
+# Install Snyk CLI
+RUN npm install -g snyk
 
 # Copy requirements and install Python dependencies
 COPY requirements.txt .

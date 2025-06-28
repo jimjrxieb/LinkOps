@@ -10,5 +10,4 @@ gitpython==3.1.41
 bandit==1.7.5
 safety==2.3.5
 checkov==3.1.0
-snyk==0.8.0
 semgrep==1.50.0 
