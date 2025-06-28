@@ -22,7 +22,9 @@ class Settings(BaseSettings):
     )
 
     # Application Settings
-    APP_NAME: str = Field(default="LinkOps Core", description="Application name")
+    APP_NAME: str = Field(
+        default="LinkOps Core",
+        description="Application name")
     DEBUG: bool = Field(default=False, description="Debug mode")
     HOST: str = Field(default="0.0.0.0", description="Host to bind to")
     PORT: int = Field(default=8000, description="Port to bind to")

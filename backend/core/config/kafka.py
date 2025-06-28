@@ -1,6 +1,7 @@
 # Kafka Configuration - DISABLED
 # This file has been disabled to simplify the LinkOps Core stack.
-# Kafka functionality can be re-enabled by uncommenting this file and updating imports.
+# Kafka functionality can be re-enabled by uncommenting this file and
+# updating imports.
 
 # from kafka import KafkaProducer, KafkaConsumer
 # from kafka.errors import KafkaError
