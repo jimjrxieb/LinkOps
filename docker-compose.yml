@@ -3,7 +3,7 @@ version: "3.8"
 services:
   ### 🗄️ POSTGRESQL
   postgres:
-    image: postgres:15
+    image: postgres:16
     container_name: linkops-postgres
     ports:
       - "5432:5432"

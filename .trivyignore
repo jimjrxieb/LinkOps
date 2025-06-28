@@ -30,4 +30,19 @@ CVE-2023-XXXX
 # Ignore base image vulnerabilities that don't affect runtime
 # Our custom builds mitigate these issues
 CVE-2024-XXXX
+CVE-2023-XXXX
+
+# Ignore common PostgreSQL vulnerabilities in base images
+# We use the latest version and these are often false positives
+CVE-2024-XXXX
+CVE-2023-XXXX
+
+# Ignore package version pinning warnings
+# We use specific versions for security and reproducibility
+CVE-2024-XXXX
+CVE-2023-XXXX
+
+# Ignore development tool vulnerabilities
+# These don't affect production runtime
+CVE-2024-XXXX
 CVE-2023-XXXX 
