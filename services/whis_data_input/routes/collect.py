@@ -8,7 +8,9 @@ from typing import Dict, Any, Optional
 
 router = APIRouter(prefix="/api/collect", tags=["Collector"])
 
-SANITIZER_URL = os.getenv("SANITIZER_URL", "http://whis_sanitize:8002/api/sanitize")
+SANITIZER_URL = os.getenv(
+    "SANITIZER_URL", "http://whis_sanitize:8002/api/sanitize"
+)
 
 
 class CollectedInput(BaseModel):
