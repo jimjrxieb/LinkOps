@@ -14,7 +14,9 @@
 #     """Kafka manager for LinkOps Core"""
 #
 #     def __init__(self):
-#         self.bootstrap_servers = settings.KAFKA_BOOTSTRAP_SERVERS.split(',')
+#         self.bootstrap_servers = (
+#             settings.KAFKA_BOOTSTRAP_SERVERS.split(',')
+#         )
 #         self.producer = None
 #         self.consumer = None
 #         self.logger = logging.getLogger(__name__)
@@ -25,7 +27,9 @@
 #             self.producer = KafkaProducer(
 #                 bootstrap_servers=self.bootstrap_servers,
 #                 value_serializer=lambda v: json.dumps(v).encode('utf-8'),
-#                 key_serializer=lambda k: k.encode('utf-8') if k else None
+#                 key_serializer=lambda k: (
+#                     k.encode('utf-8') if k else None
+#                 )
 #             )
 #         return self.producer
 #
@@ -44,13 +48,19 @@
 #         )
 #         return self.consumer
 #
-#     def send_message(self, topic: str, message: Dict[str, Any], key: str = None) -> bool:
+#     def send_message(
+#         self, topic: str, message: Dict[str, Any], key: str = None
+#     ) -> bool:
 #         """Send message to Kafka topic"""
 #         try:
 #             producer = self.get_producer()
 #             future = producer.send(topic, value=message, key=key)
 #             record_metadata = future.get(timeout=10)
-#             self.logger.info(f"Message sent to {topic} partition {record_metadata.partition} offset {record_metadata.offset}")
+#             self.logger.info(
+#                 f"Message sent to {topic} partition "
+#                 f"{record_metadata.partition} offset "
+#                 f"{record_metadata.offset}"
+#             )
 #             return True
 #         except KafkaError as e:
 #             self.logger.error(f"Failed to send message to Kafka: {e}")

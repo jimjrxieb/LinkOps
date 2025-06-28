@@ -1,3 +1,6 @@
+import backend.models.rune  # Ensure RuneCandidate is registered
+import backend.models.log  # Ensure LogEntry is registered
+from backend.config.database import Base
 from logging.config import fileConfig
 import os
 from dotenv import load_dotenv
@@ -18,8 +21,8 @@ config = context.config
 config.set_main_option(
     "sqlalchemy.url",
     os.getenv(
-        "DATABASE_URL", "postgresql://linkops:linkops_password@localhost:5432/linkops"
-    ),
+        "DATABASE_URL",
+        "postgresql://linkops:linkops_password@localhost:5432/linkops"),
 )
 
 # Interpret the config file for Python logging.
@@ -29,9 +32,6 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-from backend.config.database import Base
-import backend.models.log  # Ensure LogEntry is registered
-import backend.models.rune  # Ensure RuneCandidate is registered
 
 target_metadata = Base.metadata
 
@@ -79,7 +79,9 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()
