@@ -1,0 +1,198 @@
+name: LinkOps-MLOps CI (Microservices)
+
+on: [push, pull_request]
+
+jobs:
+  check-python:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - james
+          - igris
+          - katie
+          - whis
+          - sanitizer
+          - data_collector
+          - scraperdash
+          - auditguard
+          - ficknury
+          - whis_data_input
+          - whis_sanitize
+          - whis_smithing
+          - whis_enhance
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Python deps
+        run: |
+          pip install black flake8
+
+      - name: Check if service has Python files
+        id: check-python
+        run: |
+          if [ -d "services/${{ matrix.service }}" ] && [ -f "services/${{ matrix.service }}/requirements.txt" ]; then
+            echo "has_python=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_python=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run Black Lint
+        if: steps.check-python.outputs.has_python == 'true'
+        run: |
+          black --check services/${{ matrix.service }}
+
+      - name: Run Flake8 Lint
+        if: steps.check-python.outputs.has_python == 'true'
+        run: |
+          flake8 services/${{ matrix.service }}
+
+  build-docker:
+    needs: check-python
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - james
+          - igris
+          - katie
+          - whis
+          - sanitizer
+          - data_collector
+          - scraperdash
+          - auditguard
+          - ficknury
+          - whis_data_input
+          - whis_sanitize
+          - whis_smithing
+          - whis_enhance
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check if service has Dockerfile
+        id: check-dockerfile
+        run: |
+          if [ -f "services/${{ matrix.service }}/Dockerfile" ]; then
+            echo "has_dockerfile=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_dockerfile=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build Docker image for ${{ matrix.service }}
+        if: steps.check-dockerfile.outputs.has_dockerfile == 'true'
+        run: |
+          docker build -t linkops-${{ matrix.service }}:ci ./services/${{ matrix.service }}
+
+  check-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check if frontend exists
+        id: check-frontend
+        run: |
+          if [ -d "frontend" ]; then
+            echo "has_frontend=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_frontend=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Node.js
+        if: steps.check-frontend.outputs.has_frontend == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        if: steps.check-frontend.outputs.has_frontend == 'true'
+        working-directory: frontend
+        run: npm ci
+
+      - name: Lint frontend
+        if: steps.check-frontend.outputs.has_frontend == 'true'
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Build frontend
+        if: steps.check-frontend.outputs.has_frontend == 'true'
+        working-directory: frontend
+        run: npm run build
+
+  check-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check if backend exists
+        id: check-backend
+        run: |
+          if [ -d "backend" ]; then
+            echo "has_backend=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_backend=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up Python
+        if: steps.check-backend.outputs.has_backend == 'true'
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Python deps
+        if: steps.check-backend.outputs.has_backend == 'true'
+        run: |
+          pip install black flake8
+
+      - name: Run Black Lint - Backend
+        if: steps.check-backend.outputs.has_backend == 'true'
+        run: |
+          black --check backend/
+
+      - name: Run Flake8 Lint - Backend
+        if: steps.check-backend.outputs.has_backend == 'true'
+        run: |
+          flake8 backend/
+
+  validate-helm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check if Helm charts exist
+        id: check-helm
+        run: |
+          if [ -d "helm" ]; then
+            echo "has_helm=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_helm=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Helm
+        if: steps.check-helm.outputs.has_helm == 'true'
+        uses: azure/setup-helm@v3
+        with:
+          version: 'v3.12.0'
+
+      - name: Lint Helm Charts
+        if: steps.check-helm.outputs.has_helm == 'true'
+        run: |
+          for chart in helm/*/; do
+            if [ -f "${chart}Chart.yaml" ]; then
+              echo "Linting chart: $chart"
+              helm lint "$chart"
+            fi
+          done 

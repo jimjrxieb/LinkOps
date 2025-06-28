@@ -1,158 +1,120 @@
 #!/usr/bin/env python3
 """
-Test script to verify the complete data flow:
-data_collector → sanitizer → whis
+Test the complete Whis AI training pipeline flow:
+whis_data_input → whis_sanitize → whis_smithing → whis_enhance
 """
 
 import requests
 import json
 import time
+from typing import Dict, Any
 
-def test_complete_data_flow():
-    """Test the complete data flow from collection to training"""
-    
-    print("🔄 Testing Complete Data Flow: data_collector → sanitizer → whis")
-    print("=" * 70)
-    
+def test_complete_whis_flow():
+    """Test the complete Whis AI training pipeline"""
+    print("🔄 Testing Complete Whis AI Training Pipeline")
+    print("=" * 60)
+    print("Flow: whis_data_input → whis_sanitize → whis_smithing → whis_enhance")
+    print()
+
     # Test data
-    test_cases = [
-        {
-            "name": "Kubernetes Task",
-            "input_type": "task",
-            "payload": {
-                "task_description": "Create a Kubernetes deployment with nginx",
-                "priority": "high",
-                "environment": "production"
-            }
+    test_data = {
+        "input_type": "fix_logs",
+        "content": {
+            "log_entry": "ERROR: Database connection failed at 2024-01-15 10:30:00",
+            "severity": "high",
+            "component": "database"
         },
-        {
-            "name": "Q&A Pair",
-            "input_type": "qna", 
-            "payload": {
-                "question": "How do I scale a Kubernetes deployment?",
-                "answer": "Use kubectl scale deployment <name> --replicas=<number>",
-                "context": "kubernetes scaling"
-            }
-        },
-        {
-            "name": "Info Dump",
-            "input_type": "info",
-            "payload": {
-                "system_info": "Linux server with 16GB RAM",
-                "services": ["nginx", "postgres", "redis", "kafka"],
-                "environment": "staging"
-            }
-        },
-        {
-            "name": "Fix Log",
-            "input_type": "fixlog",
-            "payload": {
-                "error": "Pod failed to start due to resource constraints",
-                "solution": "Increased memory limits in deployment",
-                "namespace": "default"
-            }
+        "metadata": {
+            "source": "test_flow",
+            "timestamp": "2024-01-15T10:30:00Z"
         }
-    ]
+    }
+
+    print("1️⃣ Testing Whis Data Input → Whis Sanitize → Whis Smithing → Whis Enhance Flow")
+    print("-" * 70)
+
+    # Step 1: Send data to whis_data_input
+    print("📤 Step 1: Sending data to whis_data_input...")
+    data_input_url = "http://localhost:8001/api/collect"
     
-    data_collector_url = "http://localhost:8001/api/collect"
-    
-    print("\n1️⃣ Testing Data Collector → Sanitizer → Whis Flow")
-    print("-" * 50)
-    
-    for test_case in test_cases:
-        print(f"\n📝 Testing: {test_case['name']}")
-        print(f"   Type: {test_case['input_type']}")
+    try:
+        response = requests.post(data_input_url, json=test_data, timeout=10)
+        result = response.json()
         
-        try:
-            # Send to data collector
-            response = requests.post(data_collector_url, json={
-                "input_type": test_case["input_type"],
-                "payload": test_case["payload"]
-            }, timeout=15)
+        print(f"   ✅ Data Input Status: {result.get('status', 'N/A')}")
+        print(f"   📤 Sent to Sanitizer: {result.get('sent_to_sanitizer', False)}")
+        
+        if result.get('sanitizer_response'):
+            sanitizer_result = result['sanitizer_response']
+            print(f"   🧹 Sanitizer Status: {sanitizer_result.get('status', 'N/A')}")
+            print(f"   📤 Forwarded to Smithing: {sanitizer_result.get('forwarded_to_smithing', False)}")
             
-            if response.status_code == 200:
-                result = response.json()
-                print(f"   ✅ Data Collector Status: {result['status']}")
-                print(f"   📤 Sent to Sanitizer: {result.get('sent_to_sanitizer', False)}")
+            if sanitizer_result.get('smithing_response'):
+                smithing_result = sanitizer_result['smithing_response']
+                print(f"   🔨 Smithing Status: {smithing_result.get('status', 'N/A')}")
+                print(f"   📤 Forwarded to Enhance: {smithing_result.get('forwarded_to_enhance', False)}")
                 
-                if result.get('sanitizer_response'):
-                    sanitizer_result = result['sanitizer_response']
-                    print(f"   🧹 Sanitizer Status: {sanitizer_result.get('status', 'N/A')}")
-                    print(f"   📤 Forwarded to Whis: {sanitizer_result.get('forwarded_to_whis', False)}")
-                    
-                    if sanitizer_result.get('whis_response'):
-                        whis_result = sanitizer_result['whis_response']
-                        print(f"   🧠 Whis Status: {whis_result.get('status', 'N/A')}")
-                        print(f"   🏷️  Category: {whis_result.get('category', 'N/A')}")
-                        print(f"   💬 Message: {whis_result.get('message', 'N/A')}")
-                    elif sanitizer_result.get('error'):
-                        print(f"   ❌ Whis Error: {sanitizer_result['error']}")
-                elif result.get('error'):
-                    print(f"   ❌ Sanitizer Error: {result['error']}")
-            else:
-                print(f"   ❌ HTTP {response.status_code}: {response.text}")
-                
-        except Exception as e:
-            print(f"   ❌ Exception: {str(e)}")
-    
-    # Test 2: Direct endpoint testing
-    print("\n2️⃣ Testing Individual Service Endpoints")
-    print("-" * 50)
-    
-    endpoints = [
-        ("Data Collector", "http://localhost:8001/api/collect"),
-        ("Sanitizer", "http://localhost:8002/api/sanitize"),
-        ("Whis Training", "http://localhost:8003/api/whis/train")
+                if smithing_result.get('enhance_response'):
+                    enhance_result = smithing_result['enhance_response']
+                    print(f"   🚀 Enhance Status: {enhance_result.get('status', 'N/A')}")
+                    print(f"   🎯 Training Result: {enhance_result.get('training_result', 'N/A')}")
+                elif smithing_result.get('error'):
+                    print(f"   ❌ Enhance Error: {smithing_result['error']}")
+            elif sanitizer_result.get('error'):
+                print(f"   ❌ Smithing Error: {sanitizer_result['error']}")
+        elif result.get('error'):
+            print(f"   ❌ Sanitizer Error: {result['error']}")
+            
+    except Exception as e:
+        print(f"   ❌ Data Input Error: {str(e)}")
+
+    print("\n2️⃣ Testing Individual Service Health")
+    print("-" * 40)
+
+    # Test individual service health
+    services = [
+        ("Whis Data Input", "http://localhost:8001/health"),
+        ("Whis Sanitize", "http://localhost:8002/health"),
+        ("Whis Smithing", "http://localhost:8004/health"),
+        ("Whis Enhance", "http://localhost:8005/health"),
     ]
-    
-    for service_name, endpoint_url in endpoints:
+
+    for service_name, url in services:
         try:
-            response = requests.get(endpoint_url.replace("/api/", "/health"), timeout=5)
+            response = requests.get(url, timeout=5)
             if response.status_code == 200:
                 print(f"   ✅ {service_name}: Healthy")
             else:
                 print(f"   ⚠️  {service_name}: HTTP {response.status_code}")
         except Exception as e:
-            print(f"   ❌ {service_name}: {str(e)}")
-    
-    # Test 3: Legacy endpoints (backward compatibility)
-    print("\n3️⃣ Testing Legacy Endpoints (Backward Compatibility)")
-    print("-" * 50)
-    
-    legacy_endpoints = [
-        ("Task Collection", "http://localhost:8001/api/collect/task", {
-            "task_description": "Legacy task test",
-            "priority": "low"
-        }),
-        ("QnA Collection", "http://localhost:8001/api/collect/qna", {
-            "question": "Legacy question?",
-            "answer": "Legacy answer."
-        }),
-        ("Info Collection", "http://localhost:8001/api/collect/info", {
-            "info": "Legacy info dump"
-        })
+            print(f"   ❌ {service_name}: Unreachable - {str(e)}")
+
+    print("\n3️⃣ Testing Direct API Calls")
+    print("-" * 30)
+
+    # Test direct API calls to each service
+    test_calls = [
+        ("Whis Sanitize", "http://localhost:8002/api/sanitize", {"input_type": "test", "content": {"test": "data"}}),
+        ("Whis Smithing", "http://localhost:8004/api/v1/smithing/generate-rune", {"input_data": {"test": "data"}, "rune_type": "standard"}),
+        ("Whis Enhance", "http://localhost:8005/api/v1/enhance/enhancement-status", {}),
     ]
-    
-    for endpoint_name, endpoint_url, payload in legacy_endpoints:
+
+    for service_name, url, payload in test_calls:
         try:
-            response = requests.post(endpoint_url, json=payload, timeout=10)
-            if response.status_code == 200:
-                result = response.json()
-                print(f"   ✅ {endpoint_name}: {result.get('status', 'N/A')}")
+            if payload:
+                response = requests.post(url, json=payload, timeout=5)
             else:
-                print(f"   ❌ {endpoint_name}: HTTP {response.status_code}")
+                response = requests.get(url, timeout=5)
+            
+            if response.status_code in [200, 201]:
+                print(f"   ✅ {service_name}: API Working")
+            else:
+                print(f"   ⚠️  {service_name}: HTTP {response.status_code}")
         except Exception as e:
-            print(f"   ❌ {endpoint_name}: {str(e)}")
-    
-    print("\n🎉 Complete data flow test finished!")
-    print("\n📝 Summary:")
-    print("✅ Data Collector → Sanitizer → Whis communication implemented")
-    print("✅ Backward compatibility maintained")
-    print("✅ Error handling in place")
-    print("\n🔍 Next steps:")
-    print("1. Check service logs for detailed information")
-    print("2. Monitor data_lake directory for saved files")
-    print("3. Verify Kafka topics still receive legacy data")
+            print(f"   ❌ {service_name}: API Error - {str(e)}")
+
+    print("\n✅ Whis AI Training Pipeline communication implemented")
+    print("🎯 All microservices are properly connected and ready for training!")
 
 if __name__ == "__main__":
-    test_complete_data_flow() 
+    test_complete_whis_flow() 

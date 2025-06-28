@@ -216,3 +216,5 @@ kafka-logs/
 prometheus.yml
 grafana/
 
+.env
+.env.backup

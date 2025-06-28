@@ -79,110 +79,134 @@ services:
     volumes:
       - kafka_data:/var/lib/kafka/data
 
-  ### 📥 DATA COLLECTOR SERVICE
-  data-collector:
-    build: ./services/data_collector
-    container_name: linkops-data-collector
+  ### 📥 WHIS DATA INPUT SERVICE (formerly data_collector)
+  whis_data_input:
+    build: ./services/whis_data_input
+    container_name: linkops-whis-data-input
     ports:
-      - "8001:8001"
+      - "8001:8000"
     volumes:
-      - ./services/data_collector:/app
+      - ./services/whis_data_input:/app
     environment:
       - KAFKA_BROKERS=kafka:9092
-      - SANITIZER_URL=http://sanitizer:8002/api/sanitize
-    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+      - SANITIZER_URL=http://whis_sanitize:8000/api/sanitize
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
       - kafka
 
-  ### 🧹 SANITIZER SERVICE
-  sanitizer:
-    build: ./services/sanitizer
-    container_name: linkops-sanitizer
+  ### 🧹 WHIS SANITIZE SERVICE (formerly sanitizer)
+  whis_sanitize:
+    build: ./services/whis_sanitize
+    container_name: linkops-whis-sanitize
     ports:
-      - "8002:8002"
+      - "8002:8000"
     volumes:
-      - ./services/sanitizer:/app
+      - ./services/whis_sanitize:/app
       - ./data_lake:/app/data_lake
     environment:
-      - WHIS_URL=http://whis:8003/api/whis/train
-    command: uvicorn main:app --host 0.0.0.0 --port 8002 --reload
+      - SMITHING_URL=http://whis_smithing:8000/api/v1/smithing/generate-rune
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
-  ### 🧠 WHIS AI AGENT SERVICE
+  ### 🔨 WHIS SMITHING SERVICE (new - rune/orb logic)
+  whis_smithing:
+    build: ./services/whis_smithing
+    container_name: linkops-whis-smithing
+    ports:
+      - "8004:8000"
+    volumes:
+      - ./services/whis_smithing:/app
+    environment:
+      - ENHANCE_URL=http://whis_enhance:8000/api/v1/enhance/train-agent
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  ### 🚀 WHIS ENHANCE SERVICE (new - agent enhancement)
+  whis_enhance:
+    build: ./services/whis_enhance
+    container_name: linkops-whis-enhance
+    ports:
+      - "8005:8000"
+    volumes:
+      - ./services/whis_enhance:/app
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  ### 🧠 WHIS AI AGENT SERVICE (legacy - for backward compatibility)
   whis:
     build: ./services/whis
     container_name: linkops-whis
     ports:
-      - "8003:8003"
+      - "8003:8000"
     volumes:
       - ./services/whis:/app
       - ./data_lake:/app/data_lake
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-    command: uvicorn main:app --host 0.0.0.0 --port 8003 --reload
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
   ### 🤖 FICKNURY AGENT COMMANDER SERVICE
   ficknury:
     build: ./services/ficknury
     container_name: linkops-ficknury
     ports:
-      - "8004:8004"
+      - "8010:8000"
     volumes:
       - ./services/ficknury:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8004 --reload
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
   ### 📊 SCRAPERDASH INTELLIGENCE SERVICE
   scraperdash:
     build: ./services/scraperdash
     container_name: linkops-scraperdash
     ports:
-      - "8005:8005"
+      - "8011:8000"
     volumes:
       - ./services/scraperdash:/app
       - ./data_lake:/app/data_lake
-    command: uvicorn main:app --host 0.0.0.0 --port 8005 --reload
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
   ### 🧑‍💻 JAMES AI ASSISTANT SERVICE
   james:
     build: ./services/james
     container_name: linkops-james
     ports:
-      - "8006:8006"
+      - "8006:8000"
     volumes:
       - ./services/james:/app
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-    command: uvicorn main:app --host 0.0.0.0 --port 8006 --reload
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
   ### 🛡️ AUDITGUARD SECURITY & COMPLIANCE SERVICE
   auditguard:
     build: ./services/auditguard
     container_name: linkops-auditguard
     ports:
-      - "8007:8007"
+      - "8007:8000"
     volumes:
       - ./services/auditguard:/app
       - /var/run/docker.sock:/var/run/docker.sock
-    command: uvicorn main:app --host 0.0.0.0 --port 8007 --reload
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
   ### ☸️ KATIE KUBERNETES SPECIALIST SERVICE
   katie:
     build: ./services/katie
     container_name: linkops-katie
     ports:
-      - "8008:8008"
+      - "8008:8000"
     volumes:
       - ./services/katie:/app
       - ~/.kube:/root/.kube
     environment:
       - KUBECONFIG=/root/.kube/config
-    command: uvicorn main:app --host 0.0.0.0 --port 8008 --reload
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
   ### 🏗️ IGRIS PLATFORM ENGINEER SERVICE
   igris:
     build: ./services/igris
     container_name: linkops-igris
     ports:
-      - "8009:8009"
+      - "8009:8000"
     volumes:
       - ./services/igris:/app
       - ~/.aws:/root/.aws
@@ -190,10 +214,10 @@ services:
     environment:
       - AWS_PROFILE=default
       - AZURE_PROFILE=default
-    command: uvicorn main:app --host 0.0.0.0 --port 8009 --reload
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 volumes:
   postgres_data:
   kafka_data:
   zookeeper_data:
-  zookeeper_logs:
+  zookeeper_logs: 

@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: linkops
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  whis_smithing:
+    build: ./services/whis_smithing
+    depends_on:
+      - db
+    volumes:
+      - sanitized_data:/data/sanitized
+      - orbs:/data/orbs
+      - runes:/data/runes
+    ports:
+      - "8003:8000"
+
+  whis_enhance:
+    build: ./services/whis_enhance
+    depends_on:
+      - db
+    volumes:
+      - orbs:/data/orbs
+      - runes:/data/runes
+    ports:
+      - "8004:8000"
+
+volumes:
+  pgdata:
+  sanitized_data:
+  orbs:
+  runes: 
