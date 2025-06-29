@@ -16,7 +16,8 @@ jobs:
           - data_collector
           - scraperdash
           - auditguard
-          - ficknury
+          - ficknury_deploy
+          - ficknury_evaluator
           - whis_data_input
           - whis_sanitize
           - whis_smithing
@@ -68,7 +69,8 @@ jobs:
           - data_collector
           - scraperdash
           - auditguard
-          - ficknury
+          - ficknury_deploy
+          - ficknury_evaluator
           - whis_data_input
           - whis_sanitize
           - whis_smithing

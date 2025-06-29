@@ -1,0 +1,10 @@
+{{- if .Values.configMap.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "igris.fullname" . }}-config
+  labels:
+    {{- include "igris.labels" . | nindent 4 }}
+data:
+  {{- toYaml .Values.configMap.data | nindent 2 }}
+{{- end }} 

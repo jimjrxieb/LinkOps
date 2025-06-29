@@ -4,6 +4,13 @@
 ├── DATA_FLOW_DIAGRAM.md
 ├── ENVIRONMENT_SETUP.md
 ├── GITHUB_ACTIONS_SUMMARY.md
+├── LinkOps-MLOps
+│   └── services
+│       └── auditguard
+│           └── tests
+├── LinkOps-Manifests
+│   └── services
+│       └── auditguard
 ├── MLOps-Tree.txt
 ├── README.md
 ├── README_COMPOSE_MODES.md
@@ -15,9 +22,24 @@
 │   ├── __init__.py
 │   ├── core
 │   │   ├── config
+│   │   │   ├── database.py
+│   │   │   ├── kafka.py
+│   │   │   └── settings.py
 │   │   ├── db
+│   │   │   ├── __init__.py
+│   │   │   ├── connection.py
+│   │   │   ├── database.py
+│   │   │   ├── models.py
+│   │   │   └── seed_whis.py
 │   │   ├── models
+│   │   │   ├── __init__.py
+│   │   │   ├── entities.py
+│   │   │   ├── log.py
+│   │   │   ├── rune.py
+│   │   │   └── schemas.py
 │   │   └── routes
+│   │       ├── digest.py
+│   │       └── logs.py
 │   ├── main.py
 │   ├── migrations
 │   │   ├── README
@@ -25,6 +47,16 @@
 │   │   ├── env.py
 │   │   ├── script.py.mako
 │   │   └── versions
+│   │       ├── 504629267976_enhance_whis_queue_with_status.py
+│   │       ├── __init__.py
+│   │       ├── add_pwc_logging_fields.py
+│   │       ├── b63d0eaa7af7_add_approval_table.py
+│   │       ├── d0f79de30e4c_init.py
+│   │       ├── de5d633d1d83_initial_schema.py
+│   │       ├── eadd463a54d3_add_whis_queue_table.py
+│   │       ├── eb28b7f6740d_add_feedback_to_runes.py
+│   │       ├── ebc762fbfe4d_add_script_content_to_rune_model.py
+│   │       └── efe071886c3b_add_task_id_to_runes.py
 │   └── requirements.txt
 ├── docker-compose.daytime.yml
 ├── docker-compose.nighttime.yml
@@ -36,8 +68,6 @@
 ├── env.template
 ├── fix_flake8.py
 ├── fix_flake8.sh
-├── fix_remaining_flake8.py
-├── fix_remaining_issues.py
 ├── frontend
 │   ├── Dockerfile
 │   ├── README.md
@@ -54,13 +84,34 @@
 │   │   ├── App.css
 │   │   ├── App.vue
 │   │   ├── assets
+│   │   │   ├── cyberpunk.css
+│   │   │   └── tailwind.css
 │   │   ├── components
+│   │   │   ├── JamesAssistant.vue
+│   │   │   ├── PwCDashboard.vue
+│   │   │   ├── README.md
+│   │   │   ├── RunePreview.vue
+│   │   │   ├── StatusBadge.vue
+│   │   │   └── TaskCard.vue
 │   │   ├── index.css
 │   │   ├── main.js
 │   │   ├── router
+│   │   │   └── index.js
 │   │   ├── services
+│   │   │   └── api.js
 │   │   ├── stores
+│   │   │   └── agents.js
 │   │   └── views
+│   │       ├── About.vue
+│   │       ├── Agents.vue
+│   │       ├── AgentsPage.vue
+│   │       ├── Dashboard.vue
+│   │       ├── DataCollection.vue
+│   │       ├── Digest.vue
+│   │       ├── James.vue
+│   │       ├── Login.vue
+│   │       ├── Whis.vue
+│   │       └── WhisPage.vue
 │   ├── tailwind.config.js
 │   ├── test-holocore-simple.js
 │   ├── test-holocore.js
@@ -69,6 +120,13 @@
 │   └── whis
 │       ├── Chart.yaml
 │       ├── templates
+│       │   ├── _helpers.tpl
+│       │   ├── deployment.yaml
+│       │   ├── ingress.yaml
+│       │   ├── role.yaml
+│       │   ├── rolebinding.yaml
+│       │   ├── service.yaml
+│       │   └── serviceaccount.yaml
 │       └── values.yaml
 ├── mlops-git-push.sh
 ├── pyproject.toml
@@ -80,34 +138,63 @@
 ├── services
 │   ├── auditguard
 │   │   ├── Dockerfile
+│   │   ├── README.md
 │   │   ├── main.py
 │   │   ├── requirements.txt
-│   │   └── routes
+│   │   ├── routes
+│   │   │   ├── __init__.py
+│   │   │   ├── audit.py
+│   │   │   ├── compliance.py
+│   │   │   └── security.py
+│   │   └── tests
+│   │       ├── __init__.py
+│   │       └── test_routes.py
 │   ├── db
 │   │   ├── Dockerfile
 │   │   ├── README.md
 │   │   └── init.sql
-│   ├── ficknury
+│   ├── ficknury_deploy
 │   │   ├── Dockerfile
-│   │   ├── __init__.py
-│   │   ├── docker-compose.yml
-│   │   ├── logic
+│   │   ├── executor.py
+│   │   ├── fallback.py
 │   │   ├── main.py
 │   │   ├── requirements.txt
-│   │   ├── routes
-│   │   └── utils
-│   ├── igris
+│   │   ├── storage
+│   │   │   ├── README.md
+│   │   │   └── logs
+│   │   └── verifier.py
+│   ├── ficknury_evaluator
 │   │   ├── Dockerfile
 │   │   ├── main.py
-│   │   └── requirements.txt
+│   │   ├── requirements.txt
+│   │   ├── scorer.py
+│   │   └── selector.py
+│   ├── igris
+│   │   ├── Dockerfile
+│   │   ├── README.md
+│   │   ├── analyzer.py
+│   │   ├── infrastructure.py
+│   │   ├── main.py
+│   │   ├── opendevin.py
+│   │   ├── requirements.txt
+│   │   ├── security.py
+│   │   └── tests
+│   │       └── test_igris.py
 │   ├── james
 │   │   ├── Dockerfile
 │   │   ├── __init__.py
 │   │   ├── logic
+│   │   │   ├── __init__.py
+│   │   │   └── assistant.py
 │   │   ├── main.py
 │   │   ├── requirements.txt
 │   │   ├── routes
+│   │   │   ├── __init__.py
+│   │   │   ├── actions.py
+│   │   │   ├── chat.py
+│   │   │   └── explain.py
 │   │   └── templates
+│   │       └── voice_response.txt
 │   ├── katie
 │   │   ├── Dockerfile
 │   │   ├── main.py
@@ -116,44 +203,93 @@
 │   │   ├── Dockerfile
 │   │   ├── __init__.py
 │   │   ├── logic
+│   │   │   ├── __init__.py
+│   │   │   ├── scraper.py
+│   │   │   └── site_crawler.py
 │   │   ├── main.py
 │   │   ├── requirements.txt
 │   │   ├── routes
+│   │   │   ├── __init__.py
+│   │   │   ├── agents.py
+│   │   │   ├── logs.py
+│   │   │   ├── orbs_runes.py
+│   │   │   ├── reloop.py
+│   │   │   └── webscrape.py
 │   │   └── utils
+│   │       ├── __init__.py
+│   │       └── forward_to_collector.py
 │   ├── whis
 │   │   ├── Dockerfile
 │   │   ├── __init__.py
 │   │   ├── docker-compose.yml
 │   │   ├── logic
+│   │   │   ├── __init__.py
+│   │   │   ├── categorizer.py
+│   │   │   ├── generator.py
+│   │   │   ├── merger.py
+│   │   │   ├── recurrence.py
+│   │   │   └── updater.py
 │   │   ├── main.py
 │   │   ├── requirements.txt
 │   │   ├── routes
+│   │   │   ├── __init__.py
+│   │   │   ├── approvals.py
+│   │   │   ├── digest.py
+│   │   │   └── train.py
 │   │   └── utils
+│   │       ├── __init__.py
+│   │       └── io.py
 │   ├── whis_data_input
 │   │   ├── Dockerfile
 │   │   ├── __init__.py
 │   │   ├── main.py
 │   │   ├── models
+│   │   │   ├── __init__.py
+│   │   │   └── collector.py
 │   │   ├── requirements.txt
 │   │   ├── routes
+│   │   │   ├── __init__.py
+│   │   │   ├── collect.py
+│   │   │   ├── fixlog.py
+│   │   │   ├── image_input.py
+│   │   │   ├── info_dump.py
+│   │   │   └── qna.py
 │   │   └── utils
+│   │       ├── __init__.py
+│   │       └── kafka_producer.py
 │   ├── whis_enhance
 │   │   ├── Dockerfile
 │   │   ├── main.py
 │   │   ├── models
 │   │   ├── requirements.txt
 │   │   ├── routes
+│   │   │   ├── __init__.py
+│   │   │   ├── approvals.py
+│   │   │   ├── enhance_routes.py
+│   │   │   └── train.py
 │   │   ├── updater.py
 │   │   └── utils
 │   ├── whis_sanitize
 │   │   ├── Dockerfile
 │   │   ├── __init__.py
 │   │   ├── data_lake
+│   │   │   └── sanitized_inputs
+│   │   │       ├── fixlog_2025-06-24_174941.json
+│   │   │       ├── fixlog_2025-06-24_175023.json
+│   │   │       └── qna_2025-06-24_175042.json
 │   │   ├── main.py
 │   │   ├── requirements.txt
 │   │   ├── routes
+│   │   │   ├── __init__.py
+│   │   │   └── clean.py
 │   │   ├── sanitizer
+│   │   │   ├── __init__.py
+│   │   │   ├── logic.py
+│   │   │   ├── processor.py
+│   │   │   └── schemas.py
 │   │   └── utils
+│   │       ├── __init__.py
+│   │       └── file_writer.py
 │   └── whis_smithing
 │       ├── Dockerfile
 │       ├── generator.py
@@ -163,6 +299,8 @@
 │       ├── recurrence.py
 │       ├── requirements.txt
 │       ├── routes
+│       │   ├── __init__.py
+│       │   └── smithing_routes.py
 │       └── utils
 ├── shared
 │   └── db.py
@@ -185,8 +323,12 @@
 │   ├── test_security.py
 │   ├── test_solution_entry_flow.py
 │   ├── test_solution_entry_pipeline.py
+│   ├── test_whis_data_input.py
+│   ├── test_whis_enhance.py
 │   ├── test_whis_ficknury_flow.py
-│   └── test_whis_ficknury_integration.py
+│   ├── test_whis_ficknury_integration.py
+│   ├── test_whis_sanitize.py
+│   └── test_whis_smithing.py
 ├── tools
 │   ├── debug_data_collection.py
 │   ├── git_push.sh
@@ -194,4 +336,4 @@
 │   └── rebuild.sh
 └── upgrade-to-pwc.sh
 
-65 directories, 129 files
+75 directories, 261 files
