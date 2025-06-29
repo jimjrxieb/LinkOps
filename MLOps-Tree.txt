@@ -4,19 +4,12 @@
 ├── DATA_FLOW_DIAGRAM.md
 ├── ENVIRONMENT_SETUP.md
 ├── GITHUB_ACTIONS_SUMMARY.md
-├── LinkOps-MLOps
-│   └── services
-│       └── auditguard
-│           └── tests
-├── LinkOps-Manifests
-│   └── services
-│       └── auditguard
+├── IGRIS_DEPLOYMENT_READY.md
 ├── MLOps-Tree.txt
 ├── README.md
 ├── README_COMPOSE_MODES.md
 ├── WHIS_MICROSERVICES_REFACTOR.md
 ├── WHIS_TRAINING_SYSTEM.md
-├── audit_structure.py
 ├── backend
 │   ├── Dockerfile
 │   ├── __init__.py
@@ -66,8 +59,6 @@
 │   ├── GITHUB_SECRETS_SETUP.md
 │   └── SECURE_DEPLOYMENT_GUIDE.md
 ├── env.template
-├── fix_flake8.py
-├── fix_flake8.sh
 ├── frontend
 │   ├── Dockerfile
 │   ├── README.md
@@ -117,6 +108,17 @@
 │   ├── test-holocore.js
 │   └── vite.config.js
 ├── helm
+│   ├── igris
+│   │   ├── Chart.yaml
+│   │   ├── templates
+│   │   │   ├── _helpers.tpl
+│   │   │   ├── configmap.yaml
+│   │   │   ├── deployment.yaml
+│   │   │   ├── hpa.yaml
+│   │   │   ├── ingress.yaml
+│   │   │   ├── service.yaml
+│   │   │   └── serviceaccount.yaml
+│   │   └── values.yaml
 │   └── whis
 │       ├── Chart.yaml
 │       ├── templates
@@ -128,7 +130,6 @@
 │       │   ├── service.yaml
 │       │   └── serviceaccount.yaml
 │       └── values.yaml
-├── mlops-git-push.sh
 ├── pyproject.toml
 ├── scripts
 │   ├── ci
@@ -303,7 +304,10 @@
 │       │   └── smithing_routes.py
 │       └── utils
 ├── shared
-│   └── db.py
+│   ├── config
+│   ├── db
+│   ├── db.py
+│   └── models
 ├── start-holocore.sh
 ├── test_data_collector_sanitizer_whis_flow.py
 ├── tests
@@ -330,10 +334,13 @@
 │   ├── test_whis_sanitize.py
 │   └── test_whis_smithing.py
 ├── tools
+│   ├── audit_structure.py
 │   ├── debug_data_collection.py
+│   ├── fix_flake8.py
 │   ├── git_push.sh
 │   ├── health_check.py
+│   ├── lint.sh
 │   └── rebuild.sh
 └── upgrade-to-pwc.sh
 
-75 directories, 261 files
+73 directories, 270 files
