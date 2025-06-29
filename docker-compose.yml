@@ -131,14 +131,14 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
-  ### 🧠 WHIS AI AGENT SERVICE (legacy - for backward compatibility)
-  whis:
-    build: ./services/whis
-    container_name: linkops-whis
+  ### 🧠 WHIS LOGIC SOURCE (ML Training Logic)
+  whis_logic:
+    build: ./services/whis_logic
+    container_name: linkops-whis-logic
     ports:
       - "8003:8000"
     volumes:
-      - ./services/whis:/app
+      - ./services/whis_logic:/app
       - ./data_lake:/app/data_lake
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -154,25 +154,31 @@ services:
       - ./services/ficknury:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
-  ### 📊 SCRAPERDASH INTELLIGENCE SERVICE
-  scraperdash:
-    build: ./services/scraperdash
-    container_name: linkops-scraperdash
+  ### 🕷️ WHIS WEBSCRAPER INTELLIGENCE HARVESTER
+  whis_webscraper:
+    build: ./services/whis_webscraper
+    container_name: linkops-whis-webscraper
     ports:
-      - "8011:8000"
+      - "8011:8009"
     volumes:
-      - ./services/scraperdash:/app
-      - ./data_lake:/app/data_lake
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+      - ./services/whis_webscraper:/app
+      - ./logs:/app/logs
+    environment:
+      - SANITIZE_SERVICE_URL=http://whis_sanitize:8000
+      - LOGS_BASE_PATH=/app/logs
+    depends_on:
+      - whis_sanitize
+    networks:
+      - linkops-network
 
-  ### 🧑‍💻 JAMES AI ASSISTANT SERVICE
-  james:
-    build: ./services/james
-    container_name: linkops-james
+  ### 🧠 JAMES LOGIC SOURCE (AI Assistant Logic)
+  james_logic:
+    build: ./services/james_logic
+    container_name: linkops-james-logic
     ports:
       - "8006:8000"
     volumes:
-      - ./services/james:/app
+      - ./services/james_logic:/app
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
@@ -188,32 +194,32 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
-  ### ☸️ KATIE KUBERNETES SPECIALIST SERVICE
-  katie:
-    build: ./services/katie
-    container_name: linkops-katie
-    ports:
-      - "8008:8000"
-    volumes:
-      - ./services/katie:/app
-      - ~/.kube:/root/.kube
-    environment:
-      - KUBECONFIG=/root/.kube/config
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-
-  ### 🏗️ IGRIS PLATFORM ENGINEER SERVICE
-  igris:
-    build: ./services/igris
-    container_name: linkops-igris
+  ### 🏗️ IGRIS LOGIC SOURCE (Platform Engineering Logic)
+  igris_logic:
+    build: ./services/igris_logic
+    container_name: linkops-igris-logic
     ports:
       - "8009:8000"
     volumes:
-      - ./services/igris:/app
+      - ./services/igris_logic:/app
       - ~/.aws:/root/.aws
       - ~/.azure:/root/.azure
     environment:
       - AWS_PROFILE=default
       - AZURE_PROFILE=default
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  ### ☸️ KATIE LOGIC SOURCE (Kubernetes Operations Logic)
+  katie_logic:
+    build: ./services/katie_logic
+    container_name: linkops-katie-logic
+    ports:
+      - "8008:8000"
+    volumes:
+      - ./services/katie_logic:/app
+      - ~/.kube:/root/.kube
+    environment:
+      - KUBECONFIG=/root/.kube/config
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 volumes:

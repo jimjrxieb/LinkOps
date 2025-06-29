@@ -8,20 +8,18 @@ jobs:
     strategy:
       matrix:
         service:
-          - james
-          - igris
-          - katie
-          - whis
-          - sanitizer
-          - data_collector
-          - scraperdash
+          - james_logic
+          - igris_logic
+          - katie_logic
+          - whis_logic
+          - whis_sanitize
+          - whis_data_input
+          - whis_webscraper
+          - whis_smithing
+          - whis_enhance
           - auditguard
           - ficknury_deploy
           - ficknury_evaluator
-          - whis_data_input
-          - whis_sanitize
-          - whis_smithing
-          - whis_enhance
 
     steps:
       - name: Checkout
@@ -61,20 +59,18 @@ jobs:
     strategy:
       matrix:
         service:
-          - james
-          - igris
-          - katie
-          - whis
-          - sanitizer
-          - data_collector
-          - scraperdash
+          - james_logic
+          - igris_logic
+          - katie_logic
+          - whis_logic
+          - whis_sanitize
+          - whis_data_input
+          - whis_webscraper
+          - whis_smithing
+          - whis_enhance
           - auditguard
           - ficknury_deploy
           - ficknury_evaluator
-          - whis_data_input
-          - whis_sanitize
-          - whis_smithing
-          - whis_enhance
 
     steps:
       - name: Checkout

@@ -203,8 +203,16 @@
 │   │   └── voice_response.py
 │   ├── katie
 │   │   ├── Dockerfile
+│   │   ├── README.md
+│   │   ├── kubeops
+│   │   │   ├── describe.py
+│   │   │   ├── logs.py
+│   │   │   ├── patch.py
+│   │   │   └── scale.py
 │   │   ├── main.py
-│   │   └── requirements.txt
+│   │   ├── requirements.txt
+│   │   └── tests
+│   │       └── test_katie.py
 │   ├── scraperdash
 │   │   ├── Dockerfile
 │   │   ├── __init__.py
@@ -348,4 +356,4 @@
 │   └── rebuild.sh
 └── upgrade-to-pwc.sh
 
-73 directories, 275 files
+75 directories, 281 files
