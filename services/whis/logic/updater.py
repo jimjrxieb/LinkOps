@@ -1,5 +1,9 @@
 def generate_update_prompt(orb: dict, rune: dict) -> str:
-    return f"# Suggested update for agent logic\n# Orb: {orb['title']}\n# Rune:\n{rune['script']}"
+    return (
+        f"# Suggested update for agent logic\n"
+        f"# Orb: {orb['title']}\n"
+        f"# Rune:\n{rune['script']}"
+    )
 
 
 def update_training_data(input_type: str, payload: dict, category: str):
