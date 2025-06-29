@@ -1,33 +1,50 @@
 """
-Katie Service - Kubernetes Specialist Microservice
-Handles Kubernetes operations, security, and K8sGPT integration
+Katie - Kubernetes AI Agent and Cluster Guardian
+Handles all Kubernetes operations with intelligent analysis and K8GPT fallback
 """
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any, List, Optional
 import logging
+import requests
 
-app = FastAPI(title="Katie Service - Kubernetes Specialist")
+# Import Katie's Kubernetes operations
+from kubeops.describe import k8s_describer
+from kubeops.scale import k8s_scaler
+from kubeops.logs import k8s_log_analyzer
+from kubeops.patch import k8s_patcher
+
+app = FastAPI(
+    title="Katie - Kubernetes AI Agent",
+    description="Cluster Guardian with intelligent K8s operations and K8GPT integration",
+    version="2.0.0"
+)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# K8GPT configuration
+K8GPT_API_URL = "https://api.k8gpt.ai/v1/analyze"  # Example K8GPT endpoint
+K8GPT_ENABLED = True
 
-class AgentTaskInput(BaseModel):
-    task_text: str
-    context: Optional[Dict[str, Any]] = None
-    cluster_info: Optional[Dict[str, Any]] = None
+
+class KubernetesTask(BaseModel):
+    task_id: str
+    task_type: str  # describe, scale, logs, patch, apply
+    resource_type: str  # pod, deployment, service, namespace
+    resource_name: str
+    namespace: str = "default"
+    parameters: Optional[Dict[str, Any]] = None
 
 
 class KatieResponse(BaseModel):
     agent: str = "katie"
     task: str
     response: str
-    kubernetes_solution: Dict[str, Any]
-    generated_yaml: List[str]
-    security_recommendations: List[str]
+    operation_result: Dict[str, Any]
+    k8gpt_insight: Optional[str] = None
     confidence_score: float
 
 
@@ -36,57 +53,62 @@ def health():
     return {
         "status": "healthy",
         "service": "katie",
-        "specialization": "Kubernetes Operations & Security",
+        "role": "Kubernetes AI Agent & Cluster Guardian",
         "capabilities": [
-            "Kubernetes Cluster Management",
-            "CKA/CKS Certification Logic",
-            "Security Scanning & Compliance",
-            "Container Orchestration",
-            "K8sGPT Integration",
-            "Multi-Cluster Operations",
-            "Performance Optimization",
-            "Troubleshooting & Debugging",
+            "Pod/Deployment/Service Description",
+            "Intelligent Scaling Operations",
+            "Log Analysis & Search",
+            "Resource Patching & Updates",
+            "Manifest Application",
+            "Rollback Operations",
+            "K8GPT Integration",
+            "Error Pattern Analysis"
         ],
+        "certifications": [
+            "Kubernetes CKA",
+            "Kubernetes CKS",
+            "SRE Best Practices"
+        ]
     }
 
 
 @app.post("/execute")
-def execute(data: AgentTaskInput):
+def execute(data: KubernetesTask):
     """
-    Katie specializes in Kubernetes operations and security
-    - Manages Kubernetes clusters and deployments
-    - Implements security best practices (CKS)
-    - Integrates with K8sGPT for intelligent operations
-    - Provides container orchestration solutions
+    Katie executes Kubernetes tasks with intelligent analysis
     """
     try:
-        logger.info(f"Katie processing Kubernetes task: {data.task_text}")
+        logger.info(f"Katie executing {data.task_type} on {data.resource_type}: {data.resource_name}")
 
-        # Analyze task for Kubernetes components
-        k8s_components = _analyze_k8s_components(data.task_text)
+        # Execute the task based on type
+        if data.task_type == "describe":
+            result = _execute_describe_operation(data)
+        elif data.task_type == "scale":
+            result = _execute_scale_operation(data)
+        elif data.task_type == "logs":
+            result = _execute_logs_operation(data)
+        elif data.task_type == "patch":
+            result = _execute_patch_operation(data)
+        elif data.task_type == "apply":
+            result = _execute_apply_operation(data)
+        else:
+            raise HTTPException(status_code=400, detail=f"Unknown task type: {data.task_type}")
 
-        # Generate Kubernetes solution
-        k8s_solution = _generate_k8s_solution(data.task_text, k8s_components)
-
-        # Generate YAML manifests
-        generated_yaml = _generate_yaml_manifests(data.task_text, k8s_components)
-
-        # Security recommendations
-        security_recommendations = _generate_security_recommendations(
-            data.task_text, k8s_components
-        )
+        # Get K8GPT insight if enabled and needed
+        k8gpt_insight = None
+        if K8GPT_ENABLED and result.get("status") == "error":
+            k8gpt_insight = _get_k8gpt_insight(data, result)
 
         # Create response
         response = KatieResponse(
-            task=data.task_text,
-            response=_generate_k8s_response(data.task_text, k8s_components),
-            kubernetes_solution=k8s_solution,
-            generated_yaml=generated_yaml,
-            security_recommendations=security_recommendations,
-            confidence_score=_calculate_confidence(k8s_components),
+            task=f"{data.task_type} {data.resource_type} {data.resource_name}",
+            response=_generate_katie_response(data, result),
+            operation_result=result,
+            k8gpt_insight=k8gpt_insight,
+            confidence_score=_calculate_confidence(result)
         )
 
-        logger.info(f"Katie completed task with {len(generated_yaml)} YAML manifests")
+        logger.info(f"Katie completed {data.task_type} operation")
         return response
 
     except Exception as e:
@@ -94,272 +116,281 @@ def execute(data: AgentTaskInput):
         raise HTTPException(status_code=500, detail=f"Katie execution failed: {str(e)}")
 
 
-@app.post("/k8sgpt/analyze")
-def k8sgpt_analyze(cluster_info: Dict[str, Any]):
-    """
-    Integrate with K8sGPT for intelligent cluster analysis
-    """
-    try:
-        logger.info("Katie using K8sGPT for cluster analysis")
+@app.get("/describe/pod/{namespace}/{pod_name}")
+def describe_pod(namespace: str, pod_name: str):
+    """Describe a specific pod"""
+    return k8s_describer.describe_pod(namespace, pod_name)
 
-        # Simulate K8sGPT analysis
-        analysis = _simulate_k8sgpt_analysis(cluster_info)
 
-        return {
-            "status": "analysis_complete",
-            "k8sgpt_insights": analysis["insights"],
-            "recommendations": analysis["recommendations"],
-            "security_issues": analysis["security_issues"],
-            "performance_optimizations": analysis["performance_optimizations"],
-        }
+@app.get("/describe/deployment/{namespace}/{deployment_name}")
+def describe_deployment(namespace: str, deployment_name: str):
+    """Describe a deployment"""
+    return k8s_describer.describe_deployment(namespace, deployment_name)
 
-    except Exception as e:
-        logger.error(f"K8sGPT analysis failed: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"K8sGPT analysis failed: {str(e)}")
+
+@app.get("/describe/service/{namespace}/{service_name}")
+def describe_service(namespace: str, service_name: str):
+    """Describe a service"""
+    return k8s_describer.describe_service(namespace, service_name)
+
+
+@app.get("/describe/namespace/{namespace}")
+def describe_namespace(namespace: str):
+    """Describe a namespace"""
+    return k8s_describer.describe_namespace(namespace)
+
+
+@app.get("/describe/pods/{namespace}")
+def describe_all_pods(namespace: str = "default"):
+    """Describe all pods in a namespace"""
+    return k8s_describer.describe_all_pods(namespace)
+
+
+@app.post("/scale/deployment/{namespace}/{deployment_name}")
+def scale_deployment(namespace: str, deployment_name: str, replicas: int, dry_run: bool = False):
+    """Scale a deployment"""
+    return k8s_scaler.scale_deployment(namespace, deployment_name, replicas, dry_run)
+
+
+@app.post("/scale/statefulset/{namespace}/{statefulset_name}")
+def scale_statefulset(namespace: str, statefulset_name: str, replicas: int, dry_run: bool = False):
+    """Scale a statefulset"""
+    return k8s_scaler.scale_statefulset(namespace, statefulset_name, replicas, dry_run)
+
+
+@app.post("/scale/autoscale/{namespace}/{deployment_name}")
+def setup_autoscaling(namespace: str, deployment_name: str, min_replicas: int = 1, max_replicas: int = 10, target_cpu: int = 80):
+    """Setup auto-scaling for a deployment"""
+    return k8s_scaler.auto_scale_deployment(namespace, deployment_name, min_replicas, max_replicas, target_cpu)
+
+
+@app.get("/logs/pod/{namespace}/{pod_name}")
+def get_pod_logs(namespace: str, pod_name: str, container: Optional[str] = None, tail_lines: int = 100):
+    """Get logs from a pod"""
+    return k8s_log_analyzer.get_pod_logs(namespace, pod_name, container, tail_lines)
+
+
+@app.get("/logs/deployment/{namespace}/{deployment_name}")
+def get_deployment_logs(namespace: str, deployment_name: str, tail_lines: int = 50):
+    """Get logs from all pods in a deployment"""
+    return k8s_log_analyzer.get_deployment_logs(namespace, deployment_name, tail_lines)
+
+
+@app.post("/logs/search/{namespace}")
+def search_logs(namespace: str, search_pattern: str, pod_selector: Optional[str] = None, max_results: int = 100):
+    """Search logs across pods"""
+    return k8s_log_analyzer.search_logs(namespace, search_pattern, pod_selector, max_results=max_results)
+
+
+@app.get("/logs/errors/{namespace}")
+def analyze_errors(namespace: str, pod_name: Optional[str] = None, hours_back: int = 24):
+    """Analyze error patterns in logs"""
+    return k8s_log_analyzer.analyze_error_patterns(namespace, pod_name, hours_back)
+
+
+@app.get("/logs/summary/{namespace}")
+def get_log_summary(namespace: str, deployment_name: Optional[str] = None, hours_back: int = 1):
+    """Get log activity summary"""
+    return k8s_log_analyzer.get_log_summary(namespace, deployment_name, hours_back)
+
+
+@app.post("/patch/deployment/{namespace}/{deployment_name}")
+def patch_deployment(namespace: str, deployment_name: str, patch_data: Dict[str, Any], dry_run: bool = False):
+    """Patch a deployment"""
+    return k8s_patcher.patch_deployment(namespace, deployment_name, patch_data, dry_run)
+
+
+@app.post("/patch/configmap/{namespace}/{configmap_name}")
+def patch_configmap(namespace: str, configmap_name: str, patch_data: Dict[str, Any], dry_run: bool = False):
+    """Patch a ConfigMap"""
+    return k8s_patcher.patch_configmap(namespace, configmap_name, patch_data, dry_run)
+
+
+@app.post("/patch/service/{namespace}/{service_name}")
+def patch_service(namespace: str, service_name: str, patch_data: Dict[str, Any], dry_run: bool = False):
+    """Patch a Service"""
+    return k8s_patcher.patch_service(namespace, service_name, patch_data, dry_run)
+
+
+@app.post("/apply/manifest")
+def apply_manifest(manifest_yaml: str, namespace: str = "default", dry_run: bool = False):
+    """Apply a Kubernetes manifest"""
+    return k8s_patcher.apply_manifest(manifest_yaml, namespace, dry_run)
+
+
+@app.post("/rollback/deployment/{namespace}/{deployment_name}")
+def rollback_deployment(namespace: str, deployment_name: str, revision: Optional[int] = None):
+    """Rollback a deployment"""
+    return k8s_patcher.rollback_deployment(namespace, deployment_name, revision)
+
+
+@app.get("/recommendations/{namespace}/{deployment_name}")
+def get_scaling_recommendations(namespace: str, deployment_name: str):
+    """Get intelligent scaling recommendations"""
+    return k8s_scaler.get_scaling_recommendations(namespace, deployment_name)
 
 
 @app.get("/capabilities")
 def get_capabilities():
-    """Get current Katie capabilities"""
+    """Get Katie's current capabilities"""
     return {
         "agent": "katie",
-        "specialization": "Kubernetes Operations & Security",
+        "role": "Kubernetes AI Agent & Cluster Guardian",
+        "specialization": "Kubernetes Operations & SRE",
         "current_capabilities": [
-            "Kubernetes Cluster Management",
-            "Deployment & Service Orchestration",
-            "Security Scanning & Compliance",
-            "CKA/CKS Best Practices",
-            "K8sGPT Integration",
-            "Multi-Cluster Operations",
-            "Performance Monitoring",
-            "Troubleshooting & Debugging",
-            "RBAC & Security Policies",
-            "Network Policies & Security",
+            "Pod/Deployment/Service Description",
+            "Intelligent Scaling Operations",
+            "Log Analysis & Search",
+            "Resource Patching & Updates",
+            "Manifest Application",
+            "Rollback Operations",
+            "Error Pattern Analysis",
+            "Scaling Recommendations",
+            "K8GPT Integration"
         ],
         "certifications": [
-            "Certified Kubernetes Administrator (CKA)",
-            "Certified Kubernetes Security Specialist (CKS)",
-            "K8sGPT Integration Specialist",
+            "Kubernetes CKA",
+            "Kubernetes CKS",
+            "SRE Best Practices"
         ],
         "focus_areas": [
-            "Cluster Security Hardening",
+            "Cluster Operations",
+            "Resource Management",
+            "Troubleshooting",
             "Performance Optimization",
-            "Automated Deployment Pipelines",
-            "Multi-Environment Management",
-            "Disaster Recovery",
-            "Compliance & Governance",
-        ],
+            "Security Hardening",
+            "Automation"
+        ]
     }
 
 
-def _analyze_k8s_components(task_text: str) -> Dict[str, Any]:
-    """Analyze task for Kubernetes components"""
-    k8s_keywords = {
-        "deployment": ["deploy", "deployment", "pod", "replicaset", "scale"],
-        "service": ["service", "ingress", "loadbalancer", "clusterip"],
-        "security": ["security", "rbac", "networkpolicy", "podsecurity", "seccomp"],
-        "storage": ["pvc", "pv", "storageclass", "persistentvolume"],
-        "monitoring": ["monitoring", "metrics", "logging", "prometheus", "grafana"],
-        "networking": ["network", "ingress", "egress", "service mesh", "istio"],
-    }
-
-    components = {}
-    task_lower = task_text.lower()
-
-    for category, keywords in k8s_keywords.items():
-        components[category] = any(keyword in task_lower for keyword in keywords)
-
-    return components
-
-
-def _generate_k8s_solution(
-    task_text: str, k8s_components: Dict[str, Any]
-) -> Dict[str, Any]:
-    """Generate Kubernetes solution"""
-    solution = {
-        "approach": "kubernetes-native",
-        "components": [],
-        "security_level": "high",
-        "scalability": "auto-scaling",
-    }
-
-    if k8s_components.get("deployment"):
-        solution["components"].append("Deployment with Rolling Updates")
-
-    if k8s_components.get("service"):
-        solution["components"].append("Service with Load Balancing")
-
-    if k8s_components.get("security"):
-        solution["components"].append("Security Policies & RBAC")
-
-    if k8s_components.get("storage"):
-        solution["components"].append("Persistent Storage")
-
-    return solution
-
-
-def _generate_yaml_manifests(
-    task_text: str, k8s_components: Dict[str, Any]
-) -> List[str]:
-    """Generate YAML manifests"""
-    manifests = []
-
-    if k8s_components.get("deployment"):
-        manifests.append(
-            """
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: secure-app
-  labels:
-    app: secure-app
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: secure-app
-  template:
-    metadata:
-      labels:
-        app: secure-app
-    spec:
-      containers:
-      - name: app
-        image: secure-app:latest
-        ports:
-        - containerPort: 8080
-        securityContext:
-          runAsNonRoot: true
-          runAsUser: 1000
-"""
-        )
-
-    if k8s_components.get("service"):
-        manifests.append(
-            """
-apiVersion: v1
-kind: Service
-metadata:
-  name: secure-app-service
-spec:
-  selector:
-    app: secure-app
-  ports:
-  - port: 80
-    targetPort: 8080
-  type: ClusterIP
-"""
-        )
-
-    if k8s_components.get("security"):
-        manifests.append(
-            """
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: secure-app-network-policy
-spec:
-  podSelector:
-    matchLabels:
-      app: secure-app
-  policyTypes:
-  - Ingress
-  - Egress
-  ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          name: allowed-namespace
-    ports:
-    - protocol: TCP
-      port: 8080
-"""
-        )
-
-    return manifests
-
-
-def _generate_security_recommendations(
-    task_text: str, k8s_components: Dict[str, Any]
-) -> List[str]:
-    """Generate security recommendations"""
-    recommendations = []
-
-    if k8s_components.get("deployment"):
-        recommendations.extend(
-            [
-                "Use non-root containers",
-                "Implement resource limits",
-                "Enable pod security policies",
-                "Use image scanning",
-            ]
-        )
-
-    if k8s_components.get("security"):
-        recommendations.extend(
-            [
-                "Implement RBAC",
-                "Use network policies",
-                "Enable audit logging",
-                "Implement secrets management",
-            ]
-        )
-
-    if not recommendations:
-        recommendations.append("Follow Kubernetes security best practices")
-
-    return recommendations
-
-
-def _generate_k8s_response(task_text: str, k8s_components: Dict[str, Any]) -> str:
-    """Generate Kubernetes response"""
-    if k8s_components.get("deployment"):
-        return "Kubernetes deployment solution generated with security best practices"
-    elif k8s_components.get("service"):
-        return "Kubernetes service configuration created with proper networking"
-    elif k8s_components.get("security"):
-        return "Security policies and RBAC configuration implemented"
+def _execute_describe_operation(data: KubernetesTask) -> Dict[str, Any]:
+    """Execute describe operations"""
+    if data.resource_type == "pod":
+        return k8s_describer.describe_pod(data.namespace, data.resource_name)
+    elif data.resource_type == "deployment":
+        return k8s_describer.describe_deployment(data.namespace, data.resource_name)
+    elif data.resource_type == "service":
+        return k8s_describer.describe_service(data.namespace, data.resource_name)
+    elif data.resource_type == "namespace":
+        return k8s_describer.describe_namespace(data.resource_name)
     else:
-        return "Kubernetes solution prepared with standard best practices"
+        raise HTTPException(status_code=400, detail=f"Unsupported resource type: {data.resource_type}")
 
 
-def _calculate_confidence(k8s_components: Dict[str, Any]) -> float:
-    """Calculate confidence score based on components"""
-    if not k8s_components:
-        return 0.5
+def _execute_scale_operation(data: KubernetesTask) -> Dict[str, Any]:
+    """Execute scale operations"""
+    parameters = data.parameters or {}
+    replicas = parameters.get("replicas", 1)
+    dry_run = parameters.get("dry_run", False)
+    
+    if data.resource_type == "deployment":
+        return k8s_scaler.scale_deployment(data.namespace, data.resource_name, replicas, dry_run)
+    elif data.resource_type == "statefulset":
+        return k8s_scaler.scale_statefulset(data.namespace, data.resource_name, replicas, dry_run)
+    else:
+        raise HTTPException(status_code=400, detail=f"Unsupported scaling resource: {data.resource_type}")
 
-    # Higher confidence for more specific components
-    confidence = 0.6
-    if k8s_components.get("deployment"):
-        confidence += 0.2
-    if k8s_components.get("security"):
-        confidence += 0.15
-    if k8s_components.get("service"):
+
+def _execute_logs_operation(data: KubernetesTask) -> Dict[str, Any]:
+    """Execute logs operations"""
+    parameters = data.parameters or {}
+    tail_lines = parameters.get("tail_lines", 100)
+    
+    if data.resource_type == "pod":
+        container = parameters.get("container")
+        return k8s_log_analyzer.get_pod_logs(data.namespace, data.resource_name, container, tail_lines)
+    elif data.resource_type == "deployment":
+        return k8s_log_analyzer.get_deployment_logs(data.namespace, data.resource_name, tail_lines)
+    else:
+        raise HTTPException(status_code=400, detail=f"Unsupported logs resource: {data.resource_type}")
+
+
+def _execute_patch_operation(data: KubernetesTask) -> Dict[str, Any]:
+    """Execute patch operations"""
+    parameters = data.parameters or {}
+    patch_data = parameters.get("patch_data", {})
+    dry_run = parameters.get("dry_run", False)
+    
+    if data.resource_type == "deployment":
+        return k8s_patcher.patch_deployment(data.namespace, data.resource_name, patch_data, dry_run)
+    elif data.resource_type == "configmap":
+        return k8s_patcher.patch_configmap(data.namespace, data.resource_name, patch_data, dry_run)
+    elif data.resource_type == "service":
+        return k8s_patcher.patch_service(data.namespace, data.resource_name, patch_data, dry_run)
+    else:
+        raise HTTPException(status_code=400, detail=f"Unsupported patch resource: {data.resource_type}")
+
+
+def _execute_apply_operation(data: KubernetesTask) -> Dict[str, Any]:
+    """Execute apply operations"""
+    parameters = data.parameters or {}
+    manifest_yaml = parameters.get("manifest_yaml", "")
+    dry_run = parameters.get("dry_run", False)
+    
+    return k8s_patcher.apply_manifest(manifest_yaml, data.namespace, dry_run)
+
+
+def _get_k8gpt_insight(data: KubernetesTask, result: Dict[str, Any]) -> Optional[str]:
+    """Get K8GPT insight for error analysis"""
+    try:
+        if not K8GPT_ENABLED:
+            return None
+        
+        # Prepare context for K8GPT
+        context = {
+            "task_type": data.task_type,
+            "resource_type": data.resource_type,
+            "resource_name": data.resource_name,
+            "namespace": data.namespace,
+            "error": result.get("error", ""),
+            "operation_result": result
+        }
+        
+        # Call K8GPT API (example implementation)
+        response = requests.post(
+            K8GPT_API_URL,
+            json=context,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            k8gpt_data = response.json()
+            return k8gpt_data.get("insight", "K8GPT analysis unavailable")
+        else:
+            return "K8GPT analysis failed"
+            
+    except Exception as e:
+        logger.warning(f"K8GPT integration failed: {e}")
+        return "K8GPT analysis unavailable"
+
+
+def _generate_katie_response(data: KubernetesTask, result: Dict[str, Any]) -> str:
+    """Generate Katie's response message"""
+    if result.get("status") == "error":
+        return f"Katie encountered an issue with {data.task_type} on {data.resource_type} {data.resource_name}: {result.get('error', 'Unknown error')}"
+    
+    # Use Katie's insight if available
+    if "katie_insight" in result:
+        return result["katie_insight"]
+    
+    # Generate default response
+    return f"Katie successfully completed {data.task_type} operation on {data.resource_type} {data.resource_name}"
+
+
+def _calculate_confidence(result: Dict[str, Any]) -> float:
+    """Calculate confidence score based on operation result"""
+    if result.get("status") == "error":
+        return 0.0
+    
+    # Base confidence
+    confidence = 0.8
+    
+    # Adjust based on operation type and success indicators
+    if "katie_insight" in result:
         confidence += 0.1
-
+    
+    if result.get("operation_result", {}).get("status") == "success":
+        confidence += 0.1
+    
     return min(confidence, 1.0)
-
-
-def _simulate_k8sgpt_analysis(cluster_info: Dict[str, Any]) -> Dict[str, Any]:
-    """Simulate K8sGPT analysis"""
-    return {
-        "insights": [
-            "Cluster has good resource utilization",
-            "Security policies are properly configured",
-            "Network policies need review",
-        ],
-        "recommendations": [
-            "Update to latest Kubernetes version",
-            "Implement pod security standards",
-            "Enable network policies for all namespaces",
-        ],
-        "security_issues": [
-            "Some pods running as root",
-            "Missing network policies in default namespace",
-        ],
-        "performance_optimizations": [
-            "Consider horizontal pod autoscaling",
-            "Optimize resource requests and limits",
-            "Implement proper monitoring",
-        ],
-    }

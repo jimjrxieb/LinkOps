@@ -83,6 +83,7 @@
 │   │   │   ├── README.md
 │   │   │   ├── RunePreview.vue
 │   │   │   ├── StatusBadge.vue
+│   │   │   ├── SummonJames.vue
 │   │   │   └── TaskCard.vue
 │   │   ├── index.css
 │   │   ├── main.js
@@ -183,6 +184,7 @@
 │   │       └── test_igris.py
 │   ├── james
 │   │   ├── Dockerfile
+│   │   ├── README.md
 │   │   ├── __init__.py
 │   │   ├── logic
 │   │   │   ├── __init__.py
@@ -193,9 +195,12 @@
 │   │   │   ├── __init__.py
 │   │   │   ├── actions.py
 │   │   │   ├── chat.py
-│   │   │   └── explain.py
-│   │   └── templates
-│   │       └── voice_response.txt
+│   │   │   ├── describe_image.py
+│   │   │   ├── explain.py
+│   │   │   └── voice.py
+│   │   ├── templates
+│   │   │   └── voice_response.txt
+│   │   └── voice_response.py
 │   ├── katie
 │   │   ├── Dockerfile
 │   │   ├── main.py
@@ -343,4 +348,4 @@
 │   └── rebuild.sh
 └── upgrade-to-pwc.sh
 
-73 directories, 270 files
+73 directories, 275 files
