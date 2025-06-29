@@ -1,5 +1,4 @@
-import backend.models.rune  # Ensure RuneCandidate is registered
-import backend.models.log  # Ensure LogEntry is registered
+# noqa: F401
 from backend.config.database import Base
 from logging.config import fileConfig
 import os
@@ -21,8 +20,8 @@ config = context.config
 config.set_main_option(
     "sqlalchemy.url",
     os.getenv(
-        "DATABASE_URL",
-        "postgresql://linkops:linkops_password@localhost:5432/linkops"),
+        "DATABASE_URL", "postgresql://linkops:linkops_password@localhost:5432/linkops"
+    ),
 )
 
 # Interpret the config file for Python logging.
@@ -79,9 +78,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection,
-            target_metadata=target_metadata)
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

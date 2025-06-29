@@ -1,4 +1,5 @@
-import os, json
+import os
+import json
 from datetime import datetime
 
 DATA_DIR = "data_lake/sanitized_inputs"

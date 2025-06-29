@@ -8,7 +8,8 @@ Create Date: 2024-01-15 10:00:00.000000
 
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
+
+# noqa: F401
 
 # revision identifiers, used by Alembic.
 revision = "pwc_logging_fields"
@@ -23,46 +24,23 @@ def upgrade():
     op.add_column("logs", sa.Column("error_outcome", sa.Text(), nullable=True))
     op.add_column(
         "logs",
-        sa.Column(
-            "sanitized",
-            sa.Boolean(),
-            nullable=False,
-            server_default="false"),
+        sa.Column("sanitized", sa.Boolean(), nullable=False, server_default="false"),
+    )
+    op.add_column(
+        "logs",
+        sa.Column("approved", sa.Boolean(), nullable=False, server_default="false"),
     )
     op.add_column(
         "logs",
         sa.Column(
-            "approved",
-            sa.Boolean(),
-            nullable=False,
-            server_default="false"),
+            "auto_approved", sa.Boolean(), nullable=False, server_default="false"
+        ),
     )
-    op.add_column(
-        "logs",
-        sa.Column(
-            "auto_approved",
-            sa.Boolean(),
-            nullable=False,
-            server_default="false"),
-    )
-    op.add_column(
-        "logs",
-        sa.Column(
-            "compliance_tags",
-            sa.Text(),
-            nullable=True))
+    op.add_column("logs", sa.Column("compliance_tags", sa.Text(), nullable=True))
 
     # Create indexes for performance
-    op.create_index(
-        op.f("ix_logs_sanitized"),
-        "logs",
-        ["sanitized"],
-        unique=False)
-    op.create_index(
-        op.f("ix_logs_approved"),
-        "logs",
-        ["approved"],
-        unique=False)
+    op.create_index(op.f("ix_logs_sanitized"), "logs", ["sanitized"], unique=False)
+    op.create_index(op.f("ix_logs_approved"), "logs", ["approved"], unique=False)
 
 
 def downgrade():

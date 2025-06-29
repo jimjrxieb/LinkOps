@@ -30,7 +30,8 @@ def evaluate_task_with_approval(data: EvalInput):
     """Evaluate task and handle approval/deployment flow"""
 
     # Score the task
-    score = random.uniform(0.0, 1.0)  # TODO: Replace with real scoring logic
+    # TODO: Replace with real scoring logic
+    score = random.uniform(0.0, 1.0)
 
     print(f"[FICKNURY] Task: {data.task_description} → Score: {score:.2f}")
 
@@ -38,7 +39,9 @@ def evaluate_task_with_approval(data: EvalInput):
         # Task is highly automatable
         if data.approved:
             # Deploy the agent
-            print(f"[FICKNURY] Deploying agent {data.agent} for task {data.task_id}")
+            print(
+                f"[FICKNURY] Deploying agent {data.agent} for task " f"{data.task_id}"
+            )
 
             # Simulated CLI deploy (placeholder)
             try:
@@ -55,7 +58,10 @@ def evaluate_task_with_approval(data: EvalInput):
                     "agent": data.agent,
                     "task_id": data.task_id,
                     "score": round(score, 2),
-                    "message": f"Successfully deployed {data.agent} for task {data.task_id}",
+                    "message": (
+                        f"Successfully deployed {data.agent} for task "
+                        f"{data.task_id}"
+                    ),
                 }
             except Exception as e:
                 return {
@@ -73,7 +79,9 @@ def evaluate_task_with_approval(data: EvalInput):
                 "agent": data.agent,
                 "task_id": data.task_id,
                 "score": round(score, 2),
-                "message": "Task approved for automation, awaiting deployment approval",
+                "message": (
+                    "Task approved for automation, awaiting deployment approval"
+                ),
             }
     else:
         # Task needs manual review
@@ -82,5 +90,5 @@ def evaluate_task_with_approval(data: EvalInput):
             "agent": data.agent,
             "task_id": data.task_id,
             "score": round(score, 2),
-            "message": "Task requires manual review due to low automation score",
+            "message": ("Task requires manual review due to low automation score"),
         }

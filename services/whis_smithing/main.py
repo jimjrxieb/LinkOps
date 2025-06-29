@@ -30,12 +30,10 @@ async def root():
 
 @app.get("/health")
 async def health():
-    return {
-        "status": "healthy",
-        "service": "whis_smithing"
-    }
+    return {"status": "healthy", "service": "whis_smithing"}
 
 
 # Import routes (commented until routes are properly set up)
 # from routes import smithing_routes
-# app.include_router(smithing_routes.router, prefix="/api/v1/smithing", tags=["smithing"])
+# app.include_router(smithing_routes.router, prefix="/api/v1/smithing"
+# , tags=["smithing"])

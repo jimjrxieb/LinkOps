@@ -39,20 +39,12 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(
-        op.f("ix_audit_logs_entity_id"),
-        "audit_logs",
-        ["entity_id"],
-        unique=False)
+        op.f("ix_audit_logs_entity_id"), "audit_logs", ["entity_id"], unique=False
+    )
     op.create_index(
-        op.f("ix_audit_logs_entity_type"),
-        "audit_logs",
-        ["entity_type"],
-        unique=False)
-    op.create_index(
-        op.f("ix_audit_logs_id"),
-        "audit_logs",
-        ["id"],
-        unique=False)
+        op.f("ix_audit_logs_entity_type"), "audit_logs", ["entity_type"], unique=False
+    )
+    op.create_index(op.f("ix_audit_logs_id"), "audit_logs", ["id"], unique=False)
     op.create_table(
         "links",
         sa.Column("id", sa.String(length=36), nullable=False),
@@ -93,11 +85,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(
-        op.f("ix_orbs_category"),
-        "orbs",
-        ["category"],
-        unique=False)
+    op.create_index(op.f("ix_orbs_category"), "orbs", ["category"], unique=False)
     op.create_index(op.f("ix_orbs_name"), "orbs", ["name"], unique=False)
     op.create_table(
         "system_metrics",
@@ -137,11 +125,7 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(
-        op.f("ix_runes_language"),
-        "runes",
-        ["language"],
-        unique=False)
+    op.create_index(op.f("ix_runes_language"), "runes", ["language"], unique=False)
     op.create_index(op.f("ix_runes_orb_id"), "runes", ["orb_id"], unique=False)
     # ### end Alembic commands ###
 
@@ -152,9 +136,7 @@ def downgrade() -> None:
     op.drop_index(op.f("ix_runes_orb_id"), table_name="runes")
     op.drop_index(op.f("ix_runes_language"), table_name="runes")
     op.drop_table("runes")
-    op.drop_index(
-        op.f("ix_system_metrics_metric_name"),
-        table_name="system_metrics")
+    op.drop_index(op.f("ix_system_metrics_metric_name"), table_name="system_metrics")
     op.drop_index(op.f("ix_system_metrics_id"), table_name="system_metrics")
     op.drop_table("system_metrics")
     op.drop_index(op.f("ix_orbs_name"), table_name="orbs")

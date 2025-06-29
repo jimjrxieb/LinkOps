@@ -97,15 +97,13 @@ def execute(data: PlatformTask):
         )
 
         logger.info(
-            f"Igris completed task with {len(generated_configs)} "
-            "configurations"
+            f"Igris completed task with {len(generated_configs)} " "configurations"
         )
         return response
 
     except Exception as e:
         logger.error(f"Igris execution failed: {str(e)}")
-        raise HTTPException(status_code=500,
-                            detail=f"Igris execution failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Igris execution failed: {str(e)}")
 
 
 @app.post("/opendevin/automate")
@@ -170,30 +168,21 @@ def get_capabilities():
     }
 
 
-def _analyze_platform_components(
-        task_text: str, platform: str) -> Dict[str, Any]:
+def _analyze_platform_components(task_text: str, platform: str) -> Dict[str, Any]:
     """Analyze task for platform components"""
     platform_keywords = {
-        "kubernetes": [
-            "k8s", "kubernetes", "pod", "deployment", "service", "ingress"
-        ],
-        "aws": [
-            "aws", "ec2", "s3", "lambda", "rds", "vpc", "iam"
-        ],
-        "azure": [
-            "azure", "vm", "storage", "function", "sql", "vnet", "rbac"
-        ],
-        "gcp": [
-            "gcp", "gce", "storage", "function", "sql", "vpc", "iam"
-        ],
-        "terraform": [
-            "terraform", "infrastructure", "iac", "provisioning"
-        ],
-        "security": [
-            "security", "compliance", "audit", "scan", "vulnerability"
-        ],
+        "kubernetes": ["k8s", "kubernetes", "pod", "deployment", "service", "ingress"],
+        "aws": ["aws", "ec2", "s3", "lambda", "rds", "vpc", "iam"],
+        "azure": ["azure", "vm", "storage", "function", "sql", "vnet", "rbac"],
+        "gcp": ["gcp", "gce", "storage", "function", "sql", "vpc", "iam"],
+        "terraform": ["terraform", "infrastructure", "iac", "provisioning"],
+        "security": ["security", "compliance", "audit", "scan", "vulnerability"],
         "automation": [
-            "automation", "ci/cd", "pipeline", "deployment", "orchestration"
+            "automation",
+            "ci/cd",
+            "pipeline",
+            "deployment",
+            "orchestration",
         ],
     }
 
@@ -201,9 +190,7 @@ def _analyze_platform_components(
     task_lower = task_text.lower()
 
     for category, keywords in platform_keywords.items():
-        components[category] = any(
-            keyword in task_lower for keyword in keywords
-        )
+        components[category] = any(keyword in task_lower for keyword in keywords)
 
     # Add platform-specific components
     components[platform] = True
@@ -400,8 +387,7 @@ def _generate_platform_response(
         )
     elif platform_components.get("kubernetes"):
         return (
-            "Kubernetes platform configuration created "
-            "with security best practices"
+            "Kubernetes platform configuration created " "with security best practices"
         )
     elif platform_components.get("security"):
         return "Security and compliance framework implemented"

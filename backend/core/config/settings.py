@@ -22,10 +22,7 @@ class Settings(BaseSettings):
     )
 
     # Application Settings
-    APP_NAME: str = Field(
-        default="LinkOps Core",
-        description="Application name"
-    )
+    APP_NAME: str = Field(default="LinkOps Core", description="Application name")
     DEBUG: bool = Field(default=False, description="Debug mode")
     HOST: str = Field(default="0.0.0.0", description="Host to bind to")
     PORT: int = Field(default=8000, description="Port to bind to")
@@ -47,8 +44,7 @@ class Settings(BaseSettings):
         # Validate required settings
         if not self.OPENAI_API_KEY:
             print(
-                "WARNING: OPENAI_API_KEY not set. "
-                "LLM functionality will be limited."
+                "WARNING: OPENAI_API_KEY not set. " "LLM functionality will be limited."
             )
 
         # Create directories if they don't exist

@@ -2,31 +2,38 @@
 Seed script to populate the database with preloaded Whis MLOps templates
 """
 
-from core.db.models import Orb, Rune
+from core.db.models import Orb, Rune, TaskQueueEntry, QA, ImageEntry
 from core.db.database import get_db
 
 
 def seed_whis_templates():
     """Seed the database with preloaded Whis MLOps templates"""
 
-    preloaded_templates = [{"task_id": "mlflow/train/pipeline",
-                            "task": "Train and log a scikit-learn pipeline using MLflow",
-                            "orb_description": ("Use `mlflow.sklearn.autolog()` to track all model metrics and "
-                                                "parameters automatically."),
-                            "rune_content": """import mlflow
+    preloaded_templates = [
+        {
+            "task_id": "mlflow/train/pipeline",
+            "task": "Train and log a scikit-learn pipeline using MLflow",
+            "orb_description": (
+                "Use `mlflow.sklearn.autolog()` to track all model metrics and "
+                "parameters automatically."
+            ),
+            "rune_content": """import mlflow
 import mlflow.sklearn
 from sklearn.pipeline import Pipeline
 
 mlflow.sklearn.autolog()
 pipeline = Pipeline({{steps}})
 pipeline.fit({{X_train}}, {{y_train}})""",
-                            "category": "mlops",
-                            },
-                           {"task_id": "model/serve/fastapi",
-                            "task": "Serve a model with FastAPI using joblib",
-                            "orb_description": ("Use `joblib.load()` to restore the model and create a `/predict` "
-                                                "route with FastAPI."),
-                            "rune_content": """from fastapi import FastAPI
+            "category": "mlops",
+        },
+        {
+            "task_id": "model/serve/fastapi",
+            "task": "Serve a model with FastAPI using joblib",
+            "orb_description": (
+                "Use `joblib.load()` to restore the model and create a `/predict` "
+                "route with FastAPI."
+            ),
+            "rune_content": """from fastapi import FastAPI
 import joblib
 
 app = FastAPI()
@@ -35,13 +42,16 @@ model = joblib.load("{{model_path}}")
 @app.post("/predict")
 def predict(data: dict):
     return {"prediction": model.predict([[data['value']]])[0]}""",
-                            "category": "mlops",
-                            },
-                           {"task_id": "docker/build/deploy",
-                            "task": "Build and deploy a Docker container for ML model serving",
-                            "orb_description": ("Use multi-stage Docker builds to optimize image size and include "
-                                                "only necessary dependencies."),
-                            "rune_content": """# Dockerfile
+            "category": "mlops",
+        },
+        {
+            "task_id": "docker/build/deploy",
+            "task": "Build and deploy a Docker container for ML model serving",
+            "orb_description": (
+                "Use multi-stage Docker builds to optimize image size and include "
+                "only necessary dependencies."
+            ),
+            "rune_content": """# Dockerfile
 FROM python:3.9-slim as builder
 WORKDIR /app
 COPY requirements.txt .
@@ -49,19 +59,23 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 FROM python:3.9-slim
 WORKDIR /app
-COPY --from=builder /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
+COPY --from=builder /usr/local/lib/python3.9/site-packages \
+    /usr/local/lib/python3.9/site-packages
 COPY {{model_path}} ./model/
 COPY app.py .
 
 EXPOSE {{port}}
 CMD ["python", "app.py"]""",
-                            "category": "mlops",
-                            },
-                           {"task_id": "k8s/deploy/model",
-                            "task": "Deploy ML model to Kubernetes with horizontal pod autoscaling",
-                            "orb_description": ("Use Kubernetes deployments with resource limits and HPA for "
-                                                "automatic scaling based on CPU/memory usage."),
-                            "rune_content": """apiVersion: apps/v1
+            "category": "mlops",
+        },
+        {
+            "task_id": "k8s/deploy/model",
+            "task": "Deploy ML model to Kubernetes with horizontal pod autoscaling",
+            "orb_description": (
+                "Use Kubernetes deployments with resource limits and HPA for "
+                "automatic scaling based on CPU/memory usage."
+            ),
+            "rune_content": """apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{model_name}}-deployment
@@ -106,13 +120,17 @@ spec:
       target:
         type: Utilization
         averageUtilization: {{cpu_target}}""",
-                            "category": "mlops",
-                            },
-                           {"task_id": "monitoring/prometheus/metrics",
-                            "task": "Add Prometheus metrics to ML model serving application",
-                            "orb_description": ("Use prometheus_client to expose metrics for model predictions, "
-                                                "latency, and error rates."),
-                            "rune_content": """from prometheus_client import Counter, Histogram, generate_latest
+            "category": "mlops",
+        },
+        {
+            "task_id": "monitoring/prometheus/metrics",
+            "task": "Add Prometheus metrics to ML model serving application",
+            "orb_description": (
+                "Use prometheus_client to expose metrics for model predictions, "
+                "latency, and error rates."
+            ),
+            "rune_content": """\
+from prometheus_client import Counter, Histogram, generate_latest
 from fastapi import FastAPI, Response
 import time
 
@@ -120,7 +138,10 @@ app = FastAPI()
 
 # Metrics
 PREDICTION_COUNTER = Counter('model_predictions_total', 'Total predictions made')
-PREDICTION_LATENCY = Histogram('model_prediction_duration_seconds', 'Prediction latency')
+PREDICTION_LATENCY = Histogram(
+    'model_prediction_duration_seconds',
+    'Prediction latency'
+)
 ERROR_COUNTER = Counter('model_errors_total', 'Total prediction errors')
 
 @app.post("/predict")
@@ -139,9 +160,9 @@ def predict(data: dict):
 @app.get("/metrics")
 def metrics():
     return Response(generate_latest(), media_type="text/plain")""",
-                            "category": "mlops",
-                            },
-                           ]
+            "category": "mlops",
+        },
+    ]
 
     # Get database session
     db = next(get_db())
@@ -156,8 +177,7 @@ def metrics():
             )
 
             if existing_orb:
-                print(
-                    f"Orb already exists for {template['task_id']}, skipping...")
+                print(f"Orb already exists for {template['task_id']}, skipping...")
                 continue
 
             # Create Orb
@@ -168,7 +188,6 @@ def metrics():
             )
             db.add(orb)
             db.commit()
-            db.refresh(orb)
 
             # Create Rune
             rune = Rune(
@@ -184,6 +203,28 @@ def metrics():
             db.commit()
 
             print(f"✅ Created Whis template: {template['task_id']}")
+
+        task_queue_entry = TaskQueueEntry(
+            task_type="fixlog",
+            source="seed",
+            payload={"error": "sample"},
+        )
+        db.add(task_queue_entry)
+        db.commit()
+
+        question = QA(
+            question="What is a pod?",
+            answer=("A pod is the smallest deployable unit " "in Kubernetes."),
+        )
+        db.add(question)
+        db.commit()
+
+        image_entry = ImageEntry(
+            image_path="path/to/image",
+            extracted_text="Sample extracted text here.",
+        )
+        db.add(image_entry)
+        db.commit()
 
     except Exception as e:
         print(f"❌ Error seeding Whis templates: {e}")

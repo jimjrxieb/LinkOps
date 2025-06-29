@@ -21,15 +21,10 @@ class Link(Base):
     created_at = Column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
-    updated_at = Column(
-        DateTime(timezone=True), onupdate=func.now(), nullable=True
-    )
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
 
     def __repr__(self):
-        return (
-            f"<Link(id='{self.id}', url='{self.url}', "
-            f"title='{self.title}')>"
-        )
+        return f"<Link(id='{self.id}', url='{self.url}', " f"title='{self.title}')>"
 
     def to_dict(self):
         """Convert model to dictionary"""
@@ -39,12 +34,8 @@ class Link(Base):
             "title": self.title,
             "description": self.description,
             "screenshot_path": self.screenshot_path,
-            "created_at": (
-                self.created_at.isoformat() if self.created_at else None
-            ),
-            "updated_at": (
-                self.updated_at.isoformat() if self.updated_at else None
-            ),
+            "created_at": (self.created_at.isoformat() if self.created_at else None),
+            "updated_at": (self.updated_at.isoformat() if self.updated_at else None),
         }
 
 

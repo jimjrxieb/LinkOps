@@ -11,10 +11,7 @@ class LinkBase(BaseModel):
     """Base link schema"""
 
     url: HttpUrl = Field(..., description="The URL of the link")
-    title: Optional[str] = Field(
-        None,
-        max_length=255,
-        description="Title of the link")
+    title: Optional[str] = Field(None, max_length=255, description="Title of the link")
     description: Optional[str] = Field(
         None, max_length=1000, description="Description of the link"
     )
@@ -30,10 +27,7 @@ class LinkUpdate(BaseModel):
     """Schema for updating a link"""
 
     url: Optional[HttpUrl] = Field(None, description="The URL of the link")
-    title: Optional[str] = Field(
-        None,
-        max_length=255,
-        description="Title of the link")
+    title: Optional[str] = Field(None, max_length=255, description="Title of the link")
     description: Optional[str] = Field(
         None, max_length=1000, description="Description of the link"
     )
@@ -47,8 +41,7 @@ class LinkResponse(LinkBase):
         None, description="Path to the screenshot file"
     )
     created_at: datetime = Field(..., description="Creation timestamp")
-    updated_at: Optional[datetime] = Field(
-        None, description="Last update timestamp")
+    updated_at: Optional[datetime] = Field(None, description="Last update timestamp")
 
     class Config:
         from_attributes = True
@@ -94,10 +87,8 @@ class WhisMemoryInput(BaseModel):
 
     task: str = Field(..., description="The task description")
     solution: str = Field(..., description="The solution or execution steps")
-    category: Optional[str] = Field(
-        "mlops", description="Category for the task")
-    tips: Optional[str] = Field(
-        None, description="Additional tips or best practices")
+    category: Optional[str] = Field("mlops", description="Category for the task")
+    tips: Optional[str] = Field(None, description="Additional tips or best practices")
 
 
 class WhisMemoryResponse(BaseModel):

@@ -1,8 +1,8 @@
-import os, json
+import os
+import json
 from logic.categorizer import categorize_task
 from logic.merger import dedupe_and_merge
 from logic.recurrence import update_recurrence
-from logic.updater import generate_update_prompt
 from utils.io import save_orb, save_rune
 
 SANITIZED_DIR = "data_lake/sanitized_inputs/"
@@ -27,12 +27,14 @@ def process_batch():
         updated_orb = update_recurrence(refined_orb)
 
         # Step 5: Suggest update
-        prompt = generate_update_prompt(updated_orb, refined_rune)
+        # prompt = generate_update_prompt(updated_orb, refined_rune)  #
+        # unused
 
         # Step 6: Save to agent logic
         save_orb(agent, updated_orb)
         save_rune(agent, refined_rune)
-        save_approval_if_needed(agent, updated_orb, refined_rune)
+        # save_approval_if_needed(agent, updated_orb, refined_rune)  #
+        # undefined
 
         processed.append(fname)
 
@@ -50,7 +52,7 @@ def generate_orb_and_rune(data):
 
     rune = {
         "id": f"rune_{len(data)}",
-        "script": f"# Auto-generated script\n# Based on: {data}",
+        "script": (f"# Auto-generated script\n# Based on: {data}"),
         "language": "bash",
     }
 
