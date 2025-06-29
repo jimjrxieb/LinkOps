@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 import logging
 import os
 import re
@@ -26,7 +26,8 @@ class RepositoryAuditResult(BaseModel):
 
 
 @router.get("/health")
-def health():
+def health() -> Dict[str, Any]:
+    """Health check endpoint for the audit module."""
     return {
         "status": "healthy",
         "service": "auditguard-audit",
@@ -40,12 +41,12 @@ def health():
 
 
 @router.post("/repository")
-async def audit_repository(request: RepositoryAuditRequest):
-    """Audit repository for security issues"""
+async def audit_repository(request: RepositoryAuditRequest) -> RepositoryAuditResult:
+    """Audit repository for security issues."""
     try:
-        logger.info(f"AuditGuard repository audit for {request.repository_path}")
+        logger.info("AuditGuard repository audit for %s", request.repository_path)
 
-        findings = {}
+        findings: Dict[str, Any] = {}
 
         for scope in request.audit_scope:
             if scope == "secrets":
@@ -59,10 +60,7 @@ async def audit_repository(request: RepositoryAuditRequest):
                     request.repository_path
                 )
 
-        # Calculate risk score
         risk_score = _calculate_risk_score(findings)
-
-        # Generate recommendations
         recommendations = _generate_recommendations(findings)
 
         result = RepositoryAuditResult(
@@ -73,22 +71,21 @@ async def audit_repository(request: RepositoryAuditRequest):
             recommendations=recommendations,
         )
 
-        logger.info(f"Repository audit completed with risk score: {risk_score}")
+        logger.info("Repository audit completed with risk score: %s", risk_score)
         return result
 
-    except Exception as e:
-        logger.error(f"Repository audit failed: {str(e)}")
+    except Exception as exc:
+        logger.error("Repository audit failed: %r", exc)
         raise HTTPException(
-            status_code=500, detail=f"Repository audit failed: {str(e)}"
+            status_code=500, detail=f"Repository audit failed: {str(exc)}"
         )
 
 
 async def _check_for_secrets(repo_path: str) -> List[Dict[str, Any]]:
-    """Check for secrets in repository"""
-    secrets = []
+    """Check for secrets in repository."""
+    secrets: List[Dict[str, Any]] = []
 
-    # Common secret patterns
-    secret_patterns = [
+    patterns = [
         r'api_key["\']?\s*[:=]\s*["\'][^"\']+["\']',
         r'password["\']?\s*[:=]\s*["\'][^"\']+["\']',
         r'secret["\']?\s*[:=]\s*["\'][^"\']+["\']',
@@ -99,16 +96,17 @@ async def _check_for_secrets(repo_path: str) -> List[Dict[str, Any]]:
     ]
 
     try:
-        for root, dirs, files in os.walk(repo_path):
+        for root, _, files in os.walk(repo_path):
             for file in files:
                 if file.endswith((".py", ".js", ".json", ".yaml", ".yml", ".env")):
                     file_path = os.path.join(root, file)
                     try:
-                        with open(file_path, "r", encoding="utf-8") as f:
+                        with open(file_path, encoding="utf-8") as f:
                             content = f.read()
-                            for pattern in secret_patterns:
-                                matches = re.finditer(pattern, content, re.IGNORECASE)
-                                for match in matches:
+                            for pattern in patterns:
+                                for match in re.finditer(
+                                    pattern, content, re.IGNORECASE
+                                ):
                                     secrets.append(
                                         {
                                             "file": file_path,
@@ -120,18 +118,17 @@ async def _check_for_secrets(repo_path: str) -> List[Dict[str, Any]]:
                                     )
                     except Exception:
                         continue
-    except Exception as e:
-        logger.error(f"Error scanning for secrets: {str(e)}")
+    except Exception as exc:
+        logger.error("Error scanning for secrets: %r", exc)
 
     return secrets
 
 
 async def _check_for_credentials(repo_path: str) -> List[Dict[str, Any]]:
-    """Check for hardcoded credentials"""
-    credentials = []
+    """Check for hardcoded credentials."""
+    credentials: List[Dict[str, Any]] = []
 
-    # Credential patterns
-    credential_patterns = [
+    patterns = [
         r'username["\']?\s*[:=]\s*["\'][^"\']+["\']',
         r'user["\']?\s*[:=]\s*["\'][^"\']+["\']',
         r'login["\']?\s*[:=]\s*["\'][^"\']+["\']',
@@ -140,18 +137,19 @@ async def _check_for_credentials(repo_path: str) -> List[Dict[str, Any]]:
     ]
 
     try:
-        for root, dirs, files in os.walk(repo_path):
+        for root, _, files in os.walk(repo_path):
             for file in files:
                 if file.endswith(
                     (".py", ".js", ".json", ".yaml", ".yml", ".env", ".conf")
                 ):
                     file_path = os.path.join(root, file)
                     try:
-                        with open(file_path, "r", encoding="utf-8") as f:
+                        with open(file_path, encoding="utf-8") as f:
                             content = f.read()
-                            for pattern in credential_patterns:
-                                matches = re.finditer(pattern, content, re.IGNORECASE)
-                                for match in matches:
+                            for pattern in patterns:
+                                for match in re.finditer(
+                                    pattern, content, re.IGNORECASE
+                                ):
                                     credentials.append(
                                         {
                                             "file": file_path,
@@ -163,18 +161,17 @@ async def _check_for_credentials(repo_path: str) -> List[Dict[str, Any]]:
                                     )
                     except Exception:
                         continue
-    except Exception as e:
-        logger.error(f"Error scanning for credentials: {str(e)}")
+    except Exception as exc:
+        logger.error("Error scanning for credentials: %r", exc)
 
     return credentials
 
 
 async def _check_for_sensitive_files(repo_path: str) -> List[Dict[str, Any]]:
-    """Check for sensitive files"""
-    sensitive_files = []
+    """Check for sensitive file names."""
+    sensitive_files: List[Dict[str, Any]] = []
 
-    # Sensitive file patterns
-    sensitive_patterns = [
+    patterns = [
         r"\.env$",
         r"\.pem$",
         r"\.key$",
@@ -188,9 +185,9 @@ async def _check_for_sensitive_files(repo_path: str) -> List[Dict[str, Any]]:
     ]
 
     try:
-        for root, dirs, files in os.walk(repo_path):
+        for root, _, files in os.walk(repo_path):
             for file in files:
-                for pattern in sensitive_patterns:
+                for pattern in patterns:
                     if re.search(pattern, file, re.IGNORECASE):
                         file_path = os.path.join(root, file)
                         sensitive_files.append(
@@ -202,55 +199,41 @@ async def _check_for_sensitive_files(repo_path: str) -> List[Dict[str, Any]]:
                             }
                         )
                         break
-    except Exception as e:
-        logger.error(f"Error scanning for sensitive files: {str(e)}")
+    except Exception as exc:
+        logger.error("Error scanning for sensitive files: %r", exc)
 
     return sensitive_files
 
 
 def _calculate_risk_score(findings: Dict[str, Any]) -> float:
-    """Calculate risk score based on findings"""
-    risk_score = 0.0
-
-    # Weight different types of findings
+    """Calculate normalized risk score based on findings."""
+    score = 0.0
     if findings.get("secrets"):
-        risk_score += len(findings["secrets"]) * 0.3  # High weight for secrets
-
+        score += len(findings["secrets"]) * 0.3
     if findings.get("credentials"):
-        risk_score += (
-            len(findings["credentials"]) * 0.2
-        )  # Medium weight for credentials
-
+        score += len(findings["credentials"]) * 0.2
     if findings.get("sensitive_files"):
-        risk_score += (
-            len(findings["sensitive_files"]) * 0.25
-        )  # High weight for sensitive files
-
-    # Normalize to 0-1 scale
-    return min(risk_score, 1.0)
+        score += len(findings["sensitive_files"]) * 0.25
+    return min(score, 1.0)
 
 
 def _generate_recommendations(findings: Dict[str, Any]) -> List[str]:
-    """Generate recommendations based on findings"""
-    recommendations = []
+    """Generate best-practice remediation tips."""
+    recs: List[str] = []
 
     if findings.get("secrets"):
-        recommendations.append("Remove hardcoded secrets and use environment variables")
-        recommendations.append(
-            "Implement secret management solution (e.g., HashiCorp Vault)"
-        )
+        recs.append("Remove hardcoded secrets and use environment variables.")
+        recs.append("Implement secret management (e.g., HashiCorp Vault).")
 
     if findings.get("credentials"):
-        recommendations.append(
-            "Remove hardcoded credentials and use secure authentication"
-        )
-        recommendations.append("Implement proper credential rotation procedures")
+        recs.append("Use secure authentication flows.")
+        recs.append("Enable credential rotation policies.")
 
     if findings.get("sensitive_files"):
-        recommendations.append("Move sensitive files to secure storage")
-        recommendations.append("Update .gitignore to exclude sensitive files")
+        recs.append("Move sensitive files to secure storage.")
+        recs.append("Add sensitive files to .gitignore.")
 
-    if not recommendations:
-        recommendations.append("No immediate security issues found")
+    if not recs:
+        recs.append("No immediate security risks found.")
 
-    return recommendations
+    return recs

@@ -1,10 +1,9 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 import logging
 
 router = APIRouter(prefix="/compliance", tags=["compliance"])
-
 logger = logging.getLogger(__name__)
 
 
@@ -23,7 +22,8 @@ class ComplianceResult(BaseModel):
 
 
 @router.get("/health")
-def health():
+def health() -> Dict[str, Any]:
+    """Health check endpoint for compliance audit."""
     return {
         "status": "healthy",
         "service": "auditguard-compliance",
@@ -39,13 +39,13 @@ def health():
 
 
 @router.post("/audit")
-async def audit_compliance(request: ComplianceRequest):
-    """Audit compliance against specified frameworks"""
+async def audit_compliance(request: ComplianceRequest) -> ComplianceResult:
+    """Audit compliance against specified frameworks."""
     try:
-        logger.info(f"AuditGuard compliance audit for {request.compliance_scope}")
+        logger.info("AuditGuard compliance audit for %s", request.compliance_scope)
 
-        findings = {}
-        recommendations = []
+        findings: Dict[str, Any] = {}
+        recommendations: List[str] = []
 
         for framework in request.compliance_scope:
             framework_findings = await _audit_framework(framework, request.target)
@@ -54,10 +54,9 @@ async def audit_compliance(request: ComplianceRequest):
             if framework_findings.get("issues"):
                 recommendations.extend(framework_findings["recommendations"])
 
-        # Calculate compliance score
         compliance_score = _calculate_compliance_score(findings)
 
-        result = ComplianceResult(
+        return ComplianceResult(
             task_id=request.task_id,
             compliance_scope=request.compliance_scope,
             findings=findings,
@@ -65,35 +64,32 @@ async def audit_compliance(request: ComplianceRequest):
             compliance_score=compliance_score,
         )
 
-        logger.info(f"Compliance audit completed with score: {compliance_score}")
-        return result
-
-    except Exception as e:
-        logger.error(f"Compliance audit failed: {str(e)}")
+    except Exception as exc:
+        logger.error("Compliance audit failed: %r", exc)
         raise HTTPException(
-            status_code=500, detail=f"Compliance audit failed: {str(e)}"
+            status_code=500, detail=f"Compliance audit failed: {str(exc)}"
         )
 
 
 async def _audit_framework(framework: str, target: str) -> Dict[str, Any]:
-    """Audit specific compliance framework"""
+    """Route to individual compliance framework checks."""
     if framework == "SOC2":
         return await _audit_soc2(target)
-    elif framework == "GDPR":
+    if framework == "GDPR":
         return await _audit_gdpr(target)
-    elif framework == "ISO27001":
+    if framework == "ISO27001":
         return await _audit_iso27001(target)
-    elif framework == "NIST":
+    if framework == "NIST":
         return await _audit_nist(target)
-    else:
-        return {
-            "status": "unsupported",
-            "message": f"Framework {framework} not yet implemented",
-        }
+
+    return {
+        "status": "unsupported",
+        "message": f"Framework {framework} not yet implemented",
+    }
 
 
 async def _audit_soc2(target: str) -> Dict[str, Any]:
-    """Audit SOC2 compliance"""
+    """Simulated SOC2 audit."""
     return {
         "status": "audited",
         "issues": [],
@@ -107,7 +103,7 @@ async def _audit_soc2(target: str) -> Dict[str, Any]:
 
 
 async def _audit_gdpr(target: str) -> Dict[str, Any]:
-    """Audit GDPR compliance"""
+    """Simulated GDPR audit."""
     return {
         "status": "audited",
         "issues": [],
@@ -121,7 +117,7 @@ async def _audit_gdpr(target: str) -> Dict[str, Any]:
 
 
 async def _audit_iso27001(target: str) -> Dict[str, Any]:
-    """Audit ISO27001 compliance"""
+    """Simulated ISO27001 audit."""
     return {
         "status": "audited",
         "issues": [],
@@ -135,7 +131,7 @@ async def _audit_iso27001(target: str) -> Dict[str, Any]:
 
 
 async def _audit_nist(target: str) -> Dict[str, Any]:
-    """Audit NIST compliance"""
+    """Simulated NIST compliance audit."""
     return {
         "status": "audited",
         "issues": [],
@@ -149,13 +145,10 @@ async def _audit_nist(target: str) -> Dict[str, Any]:
 
 
 def _calculate_compliance_score(findings: Dict[str, Any]) -> float:
-    """Calculate overall compliance score"""
-    if not findings:
-        return 0.0
-
-    scores = []
-    for framework, result in findings.items():
-        if result.get("status") == "audited":
-            scores.append(result.get("score", 0.0))
-
+    """Aggregate compliance scores from all frameworks."""
+    scores = [
+        result.get("score", 0.0)
+        for result in findings.values()
+        if result.get("status") == "audited"
+    ]
     return sum(scores) / len(scores) if scores else 0.0

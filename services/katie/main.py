@@ -3,10 +3,9 @@ Katie Service - Kubernetes Specialist Microservice
 Handles Kubernetes operations, security, and K8sGPT integration
 """
 
-from fastapi import FastAPI, Body, HTTPException
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any, List, Optional
-import json
 import logging
 
 app = FastAPI(title="Katie Service - Kubernetes Specialist")
