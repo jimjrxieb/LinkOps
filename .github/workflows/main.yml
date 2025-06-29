@@ -173,7 +173,7 @@ jobs:
       - name: Check if Helm charts exist
         id: check-helm
         run: |
-          if [ -d "helm" ]; then
+          if [ -d "LinkOps-Helm/charts" ]; then
             echo "has_helm=true" >> $GITHUB_OUTPUT
           else
             echo "has_helm=false" >> $GITHUB_OUTPUT
@@ -188,9 +188,79 @@ jobs:
       - name: Lint Helm Charts
         if: steps.check-helm.outputs.has_helm == 'true'
         run: |
-          for chart in helm/*/; do
+          for chart in LinkOps-Helm/charts/*/; do
             if [ -f "${chart}Chart.yaml" ]; then
               echo "Linting chart: $chart"
               helm lint "$chart"
             fi
-          done 
+          done
+
+  validate-argocd:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check if ArgoCD manifests exist
+        id: check-argocd
+        run: |
+          if [ -d "LinkOps-Manifests/services" ]; then
+            echo "has_argocd=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_argocd=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Validate ArgoCD Applications
+        if: steps.check-argocd.outputs.has_argocd == 'true'
+        run: |
+          for app in LinkOps-Manifests/services/*.yaml; do
+            if [ -f "$app" ]; then
+              echo "Validating ArgoCD application: $app"
+              # Basic YAML validation
+              python -c "import yaml; yaml.safe_load(open('$app'))"
+            fi
+          done
+
+  test-logic-sources:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        logic_source:
+          - james_logic
+          - igris_logic
+          - katie_logic
+          - whis_logic
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Check if logic source exists
+        id: check-logic
+        run: |
+          if [ -d "services/${{ matrix.logic_source }}" ]; then
+            echo "has_logic=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_logic=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install dependencies
+        if: steps.check-logic.outputs.has_logic == 'true'
+        run: |
+          if [ -f "services/${{ matrix.logic_source }}/requirements.txt" ]; then
+            pip install -r services/${{ matrix.logic_source }}/requirements.txt
+          fi
+
+      - name: Run logic source tests
+        if: steps.check-logic.outputs.has_logic == 'true'
+        run: |
+          if [ -d "services/${{ matrix.logic_source }}/tests" ]; then
+            python -m pytest services/${{ matrix.logic_source }}/tests/ -v
+          else
+            echo "No tests found for ${{ matrix.logic_source }}"
+          fi 

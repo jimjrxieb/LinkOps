@@ -1,0 +1,111 @@
+# Default values for james-logic
+replicaCount: 1
+
+image:
+  repository: ghcr.io/shadow-link-industries/james_logic
+  tag: latest
+  pullPolicy: Always
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+rbac:
+  create: true
+  role:
+    create: true
+    name: "james-logic-role"
+
+service:
+  type: ClusterIP
+  port: 8000
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: james-logic.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+env:
+  LOG_LEVEL: "INFO"
+  OPENAI_MODEL: "gpt-4"
+  VOICE_ENABLED: "true"
+  IMAGE_PROCESSING_ENABLED: "true"
+  ASSISTANT_PERSONALITY: "calm_powerful"
+
+secrets:
+  openai:
+    enabled: true
+    secretName: "openai-secret"
+    secretKey: "key"
+  voice:
+    enabled: false
+    secretName: "voice-secret"
+    secretKey: "api-key"
+
+volumes:
+  voice_cache:
+    enabled: true
+    mountPath: "/app/voice_cache"
+    emptyDir: {}
+  image_cache:
+    enabled: true
+    mountPath: "/app/image_cache"
+    emptyDir: {}
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+
+podSecurityContext:
+  fsGroup: 1000
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8000
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 8000
+  initialDelaySeconds: 5
+  periodSeconds: 5 

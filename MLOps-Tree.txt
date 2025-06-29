@@ -1,15 +1,7 @@
 .
 ├── CD-README.md
-├── CI-CD-SETUP.md
-├── DATA_FLOW_DIAGRAM.md
-├── ENVIRONMENT_SETUP.md
-├── GITHUB_ACTIONS_SUMMARY.md
-├── IGRIS_DEPLOYMENT_READY.md
 ├── MLOps-Tree.txt
 ├── README.md
-├── README_COMPOSE_MODES.md
-├── WHIS_MICROSERVICES_REFACTOR.md
-├── WHIS_TRAINING_SYSTEM.md
 ├── backend
 │   ├── Dockerfile
 │   ├── __init__.py
@@ -51,13 +43,41 @@
 │   │       ├── ebc762fbfe4d_add_script_content_to_rune_model.py
 │   │       └── efe071886c3b_add_task_id_to_runes.py
 │   └── requirements.txt
+├── deploy-shadow-agents.sh
 ├── docker-compose.daytime.yml
 ├── docker-compose.nighttime.yml
 ├── docker-compose.yml
 ├── docs
-│   ├── GITHUB_ACTIONS_SETUP.md
-│   ├── GITHUB_SECRETS_SETUP.md
-│   └── SECURE_DEPLOYMENT_GUIDE.md
+│   ├── README.md
+│   ├── api
+│   ├── architecture
+│   │   ├── DATA_FLOW_DIAGRAM.md
+│   │   ├── WHIS_MICROSERVICES_REFACTOR.md
+│   │   └── WHIS_TRAINING_SYSTEM.md
+│   ├── deployment
+│   │   ├── CI-CD-SETUP.md
+│   │   ├── ENVIRONMENT_SETUP.md
+│   │   ├── GITHUB_ACTIONS_SETUP.md
+│   │   ├── GITHUB_ACTIONS_SUMMARY.md
+│   │   ├── GITHUB_SECRETS_SETUP.md
+│   │   ├── IGRIS_DEPLOYMENT_READY.md
+│   │   ├── README_COMPOSE_MODES.md
+│   │   ├── SECURE_DEPLOYMENT_GUIDE.md
+│   │   └── shadow-agents.md
+│   ├── development
+│   │   └── README.md
+│   ├── guides
+│   └── services
+│       ├── auditguard
+│       │   └── README.md
+│       ├── igris_logic
+│       │   └── README.md
+│       ├── james_logic
+│       │   └── README.md
+│       ├── katie_logic
+│       │   └── README.md
+│       └── whis_webscraper
+│           └── README.md
 ├── env.template
 ├── frontend
 │   ├── Dockerfile
@@ -109,28 +129,25 @@
 │   ├── test-holocore.js
 │   └── vite.config.js
 ├── helm
-│   ├── igris
+│   ├── igris_logic
+│   │   └── templates
+│   ├── james_logic
+│   │   └── templates
+│   ├── katie_logic
+│   │   └── templates
+│   ├── whis
 │   │   ├── Chart.yaml
 │   │   ├── templates
 │   │   │   ├── _helpers.tpl
-│   │   │   ├── configmap.yaml
 │   │   │   ├── deployment.yaml
-│   │   │   ├── hpa.yaml
 │   │   │   ├── ingress.yaml
+│   │   │   ├── role.yaml
+│   │   │   ├── rolebinding.yaml
 │   │   │   ├── service.yaml
 │   │   │   └── serviceaccount.yaml
 │   │   └── values.yaml
-│   └── whis
-│       ├── Chart.yaml
-│       ├── templates
-│       │   ├── _helpers.tpl
-│       │   ├── deployment.yaml
-│       │   ├── ingress.yaml
-│       │   ├── role.yaml
-│       │   ├── rolebinding.yaml
-│       │   ├── service.yaml
-│       │   └── serviceaccount.yaml
-│       └── values.yaml
+│   └── whis_logic
+│       └── templates
 ├── pyproject.toml
 ├── scripts
 │   ├── ci
@@ -157,6 +174,8 @@
 │   │   └── init.sql
 │   ├── ficknury_deploy
 │   │   ├── Dockerfile
+│   │   ├── agent_launcher.py
+│   │   ├── agent_registry.py
 │   │   ├── executor.py
 │   │   ├── fallback.py
 │   │   ├── main.py
@@ -171,7 +190,7 @@
 │   │   ├── requirements.txt
 │   │   ├── scorer.py
 │   │   └── selector.py
-│   ├── igris
+│   ├── igris_logic
 │   │   ├── Dockerfile
 │   │   ├── README.md
 │   │   ├── analyzer.py
@@ -182,7 +201,7 @@
 │   │   ├── security.py
 │   │   └── tests
 │   │       └── test_igris.py
-│   ├── james
+│   ├── james_logic
 │   │   ├── Dockerfile
 │   │   ├── README.md
 │   │   ├── __init__.py
@@ -201,7 +220,7 @@
 │   │   ├── templates
 │   │   │   └── voice_response.txt
 │   │   └── voice_response.py
-│   ├── katie
+│   ├── katie_logic
 │   │   ├── Dockerfile
 │   │   ├── README.md
 │   │   ├── kubeops
@@ -213,46 +232,6 @@
 │   │   ├── requirements.txt
 │   │   └── tests
 │   │       └── test_katie.py
-│   ├── scraperdash
-│   │   ├── Dockerfile
-│   │   ├── __init__.py
-│   │   ├── logic
-│   │   │   ├── __init__.py
-│   │   │   ├── scraper.py
-│   │   │   └── site_crawler.py
-│   │   ├── main.py
-│   │   ├── requirements.txt
-│   │   ├── routes
-│   │   │   ├── __init__.py
-│   │   │   ├── agents.py
-│   │   │   ├── logs.py
-│   │   │   ├── orbs_runes.py
-│   │   │   ├── reloop.py
-│   │   │   └── webscrape.py
-│   │   └── utils
-│   │       ├── __init__.py
-│   │       └── forward_to_collector.py
-│   ├── whis
-│   │   ├── Dockerfile
-│   │   ├── __init__.py
-│   │   ├── docker-compose.yml
-│   │   ├── logic
-│   │   │   ├── __init__.py
-│   │   │   ├── categorizer.py
-│   │   │   ├── generator.py
-│   │   │   ├── merger.py
-│   │   │   ├── recurrence.py
-│   │   │   └── updater.py
-│   │   ├── main.py
-│   │   ├── requirements.txt
-│   │   ├── routes
-│   │   │   ├── __init__.py
-│   │   │   ├── approvals.py
-│   │   │   ├── digest.py
-│   │   │   └── train.py
-│   │   └── utils
-│   │       ├── __init__.py
-│   │       └── io.py
 │   ├── whis_data_input
 │   │   ├── Dockerfile
 │   │   ├── __init__.py
@@ -283,6 +262,27 @@
 │   │   │   └── train.py
 │   │   ├── updater.py
 │   │   └── utils
+│   ├── whis_logic
+│   │   ├── Dockerfile
+│   │   ├── __init__.py
+│   │   ├── docker-compose.yml
+│   │   ├── logic
+│   │   │   ├── __init__.py
+│   │   │   ├── categorizer.py
+│   │   │   ├── generator.py
+│   │   │   ├── merger.py
+│   │   │   ├── recurrence.py
+│   │   │   └── updater.py
+│   │   ├── main.py
+│   │   ├── requirements.txt
+│   │   ├── routes
+│   │   │   ├── __init__.py
+│   │   │   ├── approvals.py
+│   │   │   ├── digest.py
+│   │   │   └── train.py
+│   │   └── utils
+│   │       ├── __init__.py
+│   │       └── io.py
 │   ├── whis_sanitize
 │   │   ├── Dockerfile
 │   │   ├── __init__.py
@@ -304,23 +304,59 @@
 │   │   └── utils
 │   │       ├── __init__.py
 │   │       └── file_writer.py
-│   └── whis_smithing
+│   ├── whis_smithing
+│   │   ├── Dockerfile
+│   │   ├── generator.py
+│   │   ├── main.py
+│   │   ├── merger.py
+│   │   ├── models
+│   │   ├── recurrence.py
+│   │   ├── requirements.txt
+│   │   ├── routes
+│   │   │   ├── __init__.py
+│   │   │   └── smithing_routes.py
+│   │   └── utils
+│   └── whis_webscraper
 │       ├── Dockerfile
-│       ├── generator.py
+│       ├── README.md
+│       ├── __init__.py
+│       ├── logic
+│       │   ├── __init__.py
+│       │   ├── scraper.py
+│       │   └── site_crawler.py
 │       ├── main.py
-│       ├── merger.py
-│       ├── models
-│       ├── recurrence.py
 │       ├── requirements.txt
 │       ├── routes
 │       │   ├── __init__.py
-│       │   └── smithing_routes.py
+│       │   ├── agents.py
+│       │   ├── logs.py
+│       │   ├── orbs_runes.py
+│       │   ├── reloop.py
+│       │   └── webscrape.py
+│       ├── scrape_agent_logs.py
+│       ├── scrape_sources.py
+│       ├── send_to_sanitize.py
+│       ├── tests
+│       │   └── test_whis_webscraper.py
 │       └── utils
+│           ├── __init__.py
+│           └── forward_to_collector.py
 ├── shared
+│   ├── __init__.py
 │   ├── config
+│   │   ├── database.py
+│   │   ├── kafka.py
+│   │   └── settings.py
 │   ├── db
 │   ├── db.py
-│   └── models
+│   ├── models
+│   │   ├── agent_log.py
+│   │   ├── rune.py
+│   │   └── task_queue.py
+│   ├── schemas
+│   │   ├── rune_schemas.py
+│   │   └── task_schemas.py
+│   └── utils
 ├── start-holocore.sh
 ├── test_data_collector_sanitizer_whis_flow.py
 ├── tests
@@ -356,4 +392,4 @@
 │   └── rebuild.sh
 └── upgrade-to-pwc.sh
 
-75 directories, 281 files
+95 directories, 297 files

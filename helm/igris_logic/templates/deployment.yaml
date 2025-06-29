@@ -1,0 +1,125 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "igris-logic.fullname" . }}
+  labels:
+    {{- include "igris-logic.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "igris-logic.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "igris-logic.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "igris-logic.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          env:
+            {{- range $key, $value := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+            {{- if .Values.secrets.openai.enabled }}
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.openai.secretName }}
+                  key: {{ .Values.secrets.openai.secretKey }}
+            {{- end }}
+            {{- if .Values.secrets.aws.enabled }}
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.aws.secretName }}
+                  key: aws-access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.aws.secretName }}
+                  key: aws-secret-access-key
+            - name: AWS_REGION
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.aws.secretName }}
+                  key: aws-region
+            {{- end }}
+            {{- if .Values.secrets.azure.enabled }}
+            - name: AZURE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.azure.secretName }}
+                  key: azure-client-id
+            - name: AZURE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.azure.secretName }}
+                  key: azure-client-secret
+            - name: AZURE_TENANT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.azure.secretName }}
+                  key: azure-tenant-id
+            {{- end }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- if or .Values.volumes.aws_config.enabled .Values.volumes.azure_config.enabled }}
+          volumeMounts:
+            {{- if .Values.volumes.aws_config.enabled }}
+            - name: aws-config
+              mountPath: {{ .Values.volumes.aws_config.mountPath }}
+              readOnly: true
+            {{- end }}
+            {{- if .Values.volumes.azure_config.enabled }}
+            - name: azure-config
+              mountPath: {{ .Values.volumes.azure_config.mountPath }}
+              readOnly: true
+            {{- end }}
+          {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.volumes.aws_config.enabled .Values.volumes.azure_config.enabled }}
+      volumes:
+        {{- if .Values.volumes.aws_config.enabled }}
+        - name: aws-config
+          secret:
+            secretName: {{ .Values.volumes.aws_config.secretName }}
+        {{- end }}
+        {{- if .Values.volumes.azure_config.enabled }}
+        - name: azure-config
+          secret:
+            secretName: {{ .Values.volumes.azure_config.secretName }}
+        {{- end }}
+      {{- end }} 

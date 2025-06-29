@@ -1,0 +1,21 @@
+apiVersion: v2
+name: katie-logic
+description: AI Logic Service for Katie - Kubernetes AI Agent & Cluster Guardian
+type: application
+version: 0.1.0
+appVersion: "1.0"
+keywords:
+  - ai
+  - kubernetes
+  - cluster-management
+  - sre
+  - k8gpt
+home: https://github.com/shadow-link-industries/linkops-mlops
+sources:
+  - https://github.com/shadow-link-industries/linkops-mlops
+maintainers:
+  - name: Shadow Link Industries
+    email: dev@shadow-link-industries.com
+annotations:
+  category: AI/ML
+  licenses: MIT 

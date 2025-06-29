@@ -1,0 +1,42 @@
+{{- if .Values.rbac.create -}}
+{{- if .Values.rbac.role.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "whis-logic.fullname" . }}-role
+  labels:
+    {{- include "whis-logic.labels" . | nindent 4 }}
+rules:
+  # Intelligence processing operations
+  - apiGroups: [""]
+    resources: ["pods", "services", "configmaps", "secrets"]
+    verbs: ["get", "list", "watch"]
+  
+  # Data processing
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims", "persistentvolumes"]
+    verbs: ["get", "list", "watch"]
+  
+  # ML model operations
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["get", "list", "watch"]
+{{- end }}
+
+{{- if and .Values.rbac.create .Values.rbac.role.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "whis-logic.fullname" . }}-role-binding
+  labels:
+    {{- include "whis-logic.labels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "whis-logic.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ include "whis-logic.fullname" . }}-role
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}
+{{- end }} 

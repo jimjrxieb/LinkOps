@@ -1,255 +1,112 @@
-# LinkOps Core
+# LinkOps MLOps Platform
 
-A FastAPI microservice following MLOps best practices for managing links and screenshots with PostgreSQL and Kafka integration.
+A sophisticated MLOps platform with multiple AI agent microservices, intelligent pipelines, GitOps delivery, and comprehensive observability.
 
-## 🚀 Features
+## 🚀 **Quick Start**
 
-- **FastAPI Framework**: Modern, fast web framework for building APIs
-- **PostgreSQL Database**: Robust relational database with connection pooling
-- **Kafka Integration**: Message broker for event-driven architecture
-- **Health Checks**: Comprehensive monitoring endpoints
-- **File Storage**: Screenshot and log management
-- **Environment Configuration**: Flexible configuration management
-- **Docker Support**: Containerized deployment
-- **Testing**: Comprehensive test suite
-
-## 📁 Project Structure
-
-```
-./
-├── core/
-│   ├── api/
-│   │   ├── app.py              # FastAPI application factory
-│   │   └── dependencies.py     # API dependencies
-│   ├── db/
-│   │   ├── connection.py       # Database connection management
-│   │   └── models.py           # Database models
-│   ├── models/
-│   │   ├── schemas.py          # Pydantic schemas
-│   │   └── entities.py         # SQLAlchemy entities
-│   └── routes/
-│       ├── health.py           # Health check endpoints
-│       └── api.py              # Main API routes
-├── config/
-│   ├── settings.py             # Application settings
-│   ├── database.py             # Database configuration
-│   └── kafka.py                # Kafka configuration
-├── screenshots/                # Screenshot storage
-├── logs/                       # Application logs
-├── tests/                      # Test suite
-├── main.py                     # Application entry point
-├── requirements.txt            # Python dependencies
-├── .env.example               # Environment variables template
-├── .gitignore                 # Git ignore rules
-├── Dockerfile                 # Docker configuration
-├── docker-compose.yml         # Docker Compose setup
-└── README.md                  # This file
-```
-
-## 🛠️ Installation
-
-### Prerequisites
-
-- Python 3.8+
-- PostgreSQL 12+
-- Kafka 2.8+
-- Docker (optional)
-
-### Local Development
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd ./
-   ```
-
-2. **Create virtual environment**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your configuration
-   ```
-
-5. **Initialize database**
-   ```bash
-   # Create PostgreSQL database
-   createdb linkops
-   
-   # Run database migrations (if using Alembic)
-   alembic upgrade head
-   ```
-
-6. **Start the application**
-   ```bash
-   python main.py
-   ```
-
-### Docker Deployment
-
-1. **Build and run with Docker Compose**
-   ```bash
-   docker-compose up --build
-   ```
-
-2. **Or build manually**
-   ```bash
-   docker build -t linkops-core .
-   docker run -p 8000:8000 linkops-core
-   ```
-
-## 🔧 Configuration
-
-### Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `APP_NAME` | Application name | `LinkOps Core` |
-| `DEBUG` | Debug mode | `false` |
-| `HOST` | Host to bind to | `0.0.0.0` |
-| `PORT` | Port to bind to | `8000` |
-| `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:password@localhost:5432/linkops` |
-| `KAFKA_BOOTSTRAP_SERVERS` | Kafka servers | `localhost:9092` |
-| `SCREENSHOTS_DIR` | Screenshot storage directory | `./screenshots` |
-| `LOGS_DIR` | Log storage directory | `./logs` |
-
-## 📚 API Documentation
-
-### Health Checks
-
-- `GET /health/` - Basic health check
-- `GET /health/detailed` - Detailed health with metrics
-- `GET /health/ready` - Kubernetes readiness probe
-- `GET /health/live` - Kubernetes liveness probe
-
-### Links API
-
-- `GET /api/v1/links` - Get all links (paginated)
-- `GET /api/v1/links/{link_id}` - Get specific link
-- `POST /api/v1/links` - Create new link
-- `PUT /api/v1/links/{link_id}` - Update link
-- `DELETE /api/v1/links/{link_id}` - Delete link
-- `POST /api/v1/links/{link_id}/screenshot` - Upload screenshot
-
-### Interactive Documentation
-
-Once the application is running, visit:
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
-
-## 🧪 Testing
-
-### Run Tests
 ```bash
-# Run all tests
-pytest
+# Clone the repository
+git clone https://github.com/shadow-link-industries/linkops-mlops.git
+cd linkops-mlops
 
-# Run with coverage
-pytest --cov=core
+# Setup environment
+cp env.template .env
+# Edit .env with your configuration
 
-# Run specific test file
-pytest tests/test_api.py
+# Start the platform
+docker-compose up -d
 ```
 
-### Test Structure
-- `tests/test_api.py` - API endpoint tests
-- `tests/test_models.py` - Model validation tests
-- `tests/conftest.py` - Test configuration and fixtures
+## 🏗️ **Architecture Overview**
 
-## 📊 Monitoring
+LinkOps consists of intelligent AI agents and microservices:
 
-### Health Checks
-The application provides comprehensive health checks:
-- Database connectivity
-- Kafka connectivity
-- System metrics (CPU, memory, disk)
-- Directory accessibility
+### **🤖 Core AI Agents**
+- **Whis** - ML Training & Agent Enhancement AI
+- **Katie** - Kubernetes AI Agent & Cluster Guardian  
+- **James** - Personal AI Assistant & Executive Aid
+- **Igris** - Platform Engineering & Infrastructure Analysis
 
-### Logging
-- Structured logging with JSON format
-- Configurable log levels
-- Log rotation and archiving
+### **🔧 Support Services**
+- **Whis WebScraper** - Intelligence harvester for training data
+- **Whis Sanitize** - Data cleaning and preprocessing
+- **Whis Smithing** - Rune and orb generation
+- **Whis Enhance** - Agent capability enhancement
+- **FickNury** - Task evaluation and deployment
+- **AuditGuard** - Security and compliance monitoring
 
-### Metrics
-- System resource usage
-- Database connection pool status
-- API request metrics
+### **🌐 Frontend & Backend**
+- **Vue.js Frontend** - Modern web interface
+- **Shared Library** - Common components and utilities
 
-## 🔄 Kafka Events
+## 📚 **Documentation**
 
-The application publishes events to Kafka topics:
+📖 **[Comprehensive Documentation](docs/README.md)** - Complete platform documentation
 
-- `linkops.links.created` - When a new link is created
-- `linkops.links.updated` - When a link is updated
-- `linkops.links.deleted` - When a link is deleted
+### **Quick Links**
+- **[Architecture](docs/architecture/)** - System design and data flow
+- **[Deployment](docs/deployment/)** - Setup and configuration guides
+- **[Services](docs/services/)** - Individual service documentation
+- **[Development](docs/development/)** - Development guides
 
-## 🚀 Deployment
+## 🔧 **Key Features**
 
-### Production Considerations
+- **🧠 Intelligent AI Agents** - Specialized AI agents for different domains
+- **🔄 GitOps Pipeline** - Automated deployment and configuration management
+- **📊 Comprehensive Monitoring** - Health checks, metrics, and observability
+- **🔒 Security Hardened** - Non-root containers, RBAC, security scanning
+- **🚀 Production Ready** - Kubernetes manifests, Helm charts, CI/CD
 
-1. **Environment Variables**: Use proper secrets management
-2. **Database**: Use connection pooling and read replicas
-3. **Kafka**: Configure proper retention and partitioning
-4. **Monitoring**: Set up proper logging and metrics collection
-5. **Security**: Enable HTTPS, CORS, and authentication
-6. **Scaling**: Use load balancers and horizontal scaling
+## 🛠 **Technology Stack**
 
-### Kubernetes
+- **Backend**: Python, FastAPI, SQLAlchemy, PostgreSQL
+- **Frontend**: Vue.js, TypeScript, Tailwind CSS
+- **Infrastructure**: Docker, Kubernetes, Helm
+- **AI/ML**: OpenAI, Custom training pipelines
+- **Monitoring**: Prometheus, Grafana, ELK Stack
+- **CI/CD**: GitHub Actions, ArgoCD
 
-Example deployment configuration:
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: linkops-core
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: linkops-core
-  template:
-    metadata:
-      labels:
-        app: linkops-core
-    spec:
-      containers:
-      - name: linkops-core
-        image: linkops-core:latest
-        ports:
-        - containerPort: 8000
-        env:
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: linkops-secrets
-              key: database-url
-```
+## 📈 **Platform Capabilities**
 
-## 🤝 Contributing
+### **MLOps Pipeline**
+- Automated data collection and preprocessing
+- Intelligent model training and enhancement
+- Agent capability development
+- Continuous learning and improvement
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Run linting and tests
-6. Submit a pull request
+### **Kubernetes Operations**
+- Cluster management and monitoring
+- Resource scaling and optimization
+- Log analysis and error detection
+- Security and compliance auditing
 
-## 📄 License
+### **Platform Engineering**
+- Infrastructure analysis and recommendations
+- Security assessment and hardening
+- OpenDevin integration for code generation
+- Multi-cloud deployment support
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+## 🚀 **Getting Started**
 
-## 🆘 Support
+1. **Read the [Documentation](docs/README.md)**
+2. **Follow [Environment Setup](docs/deployment/ENVIRONMENT_SETUP.md)**
+3. **Configure [CI/CD Pipeline](docs/deployment/CI-CD-SETUP.md)**
+4. **Deploy to your environment**
 
-For support and questions:
-- Create an issue in the repository
-- Check the documentation
-- Review the API docs at `/docs`
+## 🤝 **Contributing**
+
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+
+## 📄 **License**
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 **Support**
+
+- **Documentation**: [docs/README.md](docs/README.md)
+- **Issues**: [GitHub Issues](https://github.com/shadow-link-industries/linkops-mlops/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/shadow-link-industries/linkops-mlops/discussions)
+
+---
+
+**LinkOps MLOps Platform** - Your Intelligent MLOps Solution 🚀✨
