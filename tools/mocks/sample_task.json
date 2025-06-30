@@ -1,0 +1,9 @@
+{
+  "raw_text": "Install Prometheus on AKS using Helm and expose it via NodePort.",
+  "source": "manual_input",
+  "topic": "Monitoring",
+  "metadata": {
+    "submitted_by": "jimmie",
+    "tags": ["aks", "prometheus", "helm"]
+  }
+} 
