@@ -1,5 +1,7 @@
 # LinkOps MLOps Platform
 
+![CI](https://github.com/jimjrxieb/LinkOps-MLOps/actions/workflows/main.yml/badge.svg)
+
 A sophisticated MLOps platform with multiple AI agent microservices, intelligent pipelines, GitOps delivery, and comprehensive observability.
 
 ## 🚀 **Quick Start**

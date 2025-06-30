@@ -90,6 +90,19 @@ jobs:
         run: |
           docker build -t linkops-${{ matrix.service }}:ci ./shadows/${{ matrix.service }}
 
+      - name: Save Docker image as artifact
+        if: steps.check-dockerfile.outputs.has_dockerfile == 'true'
+        run: |
+          docker save linkops-${{ matrix.service }}:ci -o ${{ matrix.service }}-image.tar
+
+      - name: Upload Docker image artifact
+        if: steps.check-dockerfile.outputs.has_dockerfile == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.service }}-docker-image
+          path: ${{ matrix.service }}-image.tar
+          retention-days: 7
+
   check-frontend:
     runs-on: ubuntu-latest
     steps:
@@ -210,16 +223,29 @@ jobs:
             echo "has_argocd=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Validate ArgoCD Applications
-        if: steps.check-argocd.outputs.has_argocd == 'true'
+      - name: Install yamllint
         run: |
-          for app in LinkOps-Manifests/shadows/*.yaml; do
-            if [ -f "$app" ]; then
-              echo "Validating ArgoCD application: $app"
-              # Basic YAML validation
-              python -c "import yaml; yaml.safe_load(open('$app'))"
-            fi
-          done
+          pip install yamllint
+
+      - name: Validate ArgoCD Application manifests
+        run: |
+          # Check if LinkOps-Manifests directory exists
+          if [ -d "LinkOps-Manifests" ]; then
+            echo "🔍 Validating ArgoCD Application manifests..."
+            
+            # Use yamllint for comprehensive YAML validation
+            yamllint LinkOps-Manifests/ || true
+            
+            # Validate each Application manifest
+            for app in LinkOps-Manifests/shadows/*/Application.yaml; do
+              if [ -f "$app" ]; then
+                echo "✅ Validating: $app"
+                python -c "import yaml; yaml.safe_load(open('$app')); print('✅ Valid YAML')"
+              fi
+            done
+          else
+            echo "⚠️ LinkOps-Manifests directory not found - skipping ArgoCD validation"
+          fi
 
   test-logic-sources:
     runs-on: ubuntu-latest
@@ -252,6 +278,9 @@ jobs:
       - name: Install dependencies
         if: steps.check-logic.outputs.has_logic == 'true'
         run: |
+          # Always install pytest and coverage tools
+          pip install pytest pytest-cov coverage
+          # Install service-specific requirements if they exist
           if [ -f "shadows/${{ matrix.logic_source }}/requirements.txt" ]; then
             pip install -r shadows/${{ matrix.logic_source }}/requirements.txt
           fi
@@ -260,7 +289,15 @@ jobs:
         if: steps.check-logic.outputs.has_logic == 'true'
         run: |
           if [ -d "shadows/${{ matrix.logic_source }}/tests" ]; then
-            python -m pytest shadows/${{ matrix.logic_source }}/tests/ -v
+            python -m pytest shadows/${{ matrix.logic_source }}/tests/ -v --cov=. --cov-report=xml --cov-report=term-missing
           else
-            echo "No tests found for ${{ matrix.logic_source }}"
-          fi 
+            echo "No tests found for ${{ matrix.logic_source }} - skipping"
+          fi
+
+      - name: Upload test coverage
+        if: steps.check-logic.outputs.has_logic == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.logic_source }}-coverage
+          path: shadows/${{ matrix.logic_source }}/coverage.xml
+          retention-days: 30 
