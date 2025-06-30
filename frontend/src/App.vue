@@ -137,6 +137,7 @@ export default {
       { name: 'igris', displayName: 'Igris', route: '/igris', status: 'online' },
       { name: 'katie', displayName: 'Katie', route: '/katie', status: 'online' },
       { name: 'ficknury', displayName: 'Ficknury', route: '/ficknury', status: 'online' },
+      { name: 'auditguard', displayName: 'AuditGuard', route: '/auditguard', status: 'online' },
       { name: 'agents', displayName: 'Agents', route: '/agents', status: 'online' }
     ])
 
@@ -211,6 +212,10 @@ export default {
 
 .agent-nav-item.agent-ficknury:hover {
   box-shadow: 0 8px 25px rgba(251, 191, 36, 0.3);
+}
+
+.agent-nav-item.agent-auditguard:hover {
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
 }
 
 /* Orb stream animations */

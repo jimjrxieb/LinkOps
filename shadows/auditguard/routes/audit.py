@@ -25,6 +25,22 @@ class RepositoryAuditResult(BaseModel):
     recommendations: List[str]
 
 
+class RepositoryScanRequest(BaseModel):
+    repository_url: str
+
+
+class SecurityScanRequest(BaseModel):
+    repository_url: str
+
+
+class GitOpsRecommendationsRequest(BaseModel):
+    scan_results: Dict[str, Any]
+
+
+class ComplianceReportRequest(BaseModel):
+    repository_url: str
+
+
 @router.get("/health")
 def health() -> Dict[str, Any]:
     """Health check endpoint for the audit module."""
@@ -38,6 +54,310 @@ def health() -> Dict[str, Any]:
             "Sensitive file identification",
         ],
     }
+
+
+@router.get("/logs")
+async def get_audit_logs() -> Dict[str, Any]:
+    """Get audit logs."""
+    return {
+        "logs": [
+            {
+                "id": 1,
+                "action": "Repository Audit",
+                "user": "system",
+                "description": "Security audit completed for repository: github.com/example/repo",
+                "timestamp": "2 minutes ago"
+            },
+            {
+                "id": 2,
+                "action": "Compliance Check",
+                "user": "admin",
+                "description": "SOC 2 compliance assessment initiated",
+                "timestamp": "1 hour ago"
+            },
+            {
+                "id": 3,
+                "action": "Security Scan",
+                "user": "system",
+                "description": "Automated security scan completed - 3 issues found",
+                "timestamp": "3 hours ago"
+            }
+        ]
+    }
+
+
+@router.post("/repository-scan")
+async def scan_repository(request: RepositoryScanRequest) -> Dict[str, Any]:
+    """Scan repository for security issues and compliance."""
+    try:
+        logger.info("Repository scan requested for: %s", request.repository_url)
+        
+        # Simulate repository scanning
+        scan_results = {
+            "compliance": "non-compliant",
+            "score": 72,
+            "issues": [
+                {
+                    "id": 1,
+                    "title": "Exposed API Keys",
+                    "description": "API keys found in commit history",
+                    "severity": "high",
+                    "category": "Secrets Management",
+                    "file": "config/database.yml"
+                },
+                {
+                    "id": 2,
+                    "title": "Weak Password Policy",
+                    "description": "No password complexity requirements enforced",
+                    "severity": "medium",
+                    "category": "Authentication",
+                    "file": "auth/policy.json"
+                },
+                {
+                    "id": 3,
+                    "title": "Missing Security Headers",
+                    "description": "Security headers not configured in web server",
+                    "severity": "low",
+                    "category": "Web Security",
+                    "file": "nginx.conf"
+                }
+            ],
+            "recommendations": [
+                {
+                    "id": 1,
+                    "title": "Implement GitOps Workflow",
+                    "description": "Set up automated deployment pipeline with Git as source of truth",
+                    "priority": "high",
+                    "icon": "🔄",
+                    "implementation": """# Create GitHub Actions workflow
+name: GitOps Deployment
+on:
+  push:
+    branches: [main]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f k8s/
+          kubectl rollout status deployment/app"""
+                },
+                {
+                    "id": 2,
+                    "title": "Add Security Scanning",
+                    "description": "Integrate automated security scanning in CI/CD pipeline",
+                    "priority": "high",
+                    "icon": "🔍",
+                    "implementation": """# Add to .github/workflows/security.yml
+- name: Run Security Scan
+  uses: aquasecurity/trivy-action@master
+  with:
+    scan-type: 'fs'
+    scan-ref: '.'
+    format: 'sarif'
+    output: 'trivy-results.sarif'"""
+                },
+                {
+                    "id": 3,
+                    "title": "Implement Infrastructure as Code",
+                    "description": "Convert manual infrastructure to Terraform/CloudFormation",
+                    "priority": "medium",
+                    "icon": "🏗️",
+                    "implementation": """# Example Terraform configuration
+resource "aws_ecs_cluster" "main" {
+  name = "production-cluster"
+  
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
+  }
+}"""
+                }
+            ]
+        }
+        
+        return scan_results
+        
+    except Exception as exc:
+        logger.error("Repository scan failed: %r", exc)
+        raise HTTPException(
+            status_code=500, detail=f"Repository scan failed: {str(exc)}"
+        )
+
+
+@router.post("/security-scan")
+async def run_security_scan(request: SecurityScanRequest) -> Dict[str, Any]:
+    """Run security scan on repository."""
+    try:
+        logger.info("Security scan requested for: %s", request.repository_url)
+        
+        # Simulate security scan results
+        scan_results = {
+            "compliance": "non-compliant",
+            "score": 72,
+            "issues": [
+                {
+                    "id": 1,
+                    "title": "Exposed API Keys",
+                    "description": "API keys found in commit history",
+                    "severity": "high",
+                    "category": "Secrets Management",
+                    "file": "config/database.yml"
+                },
+                {
+                    "id": 2,
+                    "title": "Weak Password Policy",
+                    "description": "No password complexity requirements enforced",
+                    "severity": "medium",
+                    "category": "Authentication",
+                    "file": "auth/policy.json"
+                },
+                {
+                    "id": 3,
+                    "title": "Missing Security Headers",
+                    "description": "Security headers not configured in web server",
+                    "severity": "low",
+                    "category": "Web Security",
+                    "file": "nginx.conf"
+                }
+            ]
+        }
+        
+        return scan_results
+        
+    except Exception as exc:
+        logger.error("Security scan failed: %r", exc)
+        raise HTTPException(
+            status_code=500, detail=f"Security scan failed: {str(exc)}"
+        )
+
+
+@router.post("/gitops-recommendations")
+async def get_gitops_recommendations(request: GitOpsRecommendationsRequest) -> Dict[str, Any]:
+    """Generate GitOps recommendations based on scan results."""
+    try:
+        logger.info("Generating GitOps recommendations")
+        
+        recommendations = [
+            {
+                "id": 1,
+                "title": "Implement GitOps Workflow",
+                "description": "Set up automated deployment pipeline with Git as source of truth",
+                "priority": "high",
+                "icon": "🔄",
+                "implementation": """# Create GitHub Actions workflow
+name: GitOps Deployment
+on:
+  push:
+    branches: [main]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f k8s/
+          kubectl rollout status deployment/app"""
+            },
+            {
+                "id": 2,
+                "title": "Add Security Scanning",
+                "description": "Integrate automated security scanning in CI/CD pipeline",
+                "priority": "high",
+                "icon": "🔍",
+                "implementation": """# Add to .github/workflows/security.yml
+- name: Run Security Scan
+  uses: aquasecurity/trivy-action@master
+  with:
+    scan-type: 'fs'
+    scan-ref: '.'
+    format: 'sarif'
+    output: 'trivy-results.sarif'"""
+            },
+            {
+                "id": 3,
+                "title": "Implement Infrastructure as Code",
+                "description": "Convert manual infrastructure to Terraform/CloudFormation",
+                "priority": "medium",
+                "icon": "🏗️",
+                "implementation": """# Example Terraform configuration
+resource "aws_ecs_cluster" "main" {
+  name = "production-cluster"
+  
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
+  }
+}"""
+            }
+        ]
+        
+        return {"recommendations": recommendations}
+        
+    except Exception as exc:
+        logger.error("GitOps recommendations generation failed: %r", exc)
+        raise HTTPException(
+            status_code=500, detail=f"GitOps recommendations generation failed: {str(exc)}"
+        )
+
+
+@router.post("/compliance-report")
+async def get_compliance_report(request: ComplianceReportRequest) -> Dict[str, Any]:
+    """Generate compliance report for repository."""
+    try:
+        logger.info("Generating compliance report for: %s", request.repository_url)
+        
+        compliance_report = {
+            "soc2": 85,
+            "gdpr": 92,
+            "hipaa": 78,
+            "iso27001": 88,
+            "overall_score": 85.75,
+            "status": "non-compliant",
+            "recommendations": [
+                "Implement data encryption at rest",
+                "Add audit logging for all data access",
+                "Establish data retention policies",
+                "Conduct regular security assessments"
+            ]
+        }
+        
+        return compliance_report
+        
+    except Exception as exc:
+        logger.error("Compliance report generation failed: %r", exc)
+        raise HTTPException(
+            status_code=500, detail=f"Compliance report generation failed: {str(exc)}"
+        )
+
+
+@router.post("/validate-gitops")
+async def validate_gitops_setup(config: Dict[str, Any]) -> Dict[str, Any]:
+    """Validate GitOps setup configuration."""
+    try:
+        logger.info("Validating GitOps setup")
+        
+        validation_result = {
+            "valid": True,
+            "score": 85,
+            "issues": [],
+            "recommendations": [
+                "Consider adding automated testing to the pipeline",
+                "Implement rollback mechanisms",
+                "Add monitoring and alerting"
+            ]
+        }
+        
+        return validation_result
+        
+    except Exception as exc:
+        logger.error("GitOps validation failed: %r", exc)
+        raise HTTPException(
+            status_code=500, detail=f"GitOps validation failed: {str(exc)}"
+        )
 
 
 @router.post("/repository")

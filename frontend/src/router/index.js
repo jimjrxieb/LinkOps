@@ -13,6 +13,7 @@ import About from '@/views/About.vue'
 import ArisePage from '@/views/ArisePage.vue'
 import DataCollection from '@/views/DataCollection.vue'
 import Digest from '@/views/Digest.vue'
+import AuditGuard from '@/views/AuditGuard.vue'
 import AuditDashboard from '@/components/PwCDashboard.vue'
 
 const routes = [
@@ -27,6 +28,7 @@ const routes = [
   { path: '/agents', component: Agents },
   { path: '/login', component: Login },
   { path: '/about', component: About },
+  { path: '/auditguard', component: AuditGuard },
   { path: '/audit-dashboard', component: AuditDashboard },
   { path: '/data-collection', component: DataCollection },
   { path: '/digest', component: Digest },

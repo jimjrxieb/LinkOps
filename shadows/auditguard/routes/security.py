@@ -46,6 +46,39 @@ def health() -> Dict[str, Any]:
     }
 
 
+@router.get("/")
+async def get_security_alerts() -> Dict[str, Any]:
+    """Get security alerts."""
+    return {
+        "alerts": [
+            {
+                "id": 1,
+                "title": "Suspicious Login Attempt",
+                "message": "Multiple failed login attempts detected from IP 192.168.1.100",
+                "level": "warning",
+                "timestamp": "2 minutes ago",
+                "source": "Authentication System"
+            },
+            {
+                "id": 2,
+                "title": "Dependency Vulnerability",
+                "message": "High severity vulnerability found in package lodash@4.17.15",
+                "level": "critical",
+                "timestamp": "15 minutes ago",
+                "source": "Dependency Scanner"
+            },
+            {
+                "id": 3,
+                "title": "Configuration Drift",
+                "message": "Infrastructure configuration has drifted from Git state",
+                "level": "warning",
+                "timestamp": "1 hour ago",
+                "source": "Infrastructure Monitor"
+            }
+        ]
+    }
+
+
 @router.post("/scan")
 async def execute_security_scan(
     request: SecurityScanRequest, background_tasks: BackgroundTasks

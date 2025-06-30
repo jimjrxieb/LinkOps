@@ -202,7 +202,11 @@ export const auditguardService = {
   getAuditLogs: () => auditguardAPI.get('/api/audit/logs'),
   getComplianceStatus: () => auditguardAPI.get('/api/audit/compliance'),
   getSecurityAlerts: () => auditguardAPI.get('/api/audit/security'),
-  runSecurityScan: () => auditguardAPI.post('/api/audit/security-scan'),
+  runSecurityScan: (data) => auditguardAPI.post('/api/audit/security-scan', data),
+  scanRepository: (repositoryUrl) => auditguardAPI.post('/api/audit/repository-scan', { repository_url: repositoryUrl }),
+  getGitOpsRecommendations: (scanResults) => auditguardAPI.post('/api/audit/gitops-recommendations', scanResults),
+  getComplianceReport: (repositoryUrl) => auditguardAPI.post('/api/audit/compliance-report', { repository_url: repositoryUrl }),
+  validateGitOpsSetup: (config) => auditguardAPI.post('/api/audit/validate-gitops', config),
 }
 
 // WebScraper API functions
