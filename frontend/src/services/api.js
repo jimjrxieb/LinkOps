@@ -187,6 +187,7 @@ export const dataCollectorService = {
   getCollectionStats: () => dataCollectorAPI.get('/api/stats'),
   submitYouTubeData: (url) => dataCollectorAPI.post('/api/youtube', { url }),
   submitManualTask: (taskData) => dataCollectorAPI.post('/api/manual-task', taskData),
+  downloadYouTubeTranscript: (data) => dataCollectorAPI.post('/input/youtube-transcript', data),
 }
 
 // Sanitizer API functions
