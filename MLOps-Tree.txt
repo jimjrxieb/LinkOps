@@ -96,6 +96,7 @@
 │   │   ├── App.vue
 │   │   ├── assets
 │   │   │   ├── cyberpunk.css
+│   │   │   ├── futuristic.css
 │   │   │   └── tailwind.css
 │   │   ├── components
 │   │   │   ├── JamesAssistant.vue
@@ -117,11 +118,16 @@
 │   │       ├── About.vue
 │   │       ├── Agents.vue
 │   │       ├── AgentsPage.vue
+│   │       ├── ArisePage.vue
 │   │       ├── Dashboard.vue
 │   │       ├── DataCollection.vue
 │   │       ├── Digest.vue
+│   │       ├── Ficknury.vue
+│   │       ├── Igris.vue
 │   │       ├── James.vue
+│   │       ├── Katie.vue
 │   │       ├── Login.vue
+│   │       ├── Tasks.vue
 │   │       ├── Whis.vue
 │   │       └── WhisPage.vue
 │   ├── tailwind.config.js
@@ -130,11 +136,32 @@
 │   └── vite.config.js
 ├── helm
 │   ├── igris_logic
-│   │   └── templates
+│   │   ├── Chart.yaml
+│   │   ├── templates
+│   │   │   ├── _helpers.tpl
+│   │   │   ├── deployment.yaml
+│   │   │   ├── rbac.yaml
+│   │   │   ├── service.yaml
+│   │   │   └── serviceaccount.yaml
+│   │   └── values.yaml
 │   ├── james_logic
-│   │   └── templates
+│   │   ├── Chart.yaml
+│   │   ├── templates
+│   │   │   ├── _helpers.tpl
+│   │   │   ├── deployment.yaml
+│   │   │   ├── rbac.yaml
+│   │   │   ├── service.yaml
+│   │   │   └── serviceaccount.yaml
+│   │   └── values.yaml
 │   ├── katie_logic
-│   │   └── templates
+│   │   ├── Chart.yaml
+│   │   ├── templates
+│   │   │   ├── _helpers.tpl
+│   │   │   ├── deployment.yaml
+│   │   │   ├── rbac.yaml
+│   │   │   ├── service.yaml
+│   │   │   └── serviceaccount.yaml
+│   │   └── values.yaml
 │   ├── whis
 │   │   ├── Chart.yaml
 │   │   ├── templates
@@ -147,14 +174,22 @@
 │   │   │   └── serviceaccount.yaml
 │   │   └── values.yaml
 │   └── whis_logic
-│       └── templates
+│       ├── Chart.yaml
+│       ├── templates
+│       │   ├── _helpers.tpl
+│       │   ├── deployment.yaml
+│       │   ├── pvc.yaml
+│       │   ├── rbac.yaml
+│       │   ├── service.yaml
+│       │   └── serviceaccount.yaml
+│       └── values.yaml
 ├── pyproject.toml
 ├── scripts
 │   ├── ci
 │   │   └── test-ci-local.sh
 │   ├── generate-helm-charts.sh
 │   └── setup-github-actions.sh
-├── services
+├── shadows
 │   ├── auditguard
 │   │   ├── Dockerfile
 │   │   ├── README.md
@@ -246,10 +281,12 @@
 │   │   │   ├── fixlog.py
 │   │   │   ├── image_input.py
 │   │   │   ├── info_dump.py
-│   │   │   └── qna.py
+│   │   │   ├── qna.py
+│   │   │   └── youtube.py
 │   │   └── utils
 │   │       ├── __init__.py
-│   │       └── kafka_producer.py
+│   │       ├── kafka_producer.py
+│   │       └── youtube_transcript.py
 │   ├── whis_enhance
 │   │   ├── Dockerfile
 │   │   ├── main.py
@@ -383,13 +420,24 @@
 │   ├── test_whis_sanitize.py
 │   └── test_whis_smithing.py
 ├── tools
+│   ├── README.md
 │   ├── audit_structure.py
-│   ├── debug_data_collection.py
+│   ├── cli
+│   │   ├── run_full_pipeline.py
+│   │   ├── submit_manual_task.py
+│   │   └── submit_youtube.py
 │   ├── fix_flake8.py
 │   ├── git_push.sh
 │   ├── health_check.py
 │   ├── lint.sh
-│   └── rebuild.sh
+│   ├── mocks
+│   │   ├── sample_task.json
+│   │   └── sample_transcript.json
+│   ├── rebuild.sh
+│   ├── run_full_pipeline.py
+│   ├── test_manual_task_upload.py
+│   ├── test_transcript_download.py
+│   └── test_youtube_transcript_upload.py
 └── upgrade-to-pwc.sh
 
-95 directories, 297 files
+97 directories, 343 files

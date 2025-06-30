@@ -3,17 +3,17 @@ name: CI - Ficknury Evaluator
 on:
   push:
     paths:
-      - "services/ficknury_evaluator/**"
+      - "shadows/ficknury_evaluator/**"
   pull_request:
     paths:
-      - "services/ficknury_evaluator/**"
+      - "shadows/ficknury_evaluator/**"
 
 jobs:
   test:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: services/ficknury_evaluator
+        working-directory: shadows/ficknury_evaluator
 
     steps:
       - name: Checkout code
@@ -44,7 +44,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     defaults:
       run:
-        working-directory: services/ficknury_evaluator
+        working-directory: shadows/ficknury_evaluator
 
     steps:
       - name: Checkout code

@@ -5,7 +5,7 @@ try:
 except ImportError:
     import sys
 
-    sys.path.append("services/whis_enhance")
+    sys.path.append("shadows/whis_enhance")
     from main import app
 
 client = TestClient(app)

@@ -33,7 +33,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'services/**'
+      - 'shadows/**'
       - 'helm/**'
       - '.github/workflows/deploy-aks.yml'
   workflow_dispatch:

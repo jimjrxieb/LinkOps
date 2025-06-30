@@ -7,17 +7,17 @@ Successfully refactored the LinkOps-MLOps monorepo into a fully microservice-nat
 ## ✅ **Completed Changes**
 
 ### **1. Service Renaming**
-- `services/data_collector/` → `services/whis_data_input/`
-- `services/sanitizer/` → `services/whis_sanitize/`
+- `shadows/data_collector/` → `shadows/whis_data_input/`
+- `shadows/sanitizer/` → `shadows/whis_sanitize/`
 
 ### **2. New Whis Microservices Created**
-- `services/whis_smithing/` - Rune/orb generation, merging, recurrence
-- `services/whis_enhance/` - Agent training, updates, approvals
+- `shadows/whis_smithing/` - Rune/orb generation, merging, recurrence
+- `shadows/whis_enhance/` - Agent training, updates, approvals
 
 ### **3. Service Architecture**
 
 ```
-LinkOps-MLOps/services/
+LinkOps-MLOps/shadows/
 ├── whis_data_input/     # 📥 Data collection (GUI/API input)
 │   ├── main.py          # FastAPI app
 │   ├── requirements.txt # Dependencies
@@ -79,7 +79,7 @@ whis_data_input → whis_sanitize → whis_smithing → whis_enhance
 ### **Reference Files**
 - ✅ `tools/health_check.py` - Updated service URLs
 - ✅ `test_data_collector_sanitizer_whis_flow.py` - Updated test flow
-- ✅ `services/whis_data_input/routes/collect.py` - Updated sanitizer URL
+- ✅ `shadows/whis_data_input/routes/collect.py` - Updated sanitizer URL
 
 ## 🚀 **Service Responsibilities**
 

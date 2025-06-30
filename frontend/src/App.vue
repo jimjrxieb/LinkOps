@@ -1,252 +1,231 @@
 <template>
-  <div class="app holo-bg">
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <h2 class="neon-text glitch" data-text="LinkOps Core">LinkOps Core</h2>
-        <p class="text-xs text-gray-400">AI Command Center</p>
-      </div>
-      <nav>
-        <ul>
-          <li><router-link to="/dashboard" class="holo-hover">📊 Dashboard</router-link></li>
-          <li><router-link to="/james" class="holo-hover">🤖 James</router-link></li>
-          <li><router-link to="/whis" class="holo-hover">🧠 Whis</router-link></li>
-          <li><router-link to="/agents" class="holo-hover">🧑‍💻 Agents</router-link></li>
-          <li><router-link to="/about" class="holo-hover">ℹ️ About</router-link></li>
-          <li><router-link to="/audit-dashboard" class="holo-hover">🛡️ Audit</router-link></li>
-          <li><router-link to="/data-collection" class="holo-hover">📥 Data Collection</router-link></li>
-          <li><router-link to="/digest" class="holo-hover">📒 Digest</router-link></li>
-        </ul>
-      </nav>
-      <div class="sidebar-footer">
-        <div class="status-indicator">
-          <span class="text-xs text-green-400">● System Online</span>
+  <div id="app" class="animated-bg min-h-screen">
+    <!-- Futuristic Navigation Bar -->
+    <nav class="glass-panel fixed top-0 left-0 right-0 z-50 mx-4 mt-4 p-4">
+      <div class="flex items-center justify-between">
+        <!-- Logo -->
+        <div class="flex items-center space-x-4">
+          <div class="futuristic-title text-2xl text-white">
+            LINKOPS
+          </div>
+          <div class="text-sm text-gray-300">
+            AI Command Center
+          </div>
         </div>
-        <div class="user-section">
-          <router-link to="/login" class="login-link">🔐 Login</router-link>
+
+        <!-- Agent Navigation -->
+        <div class="flex items-center space-x-2">
+          <router-link 
+            v-for="agent in agents" 
+            :key="agent.name"
+            :to="agent.route"
+            class="agent-nav-item glass-panel p-3 rounded-lg transition-all duration-300"
+            :class="[
+              `agent-${agent.name.toLowerCase()}`,
+              { 'neon-border': $route.path === agent.route }
+            ]"
+          >
+            <div class="flex items-center space-x-2">
+              <div 
+                class="status-indicator"
+                :class="agent.status === 'online' ? 'status-online' : 
+                       agent.status === 'processing' ? 'status-processing' : 'status-offline'"
+              ></div>
+              <span class="futuristic-subtitle text-sm">{{ agent.displayName }}</span>
+            </div>
+          </router-link>
+          
+          <!-- About Link -->
+          <router-link 
+            to="/about"
+            class="agent-nav-item glass-panel p-3 rounded-lg transition-all duration-300"
+            :class="{ 'neon-border': $route.path === '/about' }"
+          >
+            <div class="flex items-center space-x-2">
+              <div class="status-indicator status-online"></div>
+              <span class="futuristic-subtitle text-sm">About</span>
+      </div>
+          </router-link>
+        </div>
+
+        <!-- System Status -->
+        <div class="flex items-center space-x-4">
+          <div class="text-sm text-gray-300">
+            <span class="status-indicator status-online"></span>
+            System Online
+          </div>
+          <div class="text-xs text-gray-400">
+            {{ currentTime }}
+          </div>
         </div>
       </div>
-    </aside>
-    <main class="content">
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="pt-24 px-4 pb-8">
       <router-view v-slot="{ Component }">
         <transition name="page" mode="out-in">
           <component :is="Component" />
         </transition>
       </router-view>
     </main>
+
+    <!-- Orb Stream Sidebar -->
+    <div class="fixed right-4 top-24 bottom-4 w-80 glass-panel p-4 overflow-hidden">
+      <h3 class="futuristic-subtitle text-lg mb-4">Orb Stream</h3>
+      <div class="space-y-3 max-h-full overflow-y-auto">
+        <div 
+          v-for="orb in orbStream" 
+          :key="orb.id"
+          class="orb-item glass-panel p-3 rounded-lg"
+          :class="`agent-${orb.agent.toLowerCase()}`"
+        >
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-medium">{{ orb.agent }}</span>
+            <span class="text-xs text-gray-400">{{ orb.timestamp }}</span>
+          </div>
+          <p class="text-xs text-gray-300">{{ orb.description }}</p>
+          <div class="iq-bar mt-2" :style="{ width: orb.iq + '%' }"></div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
+<script>
+import { ref, onMounted, onUnmounted } from 'vue'
+
+export default {
+  name: 'App',
+  setup() {
+    const currentTime = ref('')
+    const orbStream = ref([
+      {
+        id: 1,
+        agent: 'Whis',
+        description: 'Enhanced transcript processing logic',
+        timestamp: '2m ago',
+        iq: 85
+      },
+      {
+        id: 2,
+        agent: 'Katie',
+        description: 'New Kubernetes deployment pattern',
+        timestamp: '5m ago',
+        iq: 78
+      },
+      {
+        id: 3,
+        agent: 'Igris',
+        description: 'Terraform module optimization',
+        timestamp: '8m ago',
+        iq: 92
+      },
+      {
+        id: 4,
+        agent: 'Ficknury',
+        description: 'Task routing algorithm update',
+        timestamp: '12m ago',
+        iq: 88
+      }
+    ])
+
+    const agents = ref([
+      { name: 'dashboard', displayName: 'Dashboard', route: '/dashboard', status: 'online' },
+      { name: 'tasks', displayName: 'Tasks', route: '/tasks', status: 'online' },
+      { name: 'whis', displayName: 'Whis', route: '/whis', status: 'processing' },
+      { name: 'igris', displayName: 'Igris', route: '/igris', status: 'online' },
+      { name: 'katie', displayName: 'Katie', route: '/katie', status: 'online' },
+      { name: 'ficknury', displayName: 'Ficknury', route: '/ficknury', status: 'online' },
+      { name: 'agents', displayName: 'Agents', route: '/agents', status: 'online' }
+    ])
+
+    let timeInterval
+
+    const updateTime = () => {
+      const now = new Date()
+      currentTime.value = now.toLocaleTimeString('en-US', { 
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      })
+    }
+
+    onMounted(() => {
+      updateTime()
+      timeInterval = setInterval(updateTime, 1000)
+    })
+
+    onUnmounted(() => {
+      if (timeInterval) {
+        clearInterval(timeInterval)
+      }
+    })
+
+    return {
+      currentTime,
+      agents,
+      orbStream
+    }
+  }
+}
+</script>
+
 <style>
-@import './assets/cyberpunk.css';
-
-.app {
-  display: flex;
-  height: 100vh;
-  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
-}
-
-.sidebar {
-  width: 280px;
-  background: rgba(17, 17, 17, 0.95);
-  color: #fff;
-  padding: 1.5rem;
-  border-right: 2px solid #00ffff;
-  box-shadow: 0 0 30px rgba(0, 255, 255, 0.15);
-  backdrop-filter: blur(15px);
-  position: relative;
-  overflow-y: auto;
-}
-
-.sidebar::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(180deg, 
-    rgba(0, 255, 255, 0.05) 0%, 
-    transparent 50%, 
-    rgba(255, 0, 255, 0.05) 100%);
-  pointer-events: none;
-}
-
-.sidebar-header {
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid rgba(0, 255, 255, 0.3);
-  margin-bottom: 1.5rem;
-  position: relative;
-}
-
-.sidebar-header h2 {
-  font-size: 1.4rem;
-  margin-bottom: 0.5rem;
-  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
-}
-
-.sidebar ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.sidebar li {
-  margin: 0.75rem 0;
-}
-
-.sidebar a {
-  color: #0ff;
-  text-decoration: none;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  display: block;
-  border: 1px solid transparent;
-  position: relative;
-  overflow: hidden;
-}
-
-.sidebar a::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
-}
-
-.sidebar a:hover::before {
-  left: 100%;
-}
-
-.sidebar a:hover,
-.sidebar a.router-link-active {
-  background: rgba(0, 255, 255, 0.15);
-  border-color: #00ffff;
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
-  transform: translateX(8px) scale(1.02);
-  text-shadow: 0 0 8px rgba(0, 255, 255, 0.8);
-}
-
-.sidebar-footer {
-  margin-top: auto;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(0, 255, 255, 0.3);
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.status-indicator {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.login-link {
-  color: #ff6b6b;
-  text-decoration: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 107, 107, 0.3);
-  transition: all 0.3s ease;
-  text-align: center;
-}
-
-.login-link:hover {
-  background: rgba(255, 107, 107, 0.1);
-  border-color: #ff6b6b;
-  box-shadow: 0 0 15px rgba(255, 107, 107, 0.3);
-}
-
-.content {
-  flex-grow: 1;
-  padding: 2rem;
-  background: rgba(26, 26, 26, 0.8);
-  color: #eee;
-  overflow-y: auto;
-  backdrop-filter: blur(10px);
-  position: relative;
-}
+@import './assets/futuristic.css';
 
 /* Page transitions */
 .page-enter-active,
 .page-leave-active {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s ease;
 }
 
 .page-enter-from {
   opacity: 0;
-  transform: translateX(30px);
+  transform: translateX(20px);
 }
 
 .page-leave-to {
   opacity: 0;
-  transform: translateX(-30px);
+  transform: translateX(-20px);
 }
 
-/* Holographic background effects */
-.app::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: 
-    radial-gradient(circle at 20% 80%, rgba(0, 255, 255, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255, 0, 255, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(0, 255, 0, 0.08) 0%, transparent 50%);
-  pointer-events: none;
-  z-index: -1;
-  animation: holo-shift 15s ease-in-out infinite;
+/* Agent navigation hover effects */
+.agent-nav-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
 }
 
-@keyframes holo-shift {
-  0%, 100% { opacity: 0.5; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.05); }
+.agent-nav-item.agent-whis:hover {
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
-  .sidebar {
-    width: 240px;
-    padding: 1rem;
-  }
-  
-  .content {
-    padding: 1rem;
-  }
-  
-  .sidebar a:hover,
-  .sidebar a.router-link-active {
-    transform: translateX(5px) scale(1.01);
-  }
+.agent-nav-item.agent-katie:hover {
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
 }
-</style>
 
-<script>
-export default {
-  name: 'App',
-  mounted() {
-    // Initialize GSAP animations
-    this.$nextTick(() => {
-      this.initializeAnimations();
-    });
-  },
-  methods: {
-    initializeAnimations() {
-      // Add subtle floating animation to sidebar
-      gsap.to('.sidebar', {
-        y: -5,
-        duration: 2,
-        repeat: -1,
-        yoyo: true,
-        ease: "power2.inOut"
-      });
-    }
+.agent-nav-item.agent-igris:hover {
+  box-shadow: 0 8px 25px rgba(100, 116, 139, 0.3);
+}
+
+.agent-nav-item.agent-ficknury:hover {
+  box-shadow: 0 8px 25px rgba(251, 191, 36, 0.3);
+}
+
+/* Orb stream animations */
+.orb-item {
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
-</script> 
+</style> 

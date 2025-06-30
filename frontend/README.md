@@ -27,7 +27,7 @@ frontend/
 │   ├── views/              # Page components
 │   ├── router/             # Vue Router configuration
 │   ├── stores/             # Pinia state management
-│   ├── services/           # API service layer
+│   ├── shadows/           # API service layer
 │   └── App.vue             # Root component
 └── README.md               # This file
 ```
@@ -202,7 +202,7 @@ The frontend is included in the ArgoCD application:
 
 ### Service Layer
 
-The `src/services/api.js` provides:
+The `src/shadows/api.js` provides:
 - Centralized API client configuration
 - Service-specific API functions
 - Error handling and retry logic

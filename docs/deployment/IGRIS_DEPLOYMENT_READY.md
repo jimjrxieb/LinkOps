@@ -10,7 +10,7 @@ Igris has been successfully modularized and is now fully deployment-ready with c
 
 ### **Modular Design**
 ```
-services/igris/
+shadows/igris/
 ├── main.py              # FastAPI application & routing
 ├── analyzer.py          # Platform component analysis
 ├── infrastructure.py    # Infrastructure solution generation
@@ -41,7 +41,7 @@ services/igris/
 - ✅ **Deployment**: Staging and production environments
 - ✅ **Registry**: GitHub Container Registry integration
 
-### **2. Kubernetes Manifests** (`LinkOps-Manifests/services/igris/`)
+### **2. Kubernetes Manifests** (`LinkOps-Manifests/shadows/igris/`)
 - ✅ **Deployment**: Production-ready with health checks
 - ✅ **Service**: ClusterIP with proper port mapping
 - ✅ **Ingress**: TLS-enabled with cert-manager
@@ -152,7 +152,7 @@ spec:
   source:
     repoURL: https://github.com/shadow-link-industries/LinkOps-Manifests
     targetRevision: HEAD
-    path: services/igris
+    path: shadows/igris
   destination:
     server: https://kubernetes.default.svc
     namespace: igris
@@ -189,7 +189,7 @@ helm upgrade igris ./helm/igris \
 ### **Test Execution**
 ```bash
 # Run all tests
-cd services/igris
+cd shadows/igris
 pytest tests/ -v --cov=. --cov-report=html
 
 # Run specific test categories

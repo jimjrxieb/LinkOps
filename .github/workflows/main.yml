@@ -37,7 +37,7 @@ jobs:
       - name: Check if service has Python files
         id: check-python
         run: |
-          if [ -d "services/${{ matrix.service }}" ] && [ -f "services/${{ matrix.service }}/requirements.txt" ]; then
+          if [ -d "shadows/${{ matrix.service }}" ] && [ -f "shadows/${{ matrix.service }}/requirements.txt" ]; then
             echo "has_python=true" >> $GITHUB_OUTPUT
           else
             echo "has_python=false" >> $GITHUB_OUTPUT
@@ -46,12 +46,12 @@ jobs:
       - name: Run Black Lint
         if: steps.check-python.outputs.has_python == 'true'
         run: |
-          black --check services/${{ matrix.service }}
+          black --check shadows/${{ matrix.service }}
 
       - name: Run Flake8 Lint
         if: steps.check-python.outputs.has_python == 'true'
         run: |
-          flake8 services/${{ matrix.service }}
+          flake8 shadows/${{ matrix.service }}
 
   build-docker:
     needs: check-python
@@ -79,7 +79,7 @@ jobs:
       - name: Check if service has Dockerfile
         id: check-dockerfile
         run: |
-          if [ -f "services/${{ matrix.service }}/Dockerfile" ]; then
+          if [ -f "shadows/${{ matrix.service }}/Dockerfile" ]; then
             echo "has_dockerfile=true" >> $GITHUB_OUTPUT
           else
             echo "has_dockerfile=false" >> $GITHUB_OUTPUT
@@ -88,7 +88,7 @@ jobs:
       - name: Build Docker image for ${{ matrix.service }}
         if: steps.check-dockerfile.outputs.has_dockerfile == 'true'
         run: |
-          docker build -t linkops-${{ matrix.service }}:ci ./services/${{ matrix.service }}
+          docker build -t linkops-${{ matrix.service }}:ci ./shadows/${{ matrix.service }}
 
   check-frontend:
     runs-on: ubuntu-latest
@@ -213,7 +213,7 @@ jobs:
       - name: Validate ArgoCD Applications
         if: steps.check-argocd.outputs.has_argocd == 'true'
         run: |
-          for app in LinkOps-Manifests/services/*.yaml; do
+          for app in LinkOps-Manifests/shadows/*.yaml; do
             if [ -f "$app" ]; then
               echo "Validating ArgoCD application: $app"
               # Basic YAML validation
@@ -243,7 +243,7 @@ jobs:
       - name: Check if logic source exists
         id: check-logic
         run: |
-          if [ -d "services/${{ matrix.logic_source }}" ]; then
+          if [ -d "shadows/${{ matrix.logic_source }}" ]; then
             echo "has_logic=true" >> $GITHUB_OUTPUT
           else
             echo "has_logic=false" >> $GITHUB_OUTPUT
@@ -252,15 +252,15 @@ jobs:
       - name: Install dependencies
         if: steps.check-logic.outputs.has_logic == 'true'
         run: |
-          if [ -f "services/${{ matrix.logic_source }}/requirements.txt" ]; then
-            pip install -r services/${{ matrix.logic_source }}/requirements.txt
+          if [ -f "shadows/${{ matrix.logic_source }}/requirements.txt" ]; then
+            pip install -r shadows/${{ matrix.logic_source }}/requirements.txt
           fi
 
       - name: Run logic source tests
         if: steps.check-logic.outputs.has_logic == 'true'
         run: |
-          if [ -d "services/${{ matrix.logic_source }}/tests" ]; then
-            python -m pytest services/${{ matrix.logic_source }}/tests/ -v
+          if [ -d "shadows/${{ matrix.logic_source }}/tests" ]; then
+            python -m pytest shadows/${{ matrix.logic_source }}/tests/ -v
           else
             echo "No tests found for ${{ matrix.logic_source }}"
           fi 

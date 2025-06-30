@@ -13,14 +13,14 @@ services:
       - "5432:5432"
 
   whis_data_input:
-    build: ./services/whis_data_input
+    build: ./shadows/whis_data_input
     depends_on:
       - db
     ports:
       - "8001:8000"
 
   whis_sanitize:
-    build: ./services/whis_sanitize
+    build: ./shadows/whis_sanitize
     depends_on:
       - db
     volumes:

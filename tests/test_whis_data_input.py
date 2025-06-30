@@ -15,7 +15,7 @@ except ImportError:
     # Fallback for when running tests from different directory
     import sys
 
-    sys.path.append("services/whis_data_input")
+    sys.path.append("shadows/whis_data_input")
     from main import app
 
 client = TestClient(app)

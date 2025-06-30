@@ -86,7 +86,7 @@ kubectl create secret generic katie-kubeconfig \
 #### 1. Deploy FickNury Deploy Service
 ```bash
 # Deploy the deployment service
-kubectl apply -f services/ficknury_deploy/k8s/
+kubectl apply -f shadows/ficknury_deploy/k8s/
 ```
 
 #### 2. Deploy Agents via API
@@ -158,13 +158,13 @@ curl http://ficknury-deploy:8000/deploy/agent/igris/status
 #### 1. Apply ArgoCD Applications
 ```bash
 # Apply all agent applications
-kubectl apply -f LinkOps-Manifests/services/
+kubectl apply -f LinkOps-Manifests/shadows/
 
 # Or apply individually
-kubectl apply -f LinkOps-Manifests/services/igris_logic.yaml
-kubectl apply -f LinkOps-Manifests/services/katie_logic.yaml
-kubectl apply -f LinkOps-Manifests/services/whis_logic.yaml
-kubectl apply -f LinkOps-Manifests/services/james_logic.yaml
+kubectl apply -f LinkOps-Manifests/shadows/igris_logic.yaml
+kubectl apply -f LinkOps-Manifests/shadows/katie_logic.yaml
+kubectl apply -f LinkOps-Manifests/shadows/whis_logic.yaml
+kubectl apply -f LinkOps-Manifests/shadows/james_logic.yaml
 ```
 
 #### 2. Monitor in ArgoCD UI

@@ -2,8 +2,8 @@ version: "3.8"
 
 services:
   ### 🗄️ POSTGRESQL
-  postgres:
-    image: postgres:16
+  db:
+    image: postgres:15
     container_name: linkops-postgres
     ports:
       - "5432:5432"
@@ -13,6 +13,11 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-linkops_password}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U linkops"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   ### 🔧 BACKEND (FastAPI)
   backend:
@@ -24,12 +29,22 @@ services:
     volumes:
       - ./backend:/app
     environment:
-      - DATABASE_URL=postgresql://linkops:${POSTGRES_PASSWORD:-linkops_password}@postgres:5432/linkops
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DATABASE_URL=postgresql://linkops:${POSTGRES_PASSWORD:-linkops_password}@db:5432/linkops
+      - REDIS_URL=redis://redis:6379
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
-      - postgres
-      - kafka
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   ### 🧠 FRONTEND (Vue Dev Server)
   frontend:
@@ -44,6 +59,7 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
+      - VITE_API_BASE_URL=http://localhost:8000
     command: sh -c "npm install && npm run dev -- --host"
     depends_on:
       - backend
@@ -60,6 +76,11 @@ services:
     volumes:
       - zookeeper_data:/var/lib/zookeeper/data
       - zookeeper_logs:/var/lib/zookeeper/log
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc localhost 2181"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   ### 📡 KAFKA (Zookeeper Mode)
   kafka:
@@ -70,160 +91,235 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
     depends_on:
       - zookeeper
     volumes:
       - kafka_data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   ### 📥 WHIS DATA INPUT SERVICE (formerly data_collector)
   whis_data_input:
-    build: ./services/whis_data_input
+    build: ./shadows/whis_data_input
     container_name: linkops-whis-data-input
-    ports:
-      - "8001:8000"
-    volumes:
-      - ./services/whis_data_input:/app
-    environment:
-      - KAFKA_BROKERS=kafka:9092
-      - SANITIZER_URL=http://whis_sanitize:8000/api/sanitize
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-    depends_on:
-      - kafka
-
-  ### 🧹 WHIS SANITIZE SERVICE (formerly sanitizer)
-  whis_sanitize:
-    build: ./services/whis_sanitize
-    container_name: linkops-whis-sanitize
-    ports:
-      - "8002:8000"
-    volumes:
-      - ./services/whis_sanitize:/app
-      - ./data_lake:/app/data_lake
-    environment:
-      - SMITHING_URL=http://whis_smithing:8000/api/v1/smithing/generate-rune
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-
-  ### 🔨 WHIS SMITHING SERVICE (new - rune/orb logic)
-  whis_smithing:
-    build: ./services/whis_smithing
-    container_name: linkops-whis-smithing
     ports:
       - "8004:8000"
     volumes:
-      - ./services/whis_smithing:/app
+      - ./shadows/whis_data_input:/app
     environment:
-      - ENHANCE_URL=http://whis_enhance:8000/api/v1/enhance/train-agent
+      - DATABASE_URL=postgresql://linkops:${POSTGRES_PASSWORD:-linkops_password}@db:5432/linkops
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
 
-  ### 🚀 WHIS ENHANCE SERVICE (new - agent enhancement)
-  whis_enhance:
-    build: ./services/whis_enhance
-    container_name: linkops-whis-enhance
-    ports:
-      - "8005:8000"
-    volumes:
-      - ./services/whis_enhance:/app
-    environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-
-  ### 🧠 WHIS LOGIC SOURCE (ML Training Logic)
-  whis_logic:
-    build: ./services/whis_logic
-    container_name: linkops-whis-logic
+  ### 🧹 WHIS SANITIZE SERVICE (formerly sanitizer)
+  whis_sanitize:
+    build: ./shadows/whis_sanitize
+    container_name: linkops-whis-sanitize
     ports:
       - "8003:8000"
     volumes:
-      - ./services/whis_logic:/app
+      - ./shadows/whis_sanitize:/app
       - ./data_lake:/app/data_lake
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DATABASE_URL=postgresql://linkops:${POSTGRES_PASSWORD:-linkops_password}@db:5432/linkops
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+  ### 🔨 WHIS SMITHING SERVICE (new - rune/orb logic)
+  whis_smithing:
+    build: ./shadows/whis_smithing
+    container_name: linkops-whis-smithing
+    ports:
+      - "8005:8000"
+    volumes:
+      - ./shadows/whis_smithing:/app
+    environment:
+      - DATABASE_URL=postgresql://linkops:${POSTGRES_PASSWORD:-linkops_password}@db:5432/linkops
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+  ### 🚀 WHIS ENHANCE SERVICE (new - agent enhancement)
+  whis_enhance:
+    build: ./shadows/whis_enhance
+    container_name: linkops-whis-enhance
+    ports:
+      - "8006:8000"
+    volumes:
+      - ./shadows/whis_enhance:/app
+    environment:
+      - DATABASE_URL=postgresql://linkops:${POSTGRES_PASSWORD:-linkops_password}@db:5432/linkops
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+  ### 🧠 WHIS LOGIC SOURCE (ML Training Logic)
+  whis_logic:
+    build: ./shadows/whis_logic
+    container_name: linkops-whis-logic
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./shadows/whis_logic:/app
+      - ./data_lake:/app/data_lake
+    environment:
+      - DATABASE_URL=postgresql://linkops:${POSTGRES_PASSWORD:-linkops_password}@db:5432/linkops
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
 
   ### 🤖 FICKNURY AGENT COMMANDER SERVICE
   ficknury:
-    build: ./services/ficknury
+    build: ./shadows/ficknury_deploy
     container_name: linkops-ficknury
     ports:
-      - "8010:8000"
+      - "8007:8000"
     volumes:
-      - ./services/ficknury:/app
+      - ./shadows/ficknury_deploy:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      - DATABASE_URL=postgresql://linkops:${POSTGRES_PASSWORD:-linkops_password}@db:5432/linkops
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    depends_on:
+      db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
 
   ### 🕷️ WHIS WEBSCRAPER INTELLIGENCE HARVESTER
   whis_webscraper:
-    build: ./services/whis_webscraper
+    build: ./shadows/whis_webscraper
     container_name: linkops-whis-webscraper
     ports:
-      - "8011:8009"
+      - "8009:8000"
     volumes:
-      - ./services/whis_webscraper:/app
+      - ./shadows/whis_webscraper:/app
       - ./logs:/app/logs
     environment:
-      - SANITIZE_SERVICE_URL=http://whis_sanitize:8000
-      - LOGS_BASE_PATH=/app/logs
+      - DATABASE_URL=postgresql://linkops:${POSTGRES_PASSWORD:-linkops_password}@db:5432/linkops
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     depends_on:
-      - whis_sanitize
+      db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
     networks:
       - linkops-network
 
   ### 🧠 JAMES LOGIC SOURCE (AI Assistant Logic)
   james_logic:
-    build: ./services/james_logic
+    build: ./shadows/james_logic
     container_name: linkops-james-logic
     ports:
-      - "8006:8000"
+      - "8002:8000"
     volumes:
-      - ./services/james_logic:/app
+      - ./shadows/james_logic:/app
     environment:
+      - DATABASE_URL=postgresql://linkops:${POSTGRES_PASSWORD:-linkops_password}@db:5432/linkops
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
 
   ### 🛡️ AUDITGUARD SECURITY & COMPLIANCE SERVICE
   auditguard:
-    build: ./services/auditguard
+    build: ./shadows/auditguard
     container_name: linkops-auditguard
-    ports:
-      - "8007:8000"
-    volumes:
-      - ./services/auditguard:/app
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-
-  ### 🏗️ IGRIS LOGIC SOURCE (Platform Engineering Logic)
-  igris_logic:
-    build: ./services/igris_logic
-    container_name: linkops-igris-logic
-    ports:
-      - "8009:8000"
-    volumes:
-      - ./services/igris_logic:/app
-      - ~/.aws:/root/.aws
-      - ~/.azure:/root/.azure
-    environment:
-      - AWS_PROFILE=default
-      - AZURE_PROFILE=default
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-
-  ### ☸️ KATIE LOGIC SOURCE (Kubernetes Operations Logic)
-  katie_logic:
-    build: ./services/katie_logic
-    container_name: linkops-katie-logic
     ports:
       - "8008:8000"
     volumes:
-      - ./services/katie_logic:/app
-      - ~/.kube:/root/.kube
+      - ./shadows/auditguard:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     environment:
+      - DATABASE_URL=postgresql://linkops:${POSTGRES_PASSWORD:-linkops_password}@db:5432/linkops
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    depends_on:
+      db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+  ### 🏗️ IGRIS LOGIC SOURCE (Platform Engineering Logic)
+  igris_logic:
+    build: ./shadows/igris_logic
+    container_name: linkops-igris-logic
+    ports:
+      - "8005:8000"
+    volumes:
+      - ./shadows/igris_logic:/app
+      - ~/.aws:/root/.aws
+      - ~/.azure:/root/.azure
+    environment:
+      - DATABASE_URL=postgresql://linkops:${POSTGRES_PASSWORD:-linkops_password}@db:5432/linkops
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+  ### ☸️ KATIE LOGIC SOURCE (Kubernetes Operations Logic)
+  katie_logic:
+    build: ./shadows/katie_logic
+    container_name: linkops-katie-logic
+    ports:
+      - "8006:8000"
+    volumes:
+      - ./shadows/katie_logic:/app
+      - ~/.kube:/root/.kube:ro
+    environment:
+      - DATABASE_URL=postgresql://linkops:${POSTGRES_PASSWORD:-linkops_password}@db:5432/linkops
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - KUBECONFIG=/root/.kube/config
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
 
 volumes:
   postgres_data:
   kafka_data:
   zookeeper_data:
-  zookeeper_logs: 
+  zookeeper_logs:
+  redis_data: 

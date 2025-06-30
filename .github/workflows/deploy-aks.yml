@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'services/**'
+      - 'shadows/**'
       - 'helm/**'
       - '.github/workflows/deploy-aks.yml'
   workflow_dispatch:
@@ -72,7 +72,7 @@ jobs:
       - name: Build, Scan, and Push All Microservices
         run: |
           # Loop through all service directories
-          for dir in services/*; do
+          for dir in shadows/*; do
             svc=$(basename "$dir")
             
             # Check if Dockerfile exists
@@ -152,7 +152,7 @@ jobs:
             fi
           else
             # Deploy all services that have both Dockerfile and Helm chart
-            for dir in services/*; do
+            for dir in shadows/*; do
               svc=$(basename "$dir")
               if [ -f "$dir/Dockerfile" ] && [ -d "./helm/$svc" ]; then
                 echo "🚀 Deploying $svc to demo environment"
@@ -218,7 +218,7 @@ jobs:
             fi
           else
             # Deploy all services that have both Dockerfile and Helm chart
-            for dir in services/*; do
+            for dir in shadows/*; do
               svc=$(basename "$dir")
               if [ -f "$dir/Dockerfile" ] && [ -d "./helm/$svc" ]; then
                 echo "🚀 Deploying $svc to personal environment"

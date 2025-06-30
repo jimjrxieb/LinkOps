@@ -5,7 +5,7 @@ try:
 except ImportError:
     import sys
 
-    sys.path.append("services/whis_smithing")
+    sys.path.append("shadows/whis_smithing")
     from main import app
 
 client = TestClient(app)

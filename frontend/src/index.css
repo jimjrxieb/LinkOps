@@ -1,3 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import futuristic styles */
+@import './assets/futuristic.css';
+
+/* Base styles */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Rajdhani', sans-serif;
+}
+
+#app {
+  height: 100vh;
+  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  color: #e2e8f0;
+  overflow-x: hidden;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.7);
+}
+
+/* Focus styles */
+*:focus {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 2px solid rgba(99, 102, 241, 0.5);
+  outline-offset: 2px;
+}
+
+/* Selection styles */
+::selection {
+  background: rgba(99, 102, 241, 0.3);
+  color: #ffffff;
+}
+
+/* Loading states */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Animation utilities */
+.animate-pulse-slow {
+  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-bounce-slow {
+  animation: bounce 2s infinite;
+}
+
+/* Custom animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Responsive utilities */
+@media (max-width: 640px) {
+  .glass-panel {
+    margin: 4px;
+    border-radius: 8px;
+  }
+  
+  .futuristic-title {
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+  }
+  
+  .futuristic-subtitle {
+    font-size: 1rem;
+  }
+}
+
+/* Print styles */
+@media print {
+  .glass-panel {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+  
+  .status-indicator {
+    display: none !important;
+  }
+}
+
 /* CSS Reset and Global Styles */
 * {
   margin: 0;
@@ -53,15 +169,6 @@ code {
 .p-3 { padding: 1rem; }
 .p-4 { padding: 1.5rem; }
 .p-5 { padding: 3rem; }
-
-/* Focus styles for accessibility */
-button:focus,
-input:focus,
-textarea:focus,
-select:focus {
-  outline: 2px solid #1976d2;
-  outline-offset: 2px;
-}
 
 /* Smooth scrolling */
 html {

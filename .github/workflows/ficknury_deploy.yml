@@ -3,17 +3,17 @@ name: CI - Ficknury Deploy
 on:
   push:
     paths:
-      - "services/ficknury_deploy/**"
+      - "shadows/ficknury_deploy/**"
   pull_request:
     paths:
-      - "services/ficknury_deploy/**"
+      - "shadows/ficknury_deploy/**"
 
 jobs:
   test:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: services/ficknury_deploy
+        working-directory: shadows/ficknury_deploy
 
     steps:
       - name: Checkout code
@@ -44,7 +44,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     defaults:
       run:
-        working-directory: services/ficknury_deploy
+        working-directory: shadows/ficknury_deploy
 
     steps:
       - name: Checkout code

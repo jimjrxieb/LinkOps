@@ -46,7 +46,7 @@ LinkOps consists of intelligent AI agents and microservices:
 ### **Quick Links**
 - **[Architecture](docs/architecture/)** - System design and data flow
 - **[Deployment](docs/deployment/)** - Setup and configuration guides
-- **[Services](docs/services/)** - Individual service documentation
+- **[Services](docs/shadows/)** - Individual service documentation
 - **[Development](docs/development/)** - Development guides
 
 ## 🔧 **Key Features**

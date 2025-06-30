@@ -1,233 +1,274 @@
 <template>
-  <div class="agents-page">
-    <div class="page-header">
-      <h1 class="page-title">🧑‍💻 AI Agents</h1>
-      <p class="page-subtitle">Specialized AI Agents for Task Execution</p>
+  <div class="agents-container">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="futuristic-title text-4xl mb-2">Agent Evolution Matrix</h1>
+      <p class="text-gray-300">Track agent evolution and AI confidence across domains</p>
     </div>
 
-    <div class="agents-grid">
-      <!-- Katie Agent -->
-      <div class="agent-card katie">
-        <div class="agent-header">
-          <div class="agent-avatar">👩‍💻</div>
-          <div class="agent-info">
-            <h3 class="agent-name">Katie</h3>
-            <p class="agent-title">Data Processing Specialist</p>
-            <div class="agent-status online">● Online</div>
+    <!-- Agent Overview Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div
+        v-for="agent in agents"
+        :key="agent.name"
+        class="glass-panel p-6"
+        :class="`agent-${agent.name.toLowerCase()}`"
+      >
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-2">
+            <span class="text-2xl">{{ agent.icon }}</span>
+            <div>
+              <h3 class="futuristic-subtitle text-lg">{{ agent.name }}</h3>
+              <p class="text-xs text-gray-300">{{ agent.role }}</p>
+            </div>
           </div>
+          <div class="status-indicator" :class="agent.status === 'online' ? 'status-online' : 'status-offline'"></div>
         </div>
         
-        <div class="agent-stats">
-          <div class="stat">
-            <span class="stat-number">{{ katieStats.tasksCompleted }}</span>
-            <span class="stat-label">Tasks Completed</span>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-sm">IQ Level:</span>
+            <span class="text-lg font-bold">{{ agent.iq }}</span>
           </div>
-          <div class="stat">
-            <span class="stat-number">{{ katieStats.successRate }}%</span>
-            <span class="stat-label">Success Rate</span>
+          <div class="iq-bar" :style="{ width: agent.iq + '%' }"></div>
+          
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-gray-400">Active Runes:</span>
+            <span>{{ agent.activeRunes }}</span>
           </div>
-          <div class="stat">
-            <span class="stat-number">{{ katieStats.uptime }}h</span>
-            <span class="stat-label">Uptime</span>
-          </div>
-        </div>
-        
-        <div class="agent-description">
-          <p>Specializes in data processing, analysis, and report generation. Handles complex data transformations and statistical analysis.</p>
-        </div>
-        
-        <div class="agent-capabilities">
-          <h4>Capabilities</h4>
-          <div class="capability-tags">
-            <span class="capability-tag">Data Analysis</span>
-            <span class="capability-tag">Report Generation</span>
-            <span class="capability-tag">Statistical Modeling</span>
-            <span class="capability-tag">Data Visualization</span>
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-gray-400">Tasks Completed:</span>
+            <span>{{ agent.tasksCompleted }}</span>
           </div>
         </div>
-        
-        <div class="agent-actions">
-          <button @click="viewAgentDetails('katie')" class="btn-primary">View Details</button>
-          <button @click="assignTask('katie')" class="btn-secondary">Assign Task</button>
-        </div>
-      </div>
 
-      <!-- Igris Agent -->
-      <div class="agent-card igris">
-        <div class="agent-header">
-          <div class="agent-avatar">🤖</div>
-          <div class="agent-info">
-            <h3 class="agent-name">Igris</h3>
-            <p class="agent-title">System Integration Expert</p>
-            <div class="agent-status online">● Online</div>
-          </div>
-        </div>
-        
-        <div class="agent-stats">
-          <div class="stat">
-            <span class="stat-number">{{ igrisStats.tasksCompleted }}</span>
-            <span class="stat-label">Tasks Completed</span>
-          </div>
-          <div class="stat">
-            <span class="stat-number">{{ igrisStats.successRate }}%</span>
-            <span class="stat-label">Success Rate</span>
-          </div>
-          <div class="stat">
-            <span class="stat-number">{{ igrisStats.uptime }}h</span>
-            <span class="stat-label">Uptime</span>
-          </div>
-        </div>
-        
-        <div class="agent-description">
-          <p>Expert in system integration, API management, and cross-platform communication. Handles complex integration scenarios.</p>
-        </div>
-        
-        <div class="agent-capabilities">
-          <h4>Capabilities</h4>
-          <div class="capability-tags">
-            <span class="capability-tag">API Integration</span>
-            <span class="capability-tag">System Architecture</span>
-            <span class="capability-tag">Protocol Management</span>
-            <span class="capability-tag">Cross-Platform</span>
-          </div>
-        </div>
-        
-        <div class="agent-actions">
-          <button @click="viewAgentDetails('igris')" class="btn-primary">View Details</button>
-          <button @click="assignTask('igris')" class="btn-secondary">Assign Task</button>
-        </div>
-      </div>
-
-      <!-- FickNury Agent -->
-      <div class="agent-card ficknury">
-        <div class="agent-header">
-          <div class="agent-avatar">⚡</div>
-          <div class="agent-info">
-            <h3 class="agent-name">FickNury</h3>
-            <p class="agent-title">Task Evaluation & Deployment</p>
-            <div class="agent-status online">● Online</div>
-          </div>
-        </div>
-        
-        <div class="agent-stats">
-          <div class="stat">
-            <span class="stat-number">{{ ficknuryStats.tasksCompleted }}</span>
-            <span class="stat-label">Tasks Completed</span>
-          </div>
-          <div class="stat">
-            <span class="stat-number">{{ ficknuryStats.successRate }}%</span>
-            <span class="stat-label">Success Rate</span>
-          </div>
-          <div class="stat">
-            <span class="stat-number">{{ ficknuryStats.uptime }}h</span>
-            <span class="stat-label">Uptime</span>
-          </div>
-        </div>
-        
-        <div class="agent-description">
-          <p>Specializes in task evaluation, confidence scoring, and automated deployment decisions. Makes intelligent routing choices.</p>
-        </div>
-        
-        <div class="agent-capabilities">
-          <h4>Capabilities</h4>
-          <div class="capability-tags">
-            <span class="capability-tag">Task Evaluation</span>
-            <span class="capability-tag">Confidence Scoring</span>
-            <span class="capability-tag">Deployment Logic</span>
-            <span class="capability-tag">Risk Assessment</span>
-          </div>
-        </div>
-        
-        <div class="agent-actions">
-          <button @click="viewAgentDetails('ficknury')" class="btn-primary">View Details</button>
-          <button @click="assignTask('ficknury')" class="btn-secondary">Assign Task</button>
+        <div class="mt-4 flex space-x-2">
+          <button
+            @click="upgradeAgent(agent.name)"
+            class="flex-1 glass-panel py-2 rounded-lg text-xs futuristic-subtitle hover:neon-border transition-all duration-300"
+          >
+            ⬆️ Upgrade
+          </button>
+          <button
+            @click="reviewRuneTrail(agent.name)"
+            class="flex-1 glass-panel py-2 rounded-lg text-xs futuristic-subtitle hover:neon-border transition-all duration-300"
+          >
+            🔍 Review
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- Agent Performance Dashboard -->
-    <div class="performance-dashboard">
-      <h2 class="dashboard-title">📊 Agent Performance Dashboard</h2>
-      
-      <div class="dashboard-grid">
-        <!-- Task Completion Trends -->
-        <div class="dashboard-card">
-          <h3>Task Completion Trends</h3>
-          <div class="trend-chart">
-            <div class="chart-bar" style="height: 80%">
-              <span class="bar-label">Katie</span>
-              <span class="bar-value">80%</span>
+    <!-- AI Confidence Per Domain -->
+    <div class="mb-8">
+      <h2 class="futuristic-subtitle text-2xl mb-6">AI Confidence Per Domain</h2>
+      <div class="glass-panel p-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <!-- Confidence Matrix -->
+          <div>
+            <h3 class="futuristic-subtitle text-xl mb-4">Confidence Matrix</h3>
+            <div class="space-y-4">
+              <div
+                v-for="domain in domains"
+                :key="domain.name"
+                class="glass-panel p-4 rounded-lg"
+              >
+                <div class="flex items-center justify-between mb-3">
+                  <span class="font-medium">{{ domain.name }}</span>
+                  <span class="text-sm text-gray-400">{{ domain.description }}</span>
+                </div>
+                <div class="space-y-2">
+                  <div
+                    v-for="agent in agents"
+                    :key="agent.name"
+                    class="flex items-center justify-between"
+                  >
+                    <span class="text-sm">{{ agent.name }}:</span>
+                    <div class="flex items-center space-x-2">
+                      <div class="w-20 h-2 bg-gray-700 rounded">
+                        <div 
+                          class="h-full rounded transition-all duration-500"
+                          :class="`agent-${agent.name.toLowerCase()}`"
+                          :style="{ width: getDomainConfidence(agent.name, domain.name) + '%' }"
+                        ></div>
+                      </div>
+                      <span class="text-xs">{{ getDomainConfidence(agent.name, domain.name) }}%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="chart-bar" style="height: 65%">
-              <span class="bar-label">Igris</span>
-              <span class="bar-value">65%</span>
-            </div>
-            <div class="chart-bar" style="height: 90%">
-              <span class="bar-label">FickNury</span>
-              <span class="bar-value">90%</span>
+          </div>
+
+          <!-- Evolution Timeline -->
+          <div>
+            <h3 class="futuristic-subtitle text-xl mb-4">Evolution Timeline</h3>
+            <div class="space-y-4">
+              <div
+                v-for="event in evolutionEvents"
+                :key="event.id"
+                class="glass-panel p-4 rounded-lg"
+                :class="`agent-${event.agent.toLowerCase()}`"
+              >
+                <div class="flex items-center justify-between mb-2">
+                  <div class="flex items-center space-x-2">
+                    <span class="text-lg">{{ event.icon }}</span>
+                    <span class="font-medium">{{ event.agent }}</span>
+                  </div>
+                  <span class="text-xs text-gray-400">{{ event.timestamp }}</span>
+                </div>
+                <p class="text-sm text-gray-300 mb-2">{{ event.description }}</p>
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-gray-400">IQ Change: {{ event.iqChange }}</span>
+                  <span class="text-gray-400">Runes Added: {{ event.runesAdded }}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+      </div>
+    </div>
 
-        <!-- Response Time Metrics -->
-        <div class="dashboard-card">
-          <h3>Average Response Time</h3>
-          <div class="response-times">
-            <div class="response-item">
-              <span class="agent-name">Katie</span>
-              <span class="response-time">{{ katieStats.avgResponseTime }}ms</span>
+    <!-- Detailed Agent Analysis -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+      <!-- Rune Injection History -->
+      <div class="glass-panel p-6">
+        <h2 class="futuristic-subtitle text-2xl mb-6">Rune Injection History</h2>
+        <div class="space-y-4">
+          <div
+            v-for="injection in runeInjections"
+            :key="injection.id"
+            class="glass-panel p-4 rounded-lg"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center space-x-2">
+                <span class="text-lg">⚡</span>
+                <span class="font-medium">{{ injection.runeName }}</span>
+              </div>
+              <span class="text-xs text-gray-400">{{ injection.timestamp }}</span>
             </div>
-            <div class="response-item">
-              <span class="agent-name">Igris</span>
-              <span class="response-time">{{ igrisStats.avgResponseTime }}ms</span>
-            </div>
-            <div class="response-item">
-              <span class="agent-name">FickNury</span>
-              <span class="response-time">{{ ficknuryStats.avgResponseTime }}ms</span>
+            <p class="text-sm text-gray-300 mb-2">{{ injection.description }}</p>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-gray-400">Target: {{ injection.targetAgent }}</span>
+              <span class="text-gray-400">Efficiency: {{ injection.efficiency }}%</span>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Recent Activity -->
-        <div class="dashboard-card">
-          <h3>Recent Activity</h3>
-          <div class="activity-feed">
-            <div v-for="activity in recentActivity" :key="activity.id" class="activity-item">
-              <div class="activity-icon">{{ activity.icon }}</div>
-              <div class="activity-content">
-                <p class="activity-text">{{ activity.text }}</p>
-                <span class="activity-time">{{ formatTime(activity.timestamp) }}</span>
+      <!-- Fallback Usage Analysis -->
+      <div class="glass-panel p-6">
+        <h2 class="futuristic-subtitle text-2xl mb-6">Fallback Usage Analysis</h2>
+        <div class="space-y-4">
+          <div
+            v-for="fallback in fallbackUsage"
+            :key="fallback.id"
+            class="glass-panel p-4 rounded-lg"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center space-x-2">
+                <span class="text-lg">⚠️</span>
+                <span class="font-medium">{{ fallback.agent }}</span>
               </div>
+              <span class="text-xs text-gray-400">{{ fallback.timestamp }}</span>
+            </div>
+            <p class="text-sm text-gray-300 mb-2">{{ fallback.reason }}</p>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-gray-400">Fallback Type: {{ fallback.type }}</span>
+              <span class="text-gray-400">Resolution: {{ fallback.resolution }}</span>
             </div>
           </div>
         </div>
+      </div>
+    </div>
 
-        <!-- System Health -->
-        <div class="dashboard-card">
-          <h3>System Health</h3>
-          <div class="health-metrics">
-            <div class="health-item">
-              <span class="health-label">CPU Usage</span>
-              <div class="health-bar">
-                <div class="health-fill" :style="{ width: systemHealth.cpu + '%' }"></div>
-              </div>
-              <span class="health-value">{{ systemHealth.cpu }}%</span>
-            </div>
-            <div class="health-item">
-              <span class="health-label">Memory Usage</span>
-              <div class="health-bar">
-                <div class="health-fill" :style="{ width: systemHealth.memory + '%' }"></div>
-              </div>
-              <span class="health-value">{{ systemHealth.memory }}%</span>
-            </div>
-            <div class="health-item">
-              <span class="health-label">Network</span>
-              <div class="health-bar">
-                <div class="health-fill" :style="{ width: systemHealth.network + '%' }"></div>
-              </div>
-              <span class="health-value">{{ systemHealth.network }}%</span>
-            </div>
+    <!-- Performance Metrics -->
+    <div class="mb-8">
+      <h2 class="futuristic-subtitle text-2xl mb-6">Performance Metrics</h2>
+      <div class="glass-panel p-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div class="text-center">
+            <div class="text-3xl font-bold text-white mb-2">{{ performanceMetrics.totalTasks }}</div>
+            <div class="text-sm text-gray-300">Total Tasks</div>
           </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-green-400 mb-2">{{ performanceMetrics.successRate }}%</div>
+            <div class="text-sm text-gray-300">Success Rate</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-blue-400 mb-2">{{ performanceMetrics.avgResponseTime }}s</div>
+            <div class="text-sm text-gray-300">Avg Response Time</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-purple-400 mb-2">{{ performanceMetrics.totalRunes }}</div>
+            <div class="text-sm text-gray-300">Total Runes</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent Comparison -->
+    <div>
+      <h2 class="futuristic-subtitle text-2xl mb-6">Agent Comparison</h2>
+      <div class="glass-panel p-6">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b border-gray-700">
+                <th class="text-left p-3 text-sm font-medium">Agent</th>
+                <th class="text-left p-3 text-sm font-medium">IQ</th>
+                <th class="text-left p-3 text-sm font-medium">Tasks</th>
+                <th class="text-left p-3 text-sm font-medium">Success Rate</th>
+                <th class="text-left p-3 text-sm font-medium">Runes</th>
+                <th class="text-left p-3 text-sm font-medium">Fallbacks</th>
+                <th class="text-left p-3 text-sm font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="agent in agents"
+                :key="agent.name"
+                class="border-b border-gray-800"
+              >
+                <td class="p-3">
+                  <div class="flex items-center space-x-2">
+                    <span class="text-lg">{{ agent.icon }}</span>
+                    <span class="font-medium">{{ agent.name }}</span>
+                  </div>
+                </td>
+                <td class="p-3">
+                  <div class="flex items-center space-x-2">
+                    <span class="font-medium">{{ agent.iq }}</span>
+                    <div class="iq-bar w-16" :style="{ width: agent.iq + '%' }"></div>
+                  </div>
+                </td>
+                <td class="p-3">{{ agent.tasksCompleted }}</td>
+                <td class="p-3">
+                  <span class="text-green-400">{{ agent.successRate }}%</span>
+                </td>
+                <td class="p-3">{{ agent.activeRunes }}</td>
+                <td class="p-3">
+                  <span class="text-yellow-400">{{ agent.fallbacks }}</span>
+                </td>
+                <td class="p-3">
+                  <div class="flex space-x-2">
+                    <button
+                      @click="upgradeAgent(agent.name)"
+                      class="glass-panel px-3 py-1 rounded text-xs hover:neon-border transition-all duration-300"
+                    >
+                      Upgrade
+                    </button>
+                    <button
+                      @click="reviewRuneTrail(agent.name)"
+                      class="glass-panel px-3 py-1 rounded text-xs hover:neon-border transition-all duration-300"
+                    >
+                      Review
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -235,496 +276,218 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 
 export default {
   name: 'Agents',
   setup() {
-    const katieStats = ref({
-      tasksCompleted: 1247,
-      successRate: 94,
-      uptime: 168,
-      avgResponseTime: 245
-    })
-
-    const igrisStats = ref({
-      tasksCompleted: 892,
-      successRate: 87,
-      uptime: 156,
-      avgResponseTime: 189
-    })
-
-    const ficknuryStats = ref({
-      tasksCompleted: 2156,
-      successRate: 96,
-      uptime: 192,
-      avgResponseTime: 156
-    })
-
-    const systemHealth = ref({
-      cpu: 45,
-      memory: 62,
-      network: 78
-    })
-
-    const recentActivity = ref([
+    const agents = ref([
       {
-        id: 1,
-        icon: '👩‍💻',
-        text: 'Katie completed data analysis task #1247',
-        timestamp: new Date(Date.now() - 300000)
+        name: 'Whis',
+        icon: '🧠',
+        role: 'AI Brain',
+        status: 'online',
+        iq: 85,
+        activeRunes: 23,
+        tasksCompleted: 1247,
+        successRate: 96.8,
+        fallbacks: 3
       },
       {
-        id: 2,
-        icon: '🤖',
-        text: 'Igris integrated new API endpoint',
-        timestamp: new Date(Date.now() - 600000)
+        name: 'Katie',
+        icon: '⚓',
+        role: 'Kubernetes',
+        status: 'online',
+        iq: 78,
+        activeRunes: 18,
+        tasksCompleted: 892,
+        successRate: 94.2,
+        fallbacks: 5
       },
       {
-        id: 3,
-        icon: '⚡',
-        text: 'FickNury evaluated deployment for task #2156',
-        timestamp: new Date(Date.now() - 900000)
+        name: 'Igris',
+        icon: '🏗️',
+        role: 'Platform Engineering',
+        status: 'online',
+        iq: 92,
+        activeRunes: 31,
+        tasksCompleted: 1567,
+        successRate: 98.1,
+        fallbacks: 2
       },
       {
-        id: 4,
-        icon: '👩‍💻',
-        text: 'Katie generated monthly report',
-        timestamp: new Date(Date.now() - 1200000)
+        name: 'Ficknury',
+        icon: '🎯',
+        role: 'Task Router',
+        status: 'online',
+        iq: 88,
+        activeRunes: 15,
+        tasksCompleted: 2103,
+        successRate: 97.5,
+        fallbacks: 4
       }
     ])
 
-    const viewAgentDetails = (agent) => {
-      console.log(`Viewing details for ${agent}`)
-      // Navigate to detailed agent view
-    }
+    const domains = ref([
+      {
+        name: 'Infrastructure',
+        description: 'Deployment and configuration'
+      },
+      {
+        name: 'Security',
+        description: 'Audit and compliance'
+      },
+      {
+        name: 'Monitoring',
+        description: 'Observability and alerts'
+      },
+      {
+        name: 'Automation',
+        description: 'CI/CD and workflows'
+      }
+    ])
 
-    const assignTask = (agent) => {
-      console.log(`Assigning task to ${agent}`)
-      // Open task assignment modal
-    }
+    const evolutionEvents = ref([
+      {
+        id: 1,
+        agent: 'Whis',
+        icon: '🧠',
+        description: 'Enhanced transcript processing with 15% accuracy improvement',
+        iqChange: '+5',
+        runesAdded: 3,
+        timestamp: '2h ago'
+      },
+      {
+        id: 2,
+        agent: 'Katie',
+        icon: '⚓',
+        description: 'New Kubernetes deployment pattern learned',
+        iqChange: '+3',
+        runesAdded: 2,
+        timestamp: '4h ago'
+      },
+      {
+        id: 3,
+        agent: 'Igris',
+        icon: '🏗️',
+        description: 'Terraform module optimization completed',
+        iqChange: '+7',
+        runesAdded: 4,
+        timestamp: '6h ago'
+      }
+    ])
 
-    const formatTime = (timestamp) => {
-      const now = new Date()
-      const diff = now - timestamp
-      const minutes = Math.floor(diff / 60000)
-      
-      if (minutes < 1) return 'Just now'
-      if (minutes < 60) return `${minutes}m ago`
-      
-      const hours = Math.floor(minutes / 60)
-      if (hours < 24) return `${hours}h ago`
-      
-      const days = Math.floor(hours / 24)
-      return `${days}d ago`
-    }
+    const runeInjections = ref([
+      {
+        id: 1,
+        runeName: 'DeployRune',
+        description: 'Automated deployment pattern for Kubernetes',
+        targetAgent: 'Katie',
+        efficiency: 88,
+        timestamp: '2h ago'
+      },
+      {
+        id: 2,
+        runeName: 'SecurityAuditor',
+        description: 'Automated security policy validation',
+        targetAgent: 'Igris',
+        efficiency: 95,
+        timestamp: '4h ago'
+      },
+      {
+        id: 3,
+        runeName: 'TranscriptProcessor',
+        description: 'Enhanced text processing and analysis',
+        targetAgent: 'Whis',
+        efficiency: 92,
+        timestamp: '6h ago'
+      }
+    ])
 
-    onMounted(() => {
-      // Initialize real-time updates
-      setInterval(() => {
-        // Update stats periodically
-        katieStats.value.tasksCompleted += Math.floor(Math.random() * 3)
-        igrisStats.value.tasksCompleted += Math.floor(Math.random() * 2)
-        ficknuryStats.value.tasksCompleted += Math.floor(Math.random() * 4)
-      }, 30000)
+    const fallbackUsage = ref([
+      {
+        id: 1,
+        agent: 'Katie',
+        reason: 'Insufficient permissions for cluster modification',
+        type: 'Manual Review',
+        resolution: 'Admin approval granted',
+        timestamp: '3h ago'
+      },
+      {
+        id: 2,
+        agent: 'Igris',
+        reason: 'Complex infrastructure change requiring human oversight',
+        type: 'Semi-Auto',
+        resolution: 'Human validation completed',
+        timestamp: '5h ago'
+      }
+    ])
+
+    const performanceMetrics = ref({
+      totalTasks: 5809,
+      successRate: 96.7,
+      avgResponseTime: 2.3,
+      totalRunes: 87
     })
 
+    const getDomainConfidence = (agentName, domainName) => {
+      // Mock confidence data - in real app this would come from API
+      const confidenceMap = {
+        'Whis': { 'Infrastructure': 75, 'Security': 85, 'Monitoring': 90, 'Automation': 80 },
+        'Katie': { 'Infrastructure': 95, 'Security': 70, 'Monitoring': 85, 'Automation': 75 },
+        'Igris': { 'Infrastructure': 98, 'Security': 92, 'Monitoring': 88, 'Automation': 90 },
+        'Ficknury': { 'Infrastructure': 85, 'Security': 80, 'Monitoring': 75, 'Automation': 95 }
+      }
+      return confidenceMap[agentName]?.[domainName] || 0
+    }
+
+    const upgradeAgent = (agentName) => {
+      console.log(`Upgrading agent: ${agentName}`)
+      // Implement upgrade logic
+    }
+
+    const reviewRuneTrail = (agentName) => {
+      console.log(`Reviewing rune trail for: ${agentName}`)
+      // Implement review logic
+    }
+
     return {
-      katieStats,
-      igrisStats,
-      ficknuryStats,
-      systemHealth,
-      recentActivity,
-      viewAgentDetails,
-      assignTask,
-      formatTime
+      agents,
+      domains,
+      evolutionEvents,
+      runeInjections,
+      fallbackUsage,
+      performanceMetrics,
+      getDomainConfidence,
+      upgradeAgent,
+      reviewRuneTrail
     }
   }
 }
 </script>
 
 <style scoped>
-.agents-page {
-  min-height: 100vh;
+.agents-container {
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-.page-header {
-  margin-bottom: 2rem;
-  text-align: center;
+/* Table styling */
+table {
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
-.page-title {
-  font-size: 2.5rem;
-  color: #00ffff;
-  text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
-  margin-bottom: 0.5rem;
-}
-
-.page-subtitle {
-  color: #888;
-  font-size: 1.1rem;
-}
-
-.agents-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 2rem;
-  margin-bottom: 3rem;
-}
-
-.agent-card {
-  background: rgba(0, 0, 0, 0.7);
-  border: 1px solid rgba(0, 255, 255, 0.3);
-  border-radius: 15px;
-  padding: 2rem;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 0 30px rgba(0, 255, 255, 0.1);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.agent-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(45deg, 
-    rgba(0, 255, 255, 0.05) 0%, 
-    transparent 50%, 
-    rgba(255, 0, 255, 0.05) 100%);
-  pointer-events: none;
-}
-
-.agent-card:hover {
-  border-color: rgba(0, 255, 255, 0.6);
-  box-shadow: 0 0 40px rgba(0, 255, 255, 0.2);
-  transform: translateY(-5px);
-}
-
-.agent-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.agent-avatar {
-  font-size: 3rem;
-  filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.5));
-}
-
-.agent-info {
-  flex: 1;
-}
-
-.agent-name {
-  color: #00ffff;
-  font-size: 1.5rem;
-  margin-bottom: 0.25rem;
-  text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
-}
-
-.agent-title {
-  color: #888;
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
-}
-
-.agent-status {
-  font-size: 0.8rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  display: inline-block;
-}
-
-.agent-status.online {
-  background: rgba(0, 255, 0, 0.2);
-  color: #00ff00;
-}
-
-.agent-stats {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background: rgba(0, 255, 255, 0.05);
-  border-radius: 10px;
-}
-
-.stat {
-  text-align: center;
-}
-
-.stat-number {
-  display: block;
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #00ffff;
-}
-
-.stat-label {
-  font-size: 0.8rem;
-  color: #888;
-}
-
-.agent-description {
-  margin-bottom: 1.5rem;
-}
-
-.agent-description p {
-  color: #ccc;
-  line-height: 1.6;
-}
-
-.agent-capabilities h4 {
-  color: #00ffff;
-  margin-bottom: 0.75rem;
-  font-size: 1rem;
-}
-
-.capability-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.capability-tag {
-  background: rgba(0, 255, 255, 0.1);
-  color: #00ffff;
-  padding: 0.25rem 0.75rem;
-  border-radius: 15px;
-  font-size: 0.8rem;
-  border: 1px solid rgba(0, 255, 255, 0.3);
-}
-
-.agent-actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-/* Performance Dashboard */
-.performance-dashboard {
-  margin-top: 3rem;
-}
-
-.dashboard-title {
-  color: #00ffff;
-  font-size: 2rem;
-  margin-bottom: 2rem;
-  text-align: center;
-  text-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
-}
-
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-}
-
-.dashboard-card {
-  background: rgba(0, 0, 0, 0.7);
-  border: 1px solid rgba(0, 255, 255, 0.3);
-  border-radius: 15px;
-  padding: 1.5rem;
+th {
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
 }
 
-.dashboard-card h3 {
-  color: #00ffff;
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
+td, th {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Trend Chart */
-.trend-chart {
-  display: flex;
-  align-items: end;
-  gap: 1rem;
-  height: 150px;
-}
-
-.chart-bar {
-  flex: 1;
-  background: linear-gradient(to top, #00ffff, #0080ff);
-  border-radius: 4px 4px 0 0;
-  position: relative;
-  min-height: 20px;
-}
-
-.bar-label {
-  position: absolute;
-  bottom: -25px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.8rem;
-  color: #888;
-}
-
-.bar-value {
-  position: absolute;
-  top: -25px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.8rem;
-  color: #00ffff;
-  font-weight: bold;
-}
-
-/* Response Times */
-.response-times {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.response-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem;
-  background: rgba(0, 255, 255, 0.05);
-  border-radius: 8px;
-}
-
-.agent-name {
-  color: #00ffff;
-  font-weight: 500;
-}
-
-.response-time {
-  color: #fff;
-  font-weight: bold;
-}
-
-/* Activity Feed */
-.activity-feed {
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.activity-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid rgba(0, 255, 255, 0.1);
-}
-
-.activity-item:last-child {
-  border-bottom: none;
-}
-
-.activity-icon {
-  font-size: 1.2rem;
-}
-
-.activity-content {
-  flex: 1;
-}
-
-.activity-text {
-  color: #ccc;
-  margin-bottom: 0.25rem;
-  font-size: 0.9rem;
-}
-
-.activity-time {
-  color: #888;
-  font-size: 0.8rem;
-}
-
-/* Health Metrics */
-.health-metrics {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.health-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.health-label {
-  color: #ccc;
-  min-width: 100px;
-  font-size: 0.9rem;
-}
-
-.health-bar {
-  flex: 1;
-  height: 8px;
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.health-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #00ffff, #0080ff);
-  transition: width 0.3s ease;
-}
-
-.health-value {
-  color: #00ffff;
-  font-weight: bold;
-  min-width: 50px;
-  text-align: right;
-}
-
-/* Buttons */
-.btn-primary, .btn-secondary {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  flex: 1;
-}
-
-.btn-primary {
-  background: linear-gradient(45deg, #00ffff, #0080ff);
-  color: #000;
-}
-
-.btn-secondary {
-  background: linear-gradient(45deg, #ff6b6b, #ff8e53);
-  color: #fff;
-}
-
-.btn-primary:hover, .btn-secondary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-}
-
-@media (max-width: 768px) {
-  .agents-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .agent-stats {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .agent-actions {
-    flex-direction: column;
-  }
-  
-  .trend-chart {
-    height: 120px;
-  }
+tr:hover {
+  background: rgba(255, 255, 255, 0.02);
 }
 </style> 

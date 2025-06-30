@@ -214,7 +214,7 @@ deploy_with_argocd() {
     
     # Apply ArgoCD applications
     if [ -d "LinkOps-Manifests/services" ]; then
-        kubectl apply -f LinkOps-Manifests/services/
+        kubectl apply -f LinkOps-Manifests/shadows/
         print_success "ArgoCD applications applied"
     else
         print_error "LinkOps-Manifests/services directory not found"

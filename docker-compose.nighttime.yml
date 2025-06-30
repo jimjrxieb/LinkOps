@@ -13,7 +13,7 @@ services:
       - "5432:5432"
 
   whis_smithing:
-    build: ./services/whis_smithing
+    build: ./shadows/whis_smithing
     depends_on:
       - db
     volumes:
@@ -24,7 +24,7 @@ services:
       - "8003:8000"
 
   whis_enhance:
-    build: ./services/whis_enhance
+    build: ./shadows/whis_enhance
     depends_on:
       - db
     volumes:

@@ -73,7 +73,7 @@ az role assignment create \
 ### 1. Automatic Deployment
 The workflow automatically triggers on:
 - Push to `main` branch
-- Changes to `services/`, `helm/`, or workflow files
+- Changes to `shadows/`, `helm/`, or workflow files
 - Manual workflow dispatch
 
 ### 2. Manual Deployment

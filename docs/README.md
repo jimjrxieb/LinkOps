@@ -27,13 +27,13 @@ Welcome to the comprehensive documentation for the LinkOps MLOps Platform. This 
 ### 🔧 **Services**
 
 #### **Core AI Agents**
-- **[Whis WebScraper](services/whis_webscraper/README.md)** - Intelligence harvester for Whis training
-- **[Katie Logic](services/katie_logic/README.md)** - Kubernetes AI agent and cluster guardian
-- **[James Logic](services/james_logic/README.md)** - Personal AI assistant and executive aid
-- **[Igris Logic](services/igris_logic/README.md)** - Platform engineering and infrastructure analysis
+- **[Whis WebScraper](shadows/whis_webscraper/README.md)** - Intelligence harvester for Whis training
+- **[Katie Logic](shadows/katie_logic/README.md)** - Kubernetes AI agent and cluster guardian
+- **[James Logic](shadows/james_logic/README.md)** - Personal AI assistant and executive aid
+- **[Igris Logic](shadows/igris_logic/README.md)** - Platform engineering and infrastructure analysis
 
 #### **Support Services**
-- **[AuditGuard](services/auditguard/README.md)** - Security and compliance monitoring
+- **[AuditGuard](shadows/auditguard/README.md)** - Security and compliance monitoring
 
 ### 📖 **API Documentation**
 - API specifications and endpoints (coming soon)
@@ -46,7 +46,7 @@ Welcome to the comprehensive documentation for the LinkOps MLOps Platform. This 
 ### **For Developers**
 1. Read [Environment Setup](deployment/ENVIRONMENT_SETUP.md)
 2. Review [Architecture Overview](architecture/DATA_FLOW_DIAGRAM.md)
-3. Check [Service Documentation](services/) for specific components
+3. Check [Service Documentation](shadows/) for specific components
 
 ### **For DevOps Engineers**
 1. Follow [CI/CD Setup](deployment/CI-CD-SETUP.md)
@@ -55,7 +55,7 @@ Welcome to the comprehensive documentation for the LinkOps MLOps Platform. This 
 
 ### **For Platform Engineers**
 1. Read [Igris Deployment Guide](deployment/IGRIS_DEPLOYMENT_READY.md)
-2. Review [Katie Logic Documentation](services/katie_logic/README.md)
+2. Review [Katie Logic Documentation](shadows/katie_logic/README.md)
 3. Check [Architecture Details](architecture/)
 
 ## 🔍 **Documentation Search**
@@ -63,14 +63,14 @@ Welcome to the comprehensive documentation for the LinkOps MLOps Platform. This 
 ### **By Topic**
 - **Architecture**: [Data Flow](architecture/DATA_FLOW_DIAGRAM.md), [Training System](architecture/WHIS_TRAINING_SYSTEM.md)
 - **Deployment**: [Setup](deployment/ENVIRONMENT_SETUP.md), [CI/CD](deployment/CI-CD-SETUP.md)
-- **Services**: [Whis](services/whis_webscraper/README.md), [Katie](services/katie_logic/README.md), [James](services/james_logic/README.md)
+- **Services**: [Whis](shadows/whis_webscraper/README.md), [Katie](shadows/katie_logic/README.md), [James](shadows/james_logic/README.md)
 - **Development**: [Frontend](development/README.md), [Database](development/README.md)
 
 ### **By Service**
-- **Whis Ecosystem**: [WebScraper](services/whis_webscraper/README.md), [Training](architecture/WHIS_TRAINING_SYSTEM.md)
-- **Kubernetes**: [Katie Logic](services/katie_logic/README.md)
-- **Platform Engineering**: [Igris Logic](services/igris_logic/README.md)
-- **AI Assistant**: [James Logic](services/james_logic/README.md)
+- **Whis Ecosystem**: [WebScraper](shadows/whis_webscraper/README.md), [Training](architecture/WHIS_TRAINING_SYSTEM.md)
+- **Kubernetes**: [Katie Logic](shadows/katie_logic/README.md)
+- **Platform Engineering**: [Igris Logic](shadows/igris_logic/README.md)
+- **AI Assistant**: [James Logic](shadows/james_logic/README.md)
 
 ## 📝 **Contributing to Documentation**
 

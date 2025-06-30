@@ -3,17 +3,17 @@ name: CI/CD - Igris Platform Engineering
 on:
   push:
     paths:
-      - "services/igris/**"
+      - "shadows/igris/**"
   pull_request:
     paths:
-      - "services/igris/**"
+      - "shadows/igris/**"
 
 jobs:
   test:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: services/igris
+        working-directory: shadows/igris
 
     steps:
       - name: Checkout code
@@ -42,7 +42,7 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
-          file: services/igris/coverage.xml
+          file: shadows/igris/coverage.xml
           flags: igris
           name: igris-coverage
 
@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: services/igris
+        working-directory: shadows/igris
 
     steps:
       - name: Checkout code
@@ -60,7 +60,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
-          scan-ref: 'services/igris'
+          scan-ref: 'shadows/igris'
           format: 'sarif'
           output: 'trivy-results.sarif'
 
@@ -68,7 +68,7 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         if: always()
         with:
-          sarif_file: 'services/igris/trivy-results.sarif'
+          sarif_file: 'shadows/igris/trivy-results.sarif'
 
   build:
     needs: [test, security-scan]
@@ -76,7 +76,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     defaults:
       run:
-        working-directory: services/igris
+        working-directory: shadows/igris
 
     steps:
       - name: Checkout code
@@ -129,7 +129,7 @@ jobs:
         run: |
           echo "Deploying Igris to staging environment"
           # Add your staging deployment logic here
-          # kubectl apply -f LinkOps-Manifests/services/igris/
+          # kubectl apply -f LinkOps-Manifests/shadows/igris/
 
   deploy-production:
     needs: build
@@ -145,4 +145,4 @@ jobs:
         run: |
           echo "Deploying Igris to production environment"
           # Add your production deployment logic here
-          # kubectl apply -f LinkOps-Manifests/services/igris/ 
+          # kubectl apply -f LinkOps-Manifests/shadows/igris/ 

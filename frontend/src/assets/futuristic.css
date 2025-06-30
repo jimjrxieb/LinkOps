@@ -1,0 +1,253 @@
+/* Futuristic LinkOps Platform Styles */
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Agent-specific colors */
+  --whis-primary: #6366f1;
+  --whis-secondary: #8b5cf6;
+  --katie-primary: #3b82f6;
+  --katie-secondary: #06b6d4;
+  --igris-primary: #64748b;
+  --igris-secondary: #94a3b8;
+  --ficknury-primary: #1e293b;
+  --ficknury-secondary: #fbbf24;
+  
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  
+  /* Neon effects */
+  --neon-glow: 0 0 20px rgba(99, 102, 241, 0.5);
+  --neon-text: 0 0 10px rgba(99, 102, 241, 0.8);
+}
+
+/* Base styles */
+body {
+  font-family: 'Rajdhani', sans-serif;
+  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  color: #e2e8f0;
+  overflow-x: hidden;
+}
+
+/* Futuristic typography */
+.futuristic-title {
+  font-family: 'Orbitron', monospace;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: var(--neon-text);
+}
+
+.futuristic-subtitle {
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* Glassmorphism panels */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow);
+  transition: all 0.3s ease;
+}
+
+.glass-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.5);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Neon borders and effects */
+.neon-border {
+  border: 2px solid transparent;
+  background: linear-gradient(45deg, var(--whis-primary), var(--whis-secondary)) border-box;
+  border-radius: 12px;
+  position: relative;
+}
+
+.neon-border::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, var(--whis-primary), var(--whis-secondary));
+  border-radius: 12px;
+  z-index: -1;
+  opacity: 0.5;
+  filter: blur(8px);
+}
+
+/* Agent-specific styling */
+.agent-whis {
+  --agent-primary: var(--whis-primary);
+  --agent-secondary: var(--whis-secondary);
+}
+
+.agent-katie {
+  --agent-primary: var(--katie-primary);
+  --agent-secondary: var(--katie-secondary);
+}
+
+.agent-igris {
+  --agent-primary: var(--igris-primary);
+  --agent-secondary: var(--igris-secondary);
+}
+
+.agent-ficknury {
+  --agent-primary: var(--ficknury-primary);
+  --agent-secondary: var(--ficknury-secondary);
+}
+
+/* Animated backgrounds */
+.animated-bg {
+  background: linear-gradient(-45deg, #0f0f23, #1a1a2e, #16213e, #0f0f23);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Holographic effects */
+.holographic {
+  background: linear-gradient(45deg, 
+    rgba(255,255,255,0.1) 0%, 
+    rgba(255,255,255,0.05) 50%, 
+    rgba(255,255,255,0.1) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.holographic::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255,255,255,0.2), 
+    transparent);
+  animation: holographic-sweep 3s infinite;
+}
+
+@keyframes holographic-sweep {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Status indicators */
+.status-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+  animation: pulse 2s infinite;
+}
+
+.status-online {
+  background: #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+.status-offline {
+  background: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
+.status-processing {
+  background: #f59e0b;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Data flow animations */
+.data-flow {
+  position: relative;
+  overflow: hidden;
+}
+
+.data-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--agent-primary);
+  border-radius: 50%;
+  animation: data-flow 3s linear infinite;
+}
+
+@keyframes data-flow {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* IQ Bar styling */
+.iq-bar {
+  background: linear-gradient(90deg, 
+    var(--agent-primary) 0%, 
+    var(--agent-secondary) 100%);
+  height: 8px;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.iq-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255,255,255,0.3), 
+    transparent);
+  animation: iq-glow 2s infinite;
+}
+
+@keyframes iq-glow {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .glass-panel {
+    margin: 8px;
+    border-radius: 12px;
+  }
+  
+  .futuristic-title {
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+  }
+} 

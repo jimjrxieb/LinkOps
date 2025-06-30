@@ -3,17 +3,17 @@ name: CI - AuditGuard
 on:
   push:
     paths:
-      - "services/auditguard/**"
+      - "shadows/auditguard/**"
   pull_request:
     paths:
-      - "services/auditguard/**"
+      - "shadows/auditguard/**"
 
 jobs:
   test:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: services/auditguard
+        working-directory: shadows/auditguard
 
     steps:
       - name: Checkout code
@@ -48,7 +48,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     defaults:
       run:
-        working-directory: services/auditguard
+        working-directory: shadows/auditguard
 
     steps:
       - name: Checkout code
@@ -89,7 +89,7 @@ jobs:
       - name: Update image tag in manifests
         run: |
           cd manifests
-          sed -i "s|ghcr.io/shadow-link-industries/auditguard:latest|ghcr.io/shadow-link-industries/auditguard:${{ github.sha }}|g" LinkOps-Manifests/services/auditguard/deployment.yaml
+          sed -i "s|ghcr.io/shadow-link-industries/auditguard:latest|ghcr.io/shadow-link-industries/auditguard:${{ github.sha }}|g" LinkOps-Manifests/shadows/auditguard/deployment.yaml
 
       - name: Commit and push changes
         run: |
