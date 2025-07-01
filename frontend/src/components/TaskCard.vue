@@ -14,7 +14,7 @@
 
 <script setup>
 import StatusBadge from './StatusBadge.vue'
-const props = defineProps({
+defineProps({
   task: {
     type: Object,
     required: true

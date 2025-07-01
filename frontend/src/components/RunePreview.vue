@@ -16,7 +16,7 @@
 
 <script setup>
 import StatusBadge from './StatusBadge.vue'
-const props = defineProps({
+defineProps({
   rune: {
     type: Object,
     required: true

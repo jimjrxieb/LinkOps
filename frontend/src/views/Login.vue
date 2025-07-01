@@ -64,7 +64,7 @@
       <!-- Background Effects -->
       <div class="background-effects">
         <div class="floating-particles">
-          <div v-for="i in 20" :key="i" class="particle" :style="getParticleStyle(i)"></div>
+          <div v-for="i in 20" :key="i" class="particle" :style="getParticleStyle()"></div>
         </div>
         <div class="grid-overlay"></div>
       </div>
@@ -159,7 +159,7 @@ export default {
       }
     }
 
-    const getParticleStyle = (index) => {
+    const getParticleStyle = () => {
       const delay = Math.random() * 10
       const duration = 10 + Math.random() * 20
       const x = Math.random() * 100
@@ -176,7 +176,7 @@ export default {
     onMounted(() => {
       // Initialize particle animations
       const particles = document.querySelectorAll('.particle')
-      particles.forEach((particle, index) => {
+      particles.forEach((particle) => {
         particle.style.animationDelay = `${Math.random() * 10}s`
       })
     })

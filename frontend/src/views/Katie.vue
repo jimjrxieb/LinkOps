@@ -248,7 +248,7 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 
 export default {
   name: 'Katie',
