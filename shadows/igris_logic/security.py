@@ -9,7 +9,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def generate_security_recommendations(task_text: str, platform_components: Dict[str, Any], platform: str) -> List[str]:
+def generate_security_recommendations(
+    task_text: str, platform_components: Dict[str, Any], platform: str
+) -> List[str]:
     recommendations = []
 
     if platform_components.get("terraform"):
@@ -50,7 +52,9 @@ def generate_security_recommendations(task_text: str, platform_components: Dict[
     return recommendations
 
 
-def generate_compliance_framework_recommendations(platform: str) -> Dict[str, List[str]]:
+def generate_compliance_framework_recommendations(
+    platform: str,
+) -> Dict[str, List[str]]:
     """Generate compliance framework recommendations by platform."""
     frameworks = {
         "aws": [
@@ -118,4 +122,4 @@ def generate_security_baseline_config(platform: str) -> Dict[str, Any]:
         },
     }
 
-    return baselines.get(platform, {}) 
+    return baselines.get(platform, {})

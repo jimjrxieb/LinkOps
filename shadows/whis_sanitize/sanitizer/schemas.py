@@ -3,7 +3,9 @@ from typing import Literal, Dict, Any, Optional
 
 
 class SanitizationRequest(BaseModel):
-    input_type: Literal["task", "qna", "info", "image", "fixlog", "solution_entry", "youtube"]
+    input_type: Literal[
+        "task", "qna", "info", "image", "fixlog", "solution_entry", "youtube"
+    ]
     payload: dict
 
 

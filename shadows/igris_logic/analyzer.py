@@ -1,5 +1,6 @@
 from typing import Dict
 
+
 def analyze_platform_components(task_text: str, platform: str) -> Dict[str, bool]:
     platform_keywords = {
         "kubernetes": ["k8s", "kubernetes", "pod", "deployment", "service", "ingress"],
@@ -8,7 +9,13 @@ def analyze_platform_components(task_text: str, platform: str) -> Dict[str, bool
         "gcp": ["gcp", "gce", "storage", "function", "sql", "vpc", "iam"],
         "terraform": ["terraform", "infrastructure", "iac", "provisioning"],
         "security": ["security", "compliance", "audit", "scan", "vulnerability"],
-        "automation": ["automation", "ci/cd", "pipeline", "deployment", "orchestration"],
+        "automation": [
+            "automation",
+            "ci/cd",
+            "pipeline",
+            "deployment",
+            "orchestration",
+        ],
     }
 
     components = {}
@@ -18,4 +25,4 @@ def analyze_platform_components(task_text: str, platform: str) -> Dict[str, bool
         components[category] = any(keyword in task_lower for keyword in keywords)
 
     components[platform] = True
-    return components 
+    return components

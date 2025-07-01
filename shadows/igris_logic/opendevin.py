@@ -1,5 +1,6 @@
 from typing import Dict, Any
 
+
 def simulate_opendevin_automation(task: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "insights": [
@@ -22,4 +23,4 @@ def simulate_opendevin_automation(task: Dict[str, Any]) -> Dict[str, Any]:
             "Configured Kubernetes cluster",
             "Implemented monitoring stack",
         ],
-    } 
+    }

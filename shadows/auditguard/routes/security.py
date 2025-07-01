@@ -57,7 +57,7 @@ async def get_security_alerts() -> Dict[str, Any]:
                 "message": "Multiple failed login attempts detected from IP 192.168.1.100",
                 "level": "warning",
                 "timestamp": "2 minutes ago",
-                "source": "Authentication System"
+                "source": "Authentication System",
             },
             {
                 "id": 2,
@@ -65,7 +65,7 @@ async def get_security_alerts() -> Dict[str, Any]:
                 "message": "High severity vulnerability found in package lodash@4.17.15",
                 "level": "critical",
                 "timestamp": "15 minutes ago",
-                "source": "Dependency Scanner"
+                "source": "Dependency Scanner",
             },
             {
                 "id": 3,
@@ -73,8 +73,8 @@ async def get_security_alerts() -> Dict[str, Any]:
                 "message": "Infrastructure configuration has drifted from Git state",
                 "level": "warning",
                 "timestamp": "1 hour ago",
-                "source": "Infrastructure Monitor"
-            }
+                "source": "Infrastructure Monitor",
+            },
         ]
     }
 

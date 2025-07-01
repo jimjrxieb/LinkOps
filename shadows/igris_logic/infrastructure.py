@@ -9,7 +9,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def generate_infrastructure_solution(task_text: str, platform_components: Dict[str, Any], platform: str) -> Dict[str, Any]:
+def generate_infrastructure_solution(
+    task_text: str, platform_components: Dict[str, Any], platform: str
+) -> Dict[str, Any]:
     solution = {
         "approach": "platform-native",
         "platform": platform,
@@ -36,7 +38,9 @@ def generate_infrastructure_solution(task_text: str, platform_components: Dict[s
     return solution
 
 
-def generate_configurations(task_text: str, platform_components: Dict[str, Any], platform: str) -> List[str]:
+def generate_configurations(
+    task_text: str, platform_components: Dict[str, Any], platform: str
+) -> List[str]:
     configs = []
 
     if platform_components.get("terraform"):
@@ -95,7 +99,7 @@ def _generate_cloud_config(task_text: str, platform: str) -> Dict[str, Any]:
             "sql": _extract_gcp_sql_config(task_text),
             "function": _extract_gcp_function_config(task_text),
         }
-    
+
     return {}
 
 
@@ -269,4 +273,4 @@ def _extract_gcp_sql_config(task_text: str) -> Dict[str, Any]:
 
 
 def _extract_gcp_function_config(task_text: str) -> Dict[str, Any]:
-    return {"runtime": "python39", "entry_point": "main"} 
+    return {"runtime": "python39", "entry_point": "main"}

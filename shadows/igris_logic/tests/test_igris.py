@@ -20,7 +20,7 @@ class TestHealthEndpoint:
         """Test health endpoint returns correct service info"""
         response = client.get("/health")
         assert response.status_code == 200
-        
+
         data = response.json()
         assert data["status"] == "healthy"
         assert data["service"] == "igris"
@@ -35,12 +35,12 @@ class TestExecuteEndpoint:
             "task_id": "test-001",
             "task_text": "Deploy a Kubernetes cluster with security policies",
             "platform": "kubernetes",
-            "action_type": "deploy"
+            "action_type": "deploy",
         }
-        
+
         response = client.post("/execute", json=task_data)
         assert response.status_code == 200
-        
+
         data = response.json()
         assert data["agent"] == "igris"
         assert "kubernetes" in data["task"].lower()
@@ -55,12 +55,12 @@ class TestExecuteEndpoint:
             "task_id": "test-002",
             "task_text": "Set up AWS infrastructure with EC2 and S3",
             "platform": "aws",
-            "action_type": "configure"
+            "action_type": "configure",
         }
-        
+
         response = client.post("/execute", json=task_data)
         assert response.status_code == 200
-        
+
         data = response.json()
         assert data["agent"] == "igris"
         assert "aws" in data["infrastructure_solution"]["platform"]
@@ -70,9 +70,9 @@ class TestExecuteEndpoint:
         task_data = {
             "task_id": "test-003",
             "task_text": "",  # Empty task
-            "platform": "invalid-platform"
+            "platform": "invalid-platform",
         }
-        
+
         response = client.post("/execute", json=task_data)
         assert response.status_code == 200  # Should still process
 
@@ -82,12 +82,12 @@ class TestOpenDevinEndpoint:
         """Test OpenDevin automation integration"""
         task_data = {
             "task": "Automate infrastructure deployment",
-            "platform": "kubernetes"
+            "platform": "kubernetes",
         }
-        
+
         response = client.post("/opendevin/automate", json=task_data)
         assert response.status_code == 200
-        
+
         data = response.json()
         assert data["status"] == "automation_complete"
         assert "opendevin_insights" in data
@@ -103,12 +103,12 @@ class TestEnhanceEndpoint:
             "agent": "igris",
             "orb_id": "terraform-orb",
             "rune_patch": "enhanced-terraform-capabilities",
-            "training_notes": "Added advanced Terraform modules"
+            "training_notes": "Added advanced Terraform modules",
         }
-        
+
         response = client.post("/api/enhance", json=enhancement_data)
         assert response.status_code == 200
-        
+
         data = response.json()
         assert data["agent"] == "igris"
         assert data["orb_id"] == "terraform-orb"
@@ -121,7 +121,7 @@ class TestCapabilitiesEndpoint:
         """Test capabilities endpoint"""
         response = client.get("/capabilities")
         assert response.status_code == 200
-        
+
         data = response.json()
         assert data["agent"] == "igris"
         assert "Platform Engineering" in data["specialization"]
@@ -135,9 +135,9 @@ class TestAnalyzerModule:
         """Test platform component analysis for Kubernetes"""
         task_text = "Deploy a Kubernetes cluster with pods and services"
         platform = "kubernetes"
-        
+
         components = analyze_platform_components(task_text, platform)
-        
+
         assert components["kubernetes"] is True
         assert components["platform"] is True
         assert isinstance(components, dict)
@@ -146,9 +146,9 @@ class TestAnalyzerModule:
         """Test platform component analysis for AWS"""
         task_text = "Set up AWS EC2 instances with S3 storage"
         platform = "aws"
-        
+
         components = analyze_platform_components(task_text, platform)
-        
+
         assert components["aws"] is True
         assert components["platform"] is True
 
@@ -156,9 +156,9 @@ class TestAnalyzerModule:
         """Test security component detection"""
         task_text = "Implement security scanning and compliance audit"
         platform = "kubernetes"
-        
+
         components = analyze_platform_components(task_text, platform)
-        
+
         assert components["security"] is True
 
 
@@ -168,9 +168,11 @@ class TestInfrastructureModule:
         task_text = "Deploy Kubernetes cluster"
         platform_components = {"kubernetes": True, "terraform": True}
         platform = "kubernetes"
-        
-        solution = generate_infrastructure_solution(task_text, platform_components, platform)
-        
+
+        solution = generate_infrastructure_solution(
+            task_text, platform_components, platform
+        )
+
         assert solution["platform"] == "kubernetes"
         assert solution["approach"] == "platform-native"
         assert "Kubernetes Cluster Management" in solution["components"]
@@ -181,9 +183,9 @@ class TestInfrastructureModule:
         task_text = "Deploy with Terraform and Kubernetes"
         platform_components = {"terraform": True, "kubernetes": True}
         platform = "kubernetes"
-        
+
         configs = generate_configurations(task_text, platform_components, platform)
-        
+
         assert isinstance(configs, list)
         assert len(configs) > 0
 
@@ -194,9 +196,11 @@ class TestSecurityModule:
         task_text = "Secure Kubernetes deployment"
         platform_components = {"kubernetes": True, "terraform": True}
         platform = "kubernetes"
-        
-        recommendations = generate_security_recommendations(task_text, platform_components, platform)
-        
+
+        recommendations = generate_security_recommendations(
+            task_text, platform_components, platform
+        )
+
         assert isinstance(recommendations, list)
         assert len(recommendations) > 0
         assert any("pod security policies" in rec.lower() for rec in recommendations)
@@ -206,9 +210,9 @@ class TestOpenDevinModule:
     def test_simulate_opendevin_automation(self):
         """Test OpenDevin automation simulation"""
         task = {"task": "Automate infrastructure", "platform": "kubernetes"}
-        
+
         automation = simulate_opendevin_automation(task)
-        
+
         assert "insights" in automation
         assert "actions" in automation
         assert "code_generated" in automation
@@ -218,4 +222,4 @@ class TestOpenDevinModule:
 
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-v"]) 
+    pytest.main([__file__, "-v"])

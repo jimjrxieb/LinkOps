@@ -9,10 +9,12 @@ def remove_profanity(text):
         text = text.replace(word, "[censored]")
     return text
 
+
 def remove_garbage(text):
     for symbol in GARBAGE_SYMBOLS:
         text = text.replace(symbol, "")
     return text
+
 
 def remove_duplicates(lines):
     seen = set()
@@ -43,12 +45,16 @@ def sanitize_input(input_type: str, payload: dict):
 
         # Save to data lake or queue
         from utils.file_writer import write_clean_log
-        write_clean_log(input_type, {
-            "cleaned_text": cleaned_text,
-            "topic": topic,
-            "source": source,
-            "metadata": metadata
-        })
+
+        write_clean_log(
+            input_type,
+            {
+                "cleaned_text": cleaned_text,
+                "topic": topic,
+                "source": source,
+                "metadata": metadata,
+            },
+        )
         return {
             "cleaned_text": cleaned_text,
             "topic": topic,
@@ -57,8 +63,8 @@ def sanitize_input(input_type: str, payload: dict):
             "sanitization_stats": {
                 "lines": len(lines),
                 "original_length": len(raw_text),
-                "cleaned_length": len(cleaned_text)
-            }
+                "cleaned_length": len(cleaned_text),
+            },
         }
     else:
         cleaned = scrub_values(payload)

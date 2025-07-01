@@ -5,9 +5,11 @@ import requests
 
 router = APIRouter()
 
+
 class YouTubeTranscriptRequest(BaseModel):
     url: str
     topic: str
+
 
 @router.post("/input/youtube-transcript")
 def handle_youtube_transcript(request: YouTubeTranscriptRequest):
@@ -21,10 +23,7 @@ def handle_youtube_transcript(request: YouTubeTranscriptRequest):
             "raw_text": transcript,
             "source": "youtube",
             "topic": request.topic,
-            "metadata": {
-                "url": request.url,
-                "type": "video_transcript"
-            }
+            "metadata": {"url": request.url, "type": "video_transcript"},
         }
 
         # Forward to sanitizer service
@@ -33,9 +32,13 @@ def handle_youtube_transcript(request: YouTubeTranscriptRequest):
             response.raise_for_status()
             return {"status": "queued", "sanitizer_response": response.json()}
         except requests.exceptions.RequestException as e:
-            raise HTTPException(status_code=500, detail=f"Sanitizer service error: {str(e)}")
-            
+            raise HTTPException(
+                status_code=500, detail=f"Sanitizer service error: {str(e)}"
+            )
+
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error processing transcript: {str(e)}") 
+        raise HTTPException(
+            status_code=500, detail=f"Error processing transcript: {str(e)}"
+        )

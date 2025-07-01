@@ -17,7 +17,7 @@ class KubernetesDescriber:
     """
     Katie's Kubernetes resource describer with intelligent analysis
     """
-    
+
     def __init__(self):
         try:
             # Load kubeconfig
@@ -40,19 +40,19 @@ class KubernetesDescriber:
         """
         try:
             logger.info(f"Katie describing pod: {pod_name} in {namespace}")
-            
+
             # Get pod details
             pod = self.v1.read_namespaced_pod(pod_name, namespace)
-            
+
             # Analyze pod status
             status_analysis = self._analyze_pod_status(pod)
-            
+
             # Get pod logs (last 50 lines)
             logs = self._get_pod_logs(namespace, pod_name, tail_lines=50)
-            
+
             # Analyze resource usage
             resource_analysis = self._analyze_pod_resources(pod)
-            
+
             return {
                 "agent": "katie",
                 "operation": "describe_pod",
@@ -64,16 +64,16 @@ class KubernetesDescriber:
                 "recent_logs": logs,
                 "containers": self._extract_container_info(pod),
                 "events": self._get_pod_events(namespace, pod_name),
-                "katie_insight": self._generate_katie_insight(pod, status_analysis)
+                "katie_insight": self._generate_katie_insight(pod, status_analysis),
             }
-            
+
         except ApiException as e:
             logger.error(f"Kubernetes API error: {e}")
             return {
                 "agent": "katie",
                 "operation": "describe_pod",
                 "error": f"Pod {pod_name} not found or inaccessible: {e.reason}",
-                "status": "error"
+                "status": "error",
             }
         except Exception as e:
             logger.error(f"Pod description failed: {str(e)}")
@@ -81,28 +81,34 @@ class KubernetesDescriber:
                 "agent": "katie",
                 "operation": "describe_pod",
                 "error": f"Failed to describe pod: {str(e)}",
-                "status": "error"
+                "status": "error",
             }
 
-    def describe_deployment(self, namespace: str, deployment_name: str) -> Dict[str, Any]:
+    def describe_deployment(
+        self, namespace: str, deployment_name: str
+    ) -> Dict[str, Any]:
         """
         Describe a deployment with scaling and rollout analysis
         """
         try:
-            logger.info(f"Katie describing deployment: {deployment_name} in {namespace}")
-            
+            logger.info(
+                f"Katie describing deployment: {deployment_name} in {namespace}"
+            )
+
             # Get deployment details
-            deployment = self.apps_v1.read_namespaced_deployment(deployment_name, namespace)
-            
+            deployment = self.apps_v1.read_namespaced_deployment(
+                deployment_name, namespace
+            )
+
             # Get associated pods
             pods = self._get_deployment_pods(namespace, deployment_name)
-            
+
             # Analyze deployment status
             status_analysis = self._analyze_deployment_status(deployment, pods)
-            
+
             # Get rollout history
             rollout_history = self._get_rollout_history(deployment_name, namespace)
-            
+
             return {
                 "agent": "katie",
                 "operation": "describe_deployment",
@@ -112,22 +118,28 @@ class KubernetesDescriber:
                     "desired": deployment.spec.replicas,
                     "current": deployment.status.replicas,
                     "ready": deployment.status.ready_replicas,
-                    "available": deployment.status.available_replicas
+                    "available": deployment.status.available_replicas,
                 },
                 "status_analysis": status_analysis,
                 "rollout_history": rollout_history,
                 "pods": pods,
-                "strategy": deployment.spec.strategy.type if deployment.spec.strategy else "RollingUpdate",
-                "katie_insight": self._generate_deployment_insight(deployment, status_analysis)
+                "strategy": (
+                    deployment.spec.strategy.type
+                    if deployment.spec.strategy
+                    else "RollingUpdate"
+                ),
+                "katie_insight": self._generate_deployment_insight(
+                    deployment, status_analysis
+                ),
             }
-            
+
         except ApiException as e:
             logger.error(f"Kubernetes API error: {e}")
             return {
                 "agent": "katie",
                 "operation": "describe_deployment",
                 "error": f"Deployment {deployment_name} not found: {e.reason}",
-                "status": "error"
+                "status": "error",
             }
         except Exception as e:
             logger.error(f"Deployment description failed: {str(e)}")
@@ -135,7 +147,7 @@ class KubernetesDescriber:
                 "agent": "katie",
                 "operation": "describe_deployment",
                 "error": f"Failed to describe deployment: {str(e)}",
-                "status": "error"
+                "status": "error",
             }
 
     def describe_service(self, namespace: str, service_name: str) -> Dict[str, Any]:
@@ -144,16 +156,16 @@ class KubernetesDescriber:
         """
         try:
             logger.info(f"Katie describing service: {service_name} in {namespace}")
-            
+
             # Get service details
             service = self.v1.read_namespaced_service(service_name, namespace)
-            
+
             # Get endpoints
             endpoints = self._get_service_endpoints(namespace, service_name)
-            
+
             # Analyze service configuration
             config_analysis = self._analyze_service_config(service)
-            
+
             return {
                 "agent": "katie",
                 "operation": "describe_service",
@@ -165,16 +177,16 @@ class KubernetesDescriber:
                 "ports": self._extract_service_ports(service),
                 "endpoints": endpoints,
                 "config_analysis": config_analysis,
-                "katie_insight": self._generate_service_insight(service, endpoints)
+                "katie_insight": self._generate_service_insight(service, endpoints),
             }
-            
+
         except ApiException as e:
             logger.error(f"Kubernetes API error: {e}")
             return {
                 "agent": "katie",
                 "operation": "describe_service",
                 "error": f"Service {service_name} not found: {e.reason}",
-                "status": "error"
+                "status": "error",
             }
         except Exception as e:
             logger.error(f"Service description failed: {str(e)}")
@@ -182,7 +194,7 @@ class KubernetesDescriber:
                 "agent": "katie",
                 "operation": "describe_service",
                 "error": f"Failed to describe service: {str(e)}",
-                "status": "error"
+                "status": "error",
             }
 
     def describe_namespace(self, namespace: str) -> Dict[str, Any]:
@@ -191,16 +203,16 @@ class KubernetesDescriber:
         """
         try:
             logger.info(f"Katie describing namespace: {namespace}")
-            
+
             # Get namespace details
             ns = self.v1.read_namespace(namespace)
-            
+
             # Get resource counts
             resource_counts = self._get_namespace_resources(namespace)
-            
+
             # Get namespace events
             events = self._get_namespace_events(namespace)
-            
+
             return {
                 "agent": "katie",
                 "operation": "describe_namespace",
@@ -210,16 +222,16 @@ class KubernetesDescriber:
                 "events": events,
                 "labels": ns.metadata.labels,
                 "annotations": ns.metadata.annotations,
-                "katie_insight": self._generate_namespace_insight(ns, resource_counts)
+                "katie_insight": self._generate_namespace_insight(ns, resource_counts),
             }
-            
+
         except ApiException as e:
             logger.error(f"Kubernetes API error: {e}")
             return {
                 "agent": "katie",
                 "operation": "describe_namespace",
                 "error": f"Namespace {namespace} not found: {e.reason}",
-                "status": "error"
+                "status": "error",
             }
         except Exception as e:
             logger.error(f"Namespace description failed: {str(e)}")
@@ -227,7 +239,7 @@ class KubernetesDescriber:
                 "agent": "katie",
                 "operation": "describe_namespace",
                 "error": f"Failed to describe namespace: {str(e)}",
-                "status": "error"
+                "status": "error",
             }
 
     def describe_all_pods(self, namespace: str = "default") -> Dict[str, Any]:
@@ -236,16 +248,16 @@ class KubernetesDescriber:
         """
         try:
             logger.info(f"Katie describing all pods in namespace: {namespace}")
-            
+
             # Get all pods
             pods = self.v1.list_namespaced_pod(namespace)
-            
+
             # Analyze pod statuses
             status_summary = self._analyze_pod_status_summary(pods.items)
-            
+
             # Get resource usage summary
             resource_summary = self._analyze_resource_summary(pods.items)
-            
+
             return {
                 "agent": "katie",
                 "operation": "describe_all_pods",
@@ -254,30 +266,32 @@ class KubernetesDescriber:
                 "status_summary": status_summary,
                 "resource_summary": resource_summary,
                 "pods": [self._extract_pod_summary(pod) for pod in pods.items],
-                "katie_insight": self._generate_pod_summary_insight(status_summary, resource_summary)
+                "katie_insight": self._generate_pod_summary_insight(
+                    status_summary, resource_summary
+                ),
             }
-            
+
         except Exception as e:
             logger.error(f"Pod summary description failed: {str(e)}")
             return {
                 "agent": "katie",
                 "operation": "describe_all_pods",
                 "error": f"Failed to describe pods: {str(e)}",
-                "status": "error"
+                "status": "error",
             }
 
     def _analyze_pod_status(self, pod) -> Dict[str, Any]:
         """Analyze pod status and provide insights"""
         status = pod.status.phase
         conditions = pod.status.conditions if pod.status.conditions else []
-        
+
         analysis = {
             "status": status,
             "healthy": status == "Running",
             "issues": [],
-            "recommendations": []
+            "recommendations": [],
         }
-        
+
         # Check for common issues
         if status == "Pending":
             analysis["issues"].append("Pod is pending - check resource availability")
@@ -288,21 +302,27 @@ class KubernetesDescriber:
         elif status == "Unknown":
             analysis["issues"].append("Pod status unknown - check node connectivity")
             analysis["recommendations"].append("Verify node health and network")
-        
+
         # Check container statuses
         if pod.status.container_statuses:
             for container in pod.status.container_statuses:
                 if not container.ready:
                     analysis["issues"].append(f"Container {container.name} not ready")
-                    analysis["recommendations"].append(f"Check logs for container {container.name}")
-        
+                    analysis["recommendations"].append(
+                        f"Check logs for container {container.name}"
+                    )
+
         return analysis
 
-    def _get_pod_logs(self, namespace: str, pod_name: str, tail_lines: int = 50) -> List[str]:
+    def _get_pod_logs(
+        self, namespace: str, pod_name: str, tail_lines: int = 50
+    ) -> List[str]:
         """Get recent pod logs"""
         try:
-            logs = self.v1.read_namespaced_pod_log(pod_name, namespace, tail_lines=tail_lines)
-            return logs.split('\n') if logs else []
+            logs = self.v1.read_namespaced_pod_log(
+                pod_name, namespace, tail_lines=tail_lines
+            )
+            return logs.split("\n") if logs else []
         except Exception as e:
             logger.warning(f"Failed to get logs for {pod_name}: {e}")
             return []
@@ -310,26 +330,32 @@ class KubernetesDescriber:
     def _analyze_pod_resources(self, pod) -> Dict[str, Any]:
         """Analyze pod resource requests and limits"""
         containers = pod.spec.containers if pod.spec.containers else []
-        
+
         total_requests = {"cpu": "0", "memory": "0"}
         total_limits = {"cpu": "0", "memory": "0"}
-        
+
         for container in containers:
             if container.resources.requests:
                 for resource, value in container.resources.requests.items():
                     if resource in total_requests:
                         # Simple addition (in real implementation, parse units)
-                        total_requests[resource] = str(int(total_requests[resource]) + int(str(value).replace('m', '')))
-            
+                        total_requests[resource] = str(
+                            int(total_requests[resource])
+                            + int(str(value).replace("m", ""))
+                        )
+
             if container.resources.limits:
                 for resource, value in container.resources.limits.items():
                     if resource in total_limits:
-                        total_limits[resource] = str(int(total_limits[resource]) + int(str(value).replace('m', '')))
-        
+                        total_limits[resource] = str(
+                            int(total_limits[resource])
+                            + int(str(value).replace("m", ""))
+                        )
+
         return {
             "requests": total_requests,
             "limits": total_limits,
-            "containers": len(containers)
+            "containers": len(containers),
         }
 
     def _extract_container_info(self, pod) -> List[Dict[str, Any]]:
@@ -337,24 +363,32 @@ class KubernetesDescriber:
         containers = []
         if pod.status.container_statuses:
             for container in pod.status.container_statuses:
-                containers.append({
-                    "name": container.name,
-                    "ready": container.ready,
-                    "restart_count": container.restart_count,
-                    "state": container.state.type if container.state else "Unknown"
-                })
+                containers.append(
+                    {
+                        "name": container.name,
+                        "ready": container.ready,
+                        "restart_count": container.restart_count,
+                        "state": container.state.type if container.state else "Unknown",
+                    }
+                )
         return containers
 
     def _get_pod_events(self, namespace: str, pod_name: str) -> List[Dict[str, Any]]:
         """Get recent events for a pod"""
         try:
-            events = self.v1.list_namespaced_event(namespace, field_selector=f"involvedObject.name={pod_name}")
+            events = self.v1.list_namespaced_event(
+                namespace, field_selector=f"involvedObject.name={pod_name}"
+            )
             return [
                 {
                     "type": event.type,
                     "reason": event.reason,
                     "message": event.message,
-                    "last_timestamp": event.last_timestamp.isoformat() if event.last_timestamp else None
+                    "last_timestamp": (
+                        event.last_timestamp.isoformat()
+                        if event.last_timestamp
+                        else None
+                    ),
                 }
                 for event in events.items[:10]  # Last 10 events
             ]
@@ -373,41 +407,52 @@ class KubernetesDescriber:
             else:
                 return f"Pod {pod.metadata.name} status: {pod.status.phase}"
 
-    def _analyze_deployment_status(self, deployment, pods: List[Dict]) -> Dict[str, Any]:
+    def _analyze_deployment_status(
+        self, deployment, pods: List[Dict]
+    ) -> Dict[str, Any]:
         """Analyze deployment status and health"""
         desired = deployment.spec.replicas
         current = deployment.status.replicas
         ready = deployment.status.ready_replicas
-        
+
         analysis = {
             "healthy": ready == desired,
             "scaling": current != desired,
             "issues": [],
-            "recommendations": []
+            "recommendations": [],
         }
-        
+
         if ready < desired:
             analysis["issues"].append(f"Only {ready}/{desired} replicas are ready")
-            analysis["recommendations"].append("Check pod logs and events for failed replicas")
-        
+            analysis["recommendations"].append(
+                "Check pod logs and events for failed replicas"
+            )
+
         if current != desired:
-            analysis["issues"].append(f"Scaling in progress: {current}/{desired} replicas")
+            analysis["issues"].append(
+                f"Scaling in progress: {current}/{desired} replicas"
+            )
             analysis["recommendations"].append("Monitor scaling progress")
-        
+
         return analysis
 
-    def _get_deployment_pods(self, namespace: str, deployment_name: str) -> List[Dict[str, Any]]:
+    def _get_deployment_pods(
+        self, namespace: str, deployment_name: str
+    ) -> List[Dict[str, Any]]:
         """Get pods associated with a deployment"""
         try:
             pods = self.v1.list_namespaced_pod(
-                namespace, 
-                label_selector=f"app={deployment_name}"
+                namespace, label_selector=f"app={deployment_name}"
             )
             return [
                 {
                     "name": pod.metadata.name,
                     "status": pod.status.phase,
-                    "ready": pod.status.ready_replicas if hasattr(pod.status, 'ready_replicas') else None
+                    "ready": (
+                        pod.status.ready_replicas
+                        if hasattr(pod.status, "ready_replicas")
+                        else None
+                    ),
                 }
                 for pod in pods.items
             ]
@@ -415,27 +460,42 @@ class KubernetesDescriber:
             logger.warning(f"Failed to get deployment pods: {e}")
             return []
 
-    def _get_rollout_history(self, deployment_name: str, namespace: str) -> List[Dict[str, Any]]:
+    def _get_rollout_history(
+        self, deployment_name: str, namespace: str
+    ) -> List[Dict[str, Any]]:
         """Get deployment rollout history using kubectl"""
         try:
             result = subprocess.run(
-                ["kubectl", "rollout", "history", f"deployment/{deployment_name}", "-n", namespace],
+                [
+                    "kubectl",
+                    "rollout",
+                    "history",
+                    f"deployment/{deployment_name}",
+                    "-n",
+                    namespace,
+                ],
                 capture_output=True,
                 text=True,
-                timeout=30
+                timeout=30,
             )
-            
+
             if result.returncode == 0:
-                lines = result.stdout.strip().split('\n')
+                lines = result.stdout.strip().split("\n")
                 history = []
                 for line in lines[1:]:  # Skip header
                     if line.strip():
                         parts = line.split()
                         if len(parts) >= 2:
-                            history.append({
-                                "revision": parts[0],
-                                "change_cause": " ".join(parts[1:]) if len(parts) > 1 else "No change cause"
-                            })
+                            history.append(
+                                {
+                                    "revision": parts[0],
+                                    "change_cause": (
+                                        " ".join(parts[1:])
+                                        if len(parts) > 1
+                                        else "No change cause"
+                                    ),
+                                }
+                            )
                 return history
             else:
                 return []
@@ -443,7 +503,9 @@ class KubernetesDescriber:
             logger.warning(f"Failed to get rollout history: {e}")
             return []
 
-    def _generate_deployment_insight(self, deployment, status_analysis: Dict[str, Any]) -> str:
+    def _generate_deployment_insight(
+        self, deployment, status_analysis: Dict[str, Any]
+    ) -> str:
         """Generate Katie's insight about the deployment"""
         if status_analysis["healthy"]:
             return f"Deployment {deployment.metadata.name} is healthy with all replicas ready."
@@ -461,7 +523,7 @@ class KubernetesDescriber:
             "has_external_ip": bool(service.spec.external_ips),
             "load_balancer": service.spec.type == "LoadBalancer",
             "node_port": service.spec.type == "NodePort",
-            "cluster_internal": service.spec.type == "ClusterIP"
+            "cluster_internal": service.spec.type == "ClusterIP",
         }
 
     def _extract_service_ports(self, service) -> List[Dict[str, Any]]:
@@ -469,22 +531,32 @@ class KubernetesDescriber:
         ports = []
         if service.spec.ports:
             for port in service.spec.ports:
-                ports.append({
-                    "name": port.name,
-                    "port": port.port,
-                    "target_port": port.target_port,
-                    "protocol": port.protocol
-                })
+                ports.append(
+                    {
+                        "name": port.name,
+                        "port": port.port,
+                        "target_port": port.target_port,
+                        "protocol": port.protocol,
+                    }
+                )
         return ports
 
-    def _get_service_endpoints(self, namespace: str, service_name: str) -> List[Dict[str, Any]]:
+    def _get_service_endpoints(
+        self, namespace: str, service_name: str
+    ) -> List[Dict[str, Any]]:
         """Get service endpoints"""
         try:
             endpoints = self.v1.read_namespaced_endpoints(service_name, namespace)
             return [
                 {
-                    "addresses": [addr.ip for addr in subset.addresses] if subset.addresses else [],
-                    "ports": [port.port for port in subset.ports] if subset.ports else []
+                    "addresses": (
+                        [addr.ip for addr in subset.addresses]
+                        if subset.addresses
+                        else []
+                    ),
+                    "ports": (
+                        [port.port for port in subset.ports] if subset.ports else []
+                    ),
                 }
                 for subset in endpoints.subsets
             ]
@@ -506,12 +578,8 @@ class KubernetesDescriber:
             pods = len(self.v1.list_namespaced_pod(namespace).items)
             services = len(self.v1.list_namespaced_service(namespace).items)
             deployments = len(self.apps_v1.list_namespaced_deployment(namespace).items)
-            
-            return {
-                "pods": pods,
-                "services": services,
-                "deployments": deployments
-            }
+
+            return {"pods": pods, "services": services, "deployments": deployments}
         except Exception as e:
             logger.warning(f"Failed to get namespace resources: {e}")
             return {"pods": 0, "services": 0, "deployments": 0}
@@ -525,7 +593,11 @@ class KubernetesDescriber:
                     "type": event.type,
                     "reason": event.reason,
                     "message": event.message,
-                    "last_timestamp": event.last_timestamp.isoformat() if event.last_timestamp else None
+                    "last_timestamp": (
+                        event.last_timestamp.isoformat()
+                        if event.last_timestamp
+                        else None
+                    ),
                 }
                 for event in events.items[:10]  # Last 10 events
             ]
@@ -553,11 +625,13 @@ class KubernetesDescriber:
         """Analyze resource usage summary"""
         total_pods = len(pods)
         running_pods = len([p for p in pods if p.status.phase == "Running"])
-        
+
         return {
             "total": total_pods,
             "running": running_pods,
-            "healthy_percentage": (running_pods / total_pods * 100) if total_pods > 0 else 0
+            "healthy_percentage": (
+                (running_pods / total_pods * 100) if total_pods > 0 else 0
+            ),
         }
 
     def _extract_pod_summary(self, pod) -> Dict[str, Any]:
@@ -565,15 +639,28 @@ class KubernetesDescriber:
         return {
             "name": pod.metadata.name,
             "status": pod.status.phase,
-            "ready": pod.status.ready_replicas if hasattr(pod.status, 'ready_replicas') else None,
-            "restarts": sum(container.restart_count for container in pod.status.container_statuses) if pod.status.container_statuses else 0
+            "ready": (
+                pod.status.ready_replicas
+                if hasattr(pod.status, "ready_replicas")
+                else None
+            ),
+            "restarts": (
+                sum(
+                    container.restart_count
+                    for container in pod.status.container_statuses
+                )
+                if pod.status.container_statuses
+                else 0
+            ),
         }
 
-    def _generate_pod_summary_insight(self, status_summary: Dict[str, int], resource_summary: Dict[str, Any]) -> str:
+    def _generate_pod_summary_insight(
+        self, status_summary: Dict[str, int], resource_summary: Dict[str, Any]
+    ) -> str:
         """Generate Katie's insight about pod summary"""
         running = status_summary.get("Running", 0)
         total = resource_summary["total"]
-        
+
         if total == 0:
             return "No pods found in the namespace."
         elif running == total:
@@ -584,4 +671,4 @@ class KubernetesDescriber:
 
 
 # Global instance
-k8s_describer = KubernetesDescriber() 
+k8s_describer = KubernetesDescriber()

@@ -6,6 +6,7 @@ from selector import select_agent_for_task
 
 app = FastAPI(title="FickNury Evaluator")
 
+
 class TaskItem(BaseModel):
     task_id: str
     task_description: str
@@ -52,4 +53,4 @@ async def evaluate_tasks(request: Request):
 
 @app.get("/health")
 def health() -> Dict[str, str]:
-    return {"status": "healthy", "service": "ficknury-evaluator"} 
+    return {"status": "healthy", "service": "ficknury-evaluator"}

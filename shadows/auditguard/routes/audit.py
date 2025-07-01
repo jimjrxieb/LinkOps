@@ -66,22 +66,22 @@ async def get_audit_logs() -> Dict[str, Any]:
                 "action": "Repository Audit",
                 "user": "system",
                 "description": "Security audit completed for repository: github.com/example/repo",
-                "timestamp": "2 minutes ago"
+                "timestamp": "2 minutes ago",
             },
             {
                 "id": 2,
                 "action": "Compliance Check",
                 "user": "admin",
                 "description": "SOC 2 compliance assessment initiated",
-                "timestamp": "1 hour ago"
+                "timestamp": "1 hour ago",
             },
             {
                 "id": 3,
                 "action": "Security Scan",
                 "user": "system",
                 "description": "Automated security scan completed - 3 issues found",
-                "timestamp": "3 hours ago"
-            }
+                "timestamp": "3 hours ago",
+            },
         ]
     }
 
@@ -91,7 +91,7 @@ async def scan_repository(request: RepositoryScanRequest) -> Dict[str, Any]:
     """Scan repository for security issues and compliance."""
     try:
         logger.info("Repository scan requested for: %s", request.repository_url)
-        
+
         # Simulate repository scanning
         scan_results = {
             "compliance": "non-compliant",
@@ -103,7 +103,7 @@ async def scan_repository(request: RepositoryScanRequest) -> Dict[str, Any]:
                     "description": "API keys found in commit history",
                     "severity": "high",
                     "category": "Secrets Management",
-                    "file": "config/database.yml"
+                    "file": "config/database.yml",
                 },
                 {
                     "id": 2,
@@ -111,7 +111,7 @@ async def scan_repository(request: RepositoryScanRequest) -> Dict[str, Any]:
                     "description": "No password complexity requirements enforced",
                     "severity": "medium",
                     "category": "Authentication",
-                    "file": "auth/policy.json"
+                    "file": "auth/policy.json",
                 },
                 {
                     "id": 3,
@@ -119,8 +119,8 @@ async def scan_repository(request: RepositoryScanRequest) -> Dict[str, Any]:
                     "description": "Security headers not configured in web server",
                     "severity": "low",
                     "category": "Web Security",
-                    "file": "nginx.conf"
-                }
+                    "file": "nginx.conf",
+                },
             ],
             "recommendations": [
                 {
@@ -142,7 +142,7 @@ jobs:
       - name: Deploy to Kubernetes
         run: |
           kubectl apply -f k8s/
-          kubectl rollout status deployment/app"""
+          kubectl rollout status deployment/app""",
                 },
                 {
                     "id": 2,
@@ -157,7 +157,7 @@ jobs:
     scan-type: 'fs'
     scan-ref: '.'
     format: 'sarif'
-    output: 'trivy-results.sarif'"""
+    output: 'trivy-results.sarif'""",
                 },
                 {
                     "id": 3,
@@ -173,13 +173,13 @@ resource "aws_ecs_cluster" "main" {
     name  = "containerInsights"
     value = "enabled"
   }
-}"""
-                }
-            ]
+}""",
+                },
+            ],
         }
-        
+
         return scan_results
-        
+
     except Exception as exc:
         logger.error("Repository scan failed: %r", exc)
         raise HTTPException(
@@ -192,7 +192,7 @@ async def run_security_scan(request: SecurityScanRequest) -> Dict[str, Any]:
     """Run security scan on repository."""
     try:
         logger.info("Security scan requested for: %s", request.repository_url)
-        
+
         # Simulate security scan results
         scan_results = {
             "compliance": "non-compliant",
@@ -204,7 +204,7 @@ async def run_security_scan(request: SecurityScanRequest) -> Dict[str, Any]:
                     "description": "API keys found in commit history",
                     "severity": "high",
                     "category": "Secrets Management",
-                    "file": "config/database.yml"
+                    "file": "config/database.yml",
                 },
                 {
                     "id": 2,
@@ -212,7 +212,7 @@ async def run_security_scan(request: SecurityScanRequest) -> Dict[str, Any]:
                     "description": "No password complexity requirements enforced",
                     "severity": "medium",
                     "category": "Authentication",
-                    "file": "auth/policy.json"
+                    "file": "auth/policy.json",
                 },
                 {
                     "id": 3,
@@ -220,26 +220,26 @@ async def run_security_scan(request: SecurityScanRequest) -> Dict[str, Any]:
                     "description": "Security headers not configured in web server",
                     "severity": "low",
                     "category": "Web Security",
-                    "file": "nginx.conf"
-                }
-            ]
+                    "file": "nginx.conf",
+                },
+            ],
         }
-        
+
         return scan_results
-        
+
     except Exception as exc:
         logger.error("Security scan failed: %r", exc)
-        raise HTTPException(
-            status_code=500, detail=f"Security scan failed: {str(exc)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Security scan failed: {str(exc)}")
 
 
 @router.post("/gitops-recommendations")
-async def get_gitops_recommendations(request: GitOpsRecommendationsRequest) -> Dict[str, Any]:
+async def get_gitops_recommendations(
+    request: GitOpsRecommendationsRequest,
+) -> Dict[str, Any]:
     """Generate GitOps recommendations based on scan results."""
     try:
         logger.info("Generating GitOps recommendations")
-        
+
         recommendations = [
             {
                 "id": 1,
@@ -260,7 +260,7 @@ jobs:
       - name: Deploy to Kubernetes
         run: |
           kubectl apply -f k8s/
-          kubectl rollout status deployment/app"""
+          kubectl rollout status deployment/app""",
             },
             {
                 "id": 2,
@@ -275,7 +275,7 @@ jobs:
     scan-type: 'fs'
     scan-ref: '.'
     format: 'sarif'
-    output: 'trivy-results.sarif'"""
+    output: 'trivy-results.sarif'""",
             },
             {
                 "id": 3,
@@ -291,16 +291,17 @@ resource "aws_ecs_cluster" "main" {
     name  = "containerInsights"
     value = "enabled"
   }
-}"""
-            }
+}""",
+            },
         ]
-        
+
         return {"recommendations": recommendations}
-        
+
     except Exception as exc:
         logger.error("GitOps recommendations generation failed: %r", exc)
         raise HTTPException(
-            status_code=500, detail=f"GitOps recommendations generation failed: {str(exc)}"
+            status_code=500,
+            detail=f"GitOps recommendations generation failed: {str(exc)}",
         )
 
 
@@ -309,7 +310,7 @@ async def get_compliance_report(request: ComplianceReportRequest) -> Dict[str, A
     """Generate compliance report for repository."""
     try:
         logger.info("Generating compliance report for: %s", request.repository_url)
-        
+
         compliance_report = {
             "soc2": 85,
             "gdpr": 92,
@@ -321,12 +322,12 @@ async def get_compliance_report(request: ComplianceReportRequest) -> Dict[str, A
                 "Implement data encryption at rest",
                 "Add audit logging for all data access",
                 "Establish data retention policies",
-                "Conduct regular security assessments"
-            ]
+                "Conduct regular security assessments",
+            ],
         }
-        
+
         return compliance_report
-        
+
     except Exception as exc:
         logger.error("Compliance report generation failed: %r", exc)
         raise HTTPException(
@@ -339,7 +340,7 @@ async def validate_gitops_setup(config: Dict[str, Any]) -> Dict[str, Any]:
     """Validate GitOps setup configuration."""
     try:
         logger.info("Validating GitOps setup")
-        
+
         validation_result = {
             "valid": True,
             "score": 85,
@@ -347,12 +348,12 @@ async def validate_gitops_setup(config: Dict[str, Any]) -> Dict[str, Any]:
             "recommendations": [
                 "Consider adding automated testing to the pipeline",
                 "Implement rollback mechanisms",
-                "Add monitoring and alerting"
-            ]
+                "Add monitoring and alerting",
+            ],
         }
-        
+
         return validation_result
-        
+
     except Exception as exc:
         logger.error("GitOps validation failed: %r", exc)
         raise HTTPException(

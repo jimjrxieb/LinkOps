@@ -21,7 +21,7 @@ class TestHealthEndpoint:
         """Test health endpoint returns correct service info"""
         response = client.get("/health")
         assert response.status_code == 200
-        
+
         data = response.json()
         assert data["status"] == "healthy"
         assert data["service"] == "whis_webscraper"
@@ -36,22 +36,27 @@ class TestIntelligenceScraping:
         scrape_request = {
             "sources": ["blogs", "github", "agent_logs"],
             "hours_back": 24,
-            "send_to_sanitize": True
+            "send_to_sanitize": True,
         }
-        
-        with patch.object(WhisWebScraper, 'scrape_dev_blogs') as mock_blogs, \
-             patch.object(WhisWebScraper, 'scrape_github_trending') as mock_github, \
-             patch.object(AgentLogScraper, 'scrape_agent_logs') as mock_logs, \
-             patch.object(WhisSanitizeSender, 'send_batch_to_sanitize') as mock_sanitize:
-            
+
+        with patch.object(
+            WhisWebScraper, "scrape_dev_blogs"
+        ) as mock_blogs, patch.object(
+            WhisWebScraper, "scrape_github_trending"
+        ) as mock_github, patch.object(
+            AgentLogScraper, "scrape_agent_logs"
+        ) as mock_logs, patch.object(
+            WhisSanitizeSender, "send_batch_to_sanitize"
+        ) as mock_sanitize:
+
             mock_blogs.return_value = [{"title": "Test Blog", "source": "test"}]
             mock_github.return_value = [{"title": "Test Repo", "category": "test"}]
             mock_logs.return_value = [{"message": "Test Log", "agent": "test"}]
             mock_sanitize.return_value = {"success_count": 3, "error_count": 0}
-            
+
             response = client.post("/scrape/intelligence", json=scrape_request)
             assert response.status_code == 200
-            
+
             data = response.json()
             assert data["status"] == "completed"
             assert "blogs" in data["sources_scraped"]
@@ -65,15 +70,15 @@ class TestIntelligenceScraping:
         scrape_request = {
             "sources": ["blogs"],
             "hours_back": 12,
-            "send_to_sanitize": False
+            "send_to_sanitize": False,
         }
-        
-        with patch.object(WhisWebScraper, 'scrape_dev_blogs') as mock_blogs:
+
+        with patch.object(WhisWebScraper, "scrape_dev_blogs") as mock_blogs:
             mock_blogs.return_value = [{"title": "Test Blog", "source": "test"}]
-            
+
             response = client.post("/scrape/intelligence", json=scrape_request)
             assert response.status_code == 200
-            
+
             data = response.json()
             assert data["status"] == "completed"
             assert data["sources_scraped"] == ["blogs"]
@@ -84,20 +89,25 @@ class TestIntelligenceScraping:
 class TestWebSourcesScraping:
     def test_scrape_web_sources(self):
         """Test web sources scraping endpoint"""
-        with patch.object(WhisWebScraper, 'scrape_all_sources') as mock_scrape, \
-             patch.object(WhisSanitizeSender, 'send_batch_to_sanitize') as mock_sanitize:
-            
+        with patch.object(
+            WhisWebScraper, "scrape_all_sources"
+        ) as mock_scrape, patch.object(
+            WhisSanitizeSender, "send_batch_to_sanitize"
+        ) as mock_sanitize:
+
             mock_scrape.return_value = {
                 "blog_posts": [{"title": "Blog 1"}],
                 "github_trending": [{"title": "Repo 1"}],
                 "kubernetes_docs": [{"title": "Doc 1"}],
-                "terraform_guides": [{"title": "Guide 1"}]
+                "terraform_guides": [{"title": "Guide 1"}],
             }
             mock_sanitize.return_value = {"success_count": 4, "error_count": 0}
-            
-            response = client.post("/scrape/web_sources?hours_back=24&send_to_sanitize=true")
+
+            response = client.post(
+                "/scrape/web_sources?hours_back=24&send_to_sanitize=true"
+            )
             assert response.status_code == 200
-            
+
             data = response.json()
             assert data["status"] == "success"
             assert len(data["web_sources_scraped"]) == 4
@@ -105,18 +115,21 @@ class TestWebSourcesScraping:
 
     def test_scrape_blogs_only(self):
         """Test blog scraping endpoint"""
-        with patch.object(WhisWebScraper, 'scrape_dev_blogs') as mock_blogs, \
-             patch.object(WhisSanitizeSender, 'send_batch_to_sanitize') as mock_sanitize:
-            
+        with patch.object(
+            WhisWebScraper, "scrape_dev_blogs"
+        ) as mock_blogs, patch.object(
+            WhisSanitizeSender, "send_batch_to_sanitize"
+        ) as mock_sanitize:
+
             mock_blogs.return_value = [
                 {"title": "Blog 1", "source": "kubernetes_blog"},
-                {"title": "Blog 2", "source": "terraform_blog"}
+                {"title": "Blog 2", "source": "terraform_blog"},
             ]
             mock_sanitize.return_value = {"success_count": 2, "error_count": 0}
-            
+
             response = client.get("/scrape/blogs?hours_back=24&send_to_sanitize=true")
             assert response.status_code == 200
-            
+
             data = response.json()
             assert data["status"] == "success"
             assert data["blog_posts_scraped"] == 2
@@ -125,18 +138,21 @@ class TestWebSourcesScraping:
 
     def test_scrape_github_trending(self):
         """Test GitHub trending scraping endpoint"""
-        with patch.object(WhisWebScraper, 'scrape_github_trending') as mock_github, \
-             patch.object(WhisSanitizeSender, 'send_batch_to_sanitize') as mock_sanitize:
-            
+        with patch.object(
+            WhisWebScraper, "scrape_github_trending"
+        ) as mock_github, patch.object(
+            WhisSanitizeSender, "send_batch_to_sanitize"
+        ) as mock_sanitize:
+
             mock_github.return_value = [
                 {"title": "repo1", "category": "kubernetes"},
-                {"title": "repo2", "category": "terraform"}
+                {"title": "repo2", "category": "terraform"},
             ]
             mock_sanitize.return_value = {"success_count": 2, "error_count": 0}
-            
+
             response = client.get("/scrape/github_trending?send_to_sanitize=true")
             assert response.status_code == 200
-            
+
             data = response.json()
             assert data["status"] == "success"
             assert data["trending_repos_scraped"] == 2
@@ -147,30 +163,37 @@ class TestWebSourcesScraping:
 class TestAgentLogScraping:
     def test_scrape_agent_logs(self):
         """Test agent log scraping endpoint"""
-        with patch.object(AgentLogScraper, 'scrape_agent_logs') as mock_logs, \
-             patch.object(AgentLogScraper, 'extract_intelligence_patterns') as mock_patterns, \
-             patch.object(AgentLogScraper, 'generate_intelligence_report') as mock_report, \
-             patch.object(WhisSanitizeSender, 'send_batch_to_sanitize') as mock_sanitize:
-            
+        with patch.object(
+            AgentLogScraper, "scrape_agent_logs"
+        ) as mock_logs, patch.object(
+            AgentLogScraper, "extract_intelligence_patterns"
+        ) as mock_patterns, patch.object(
+            AgentLogScraper, "generate_intelligence_report"
+        ) as mock_report, patch.object(
+            WhisSanitizeSender, "send_batch_to_sanitize"
+        ) as mock_sanitize:
+
             mock_logs.return_value = [
                 {"message": "Error in deployment", "agent": "katie"},
-                {"message": "Successfully scaled", "agent": "katie"}
+                {"message": "Successfully scaled", "agent": "katie"},
             ]
             mock_patterns.return_value = {
                 "error_patterns": [{"pattern": "Error in deployment"}],
                 "success_patterns": [{"pattern": "Successfully scaled"}],
-                "summary": {"pattern_counts": {"errors": 1, "successes": 1}}
+                "summary": {"pattern_counts": {"errors": 1, "successes": 1}},
             }
             mock_report.return_value = {
                 "report_type": "agent_intelligence",
                 "insights": ["Found 1 error patterns"],
-                "recommendations": ["Review error patterns"]
+                "recommendations": ["Review error patterns"],
             }
             mock_sanitize.return_value = {"success_count": 2, "error_count": 0}
-            
-            response = client.post("/scrape/agent_logs?hours_back=24&send_to_sanitize=true")
+
+            response = client.post(
+                "/scrape/agent_logs?hours_back=24&send_to_sanitize=true"
+            )
             assert response.status_code == 200
-            
+
             data = response.json()
             assert data["status"] == "success"
             assert data["log_entries_scraped"] == 2
@@ -184,7 +207,7 @@ class TestReloopFunctionality:
         """Test reloop finding endpoint"""
         response = client.get("/reloop/test-task-123?send_to_sanitize=true")
         assert response.status_code == 200
-        
+
         data = response.json()
         assert data["status"] == "success"
         assert data["task_id"] == "test-task-123"
@@ -194,26 +217,23 @@ class TestReloopFunctionality:
 class TestSanitizeIntegration:
     def test_check_sanitize_health(self):
         """Test sanitize health check endpoint"""
-        with patch.object(WhisSanitizeSender, 'check_sanitize_health') as mock_health:
+        with patch.object(WhisSanitizeSender, "check_sanitize_health") as mock_health:
             mock_health.return_value = True
-            
+
             response = client.get("/sanitize/health")
             assert response.status_code == 200
-            
+
             data = response.json()
             assert data["sanitize_service_healthy"] is True
 
     def test_get_sanitize_stats(self):
         """Test sanitize stats endpoint"""
-        with patch.object(WhisSanitizeSender, 'get_sanitize_stats') as mock_stats:
-            mock_stats.return_value = {
-                "total_processed": 100,
-                "success_rate": 0.95
-            }
-            
+        with patch.object(WhisSanitizeSender, "get_sanitize_stats") as mock_stats:
+            mock_stats.return_value = {"total_processed": 100, "success_rate": 0.95}
+
             response = client.get("/sanitize/stats")
             assert response.status_code == 200
-            
+
             data = response.json()
             assert "sanitize_stats" in data
             assert data["sanitize_stats"]["total_processed"] == 100
@@ -224,7 +244,7 @@ class TestCapabilities:
         """Test capabilities endpoint"""
         response = client.get("/capabilities")
         assert response.status_code == 200
-        
+
         data = response.json()
         assert data["service"] == "whis_webscraper"
         assert data["version"] == "2.0.0"
@@ -243,33 +263,33 @@ class TestWhisWebScraper:
 
     def test_scrape_dev_blogs(self):
         """Test dev blog scraping"""
-        with patch.object(WhisWebScraper, '_scrape_rss_feed') as mock_rss:
+        with patch.object(WhisWebScraper, "_scrape_rss_feed") as mock_rss:
             mock_rss.return_value = [
                 {
-                    'title': 'Test Blog Post',
-                    'link': 'https://test.com/post',
-                    'summary': 'Test summary',
-                    'published': '2024-01-01T10:00:00Z'
+                    "title": "Test Blog Post",
+                    "link": "https://test.com/post",
+                    "summary": "Test summary",
+                    "published": "2024-01-01T10:00:00Z",
                 }
             ]
-            
+
             scraper = WhisWebScraper()
             results = scraper.scrape_dev_blogs(hours_back=24)
-            
+
             assert len(results) > 0
-            assert results[0]['title'] == 'Test Blog Post'
+            assert results[0]["title"] == "Test Blog Post"
 
     def test_scrape_github_trending(self):
         """Test GitHub trending scraping"""
-        with patch.object(WhisWebScraper, 'session') as mock_session:
+        with patch.object(WhisWebScraper, "session") as mock_session:
             mock_response = MagicMock()
             mock_response.content = '<html><body><article class="Box-row"><h2 class="h3">test/repo</h2><p>Test description</p></article></body></html>'
             mock_response.raise_for_status.return_value = None
             mock_session.get.return_value = mock_response
-            
+
             scraper = WhisWebScraper()
             results = scraper.scrape_github_trending()
-            
+
             assert len(results) > 0
 
 
@@ -283,18 +303,18 @@ class TestWhisSanitizeSender:
     def test_format_for_sanitize(self):
         """Test data formatting for sanitize"""
         sender = WhisSanitizeSender()
-        
+
         scraped_data = {
             "blog_posts": [
                 {
                     "title": "Test Blog",
                     "source": "test_blog",
                     "category": "test",
-                    "link": "https://test.com"
+                    "link": "https://test.com",
                 }
             ]
         }
-        
+
         formatted = sender.format_for_sanitize(scraped_data)
         assert len(formatted) == 1
         assert formatted[0]["title"] == "Test Blog"
@@ -302,15 +322,15 @@ class TestWhisSanitizeSender:
 
     def test_send_to_sanitize(self):
         """Test sending data to sanitize"""
-        with patch.object(WhisSanitizeSender, 'session') as mock_session:
+        with patch.object(WhisSanitizeSender, "session") as mock_session:
             mock_response = MagicMock()
             mock_response.json.return_value = {"status": "success", "id": "test-123"}
             mock_response.raise_for_status.return_value = None
             mock_session.post.return_value = mock_response
-            
+
             sender = WhisSanitizeSender()
             formatted_items = [{"title": "Test", "content": "Test content"}]
-            
+
             results = sender.send_to_sanitize(formatted_items)
             assert results["success_count"] == 1
             assert results["error_count"] == 0
@@ -327,41 +347,44 @@ class TestAgentLogScraper:
     def test_extract_intelligence_patterns(self):
         """Test pattern extraction from logs"""
         scraper = AgentLogScraper()
-        
+
         log_entries = [
             {
                 "message": "Error in deployment scaling",
                 "level": "ERROR",
                 "agent": "katie",
-                "category": "kubernetes_operations"
+                "category": "kubernetes_operations",
             },
             {
                 "message": "Successfully completed analysis",
-                "level": "INFO", 
+                "level": "INFO",
                 "agent": "igris",
-                "category": "infrastructure_analysis"
-            }
+                "category": "infrastructure_analysis",
+            },
         ]
-        
+
         patterns = scraper.extract_intelligence_patterns(log_entries)
         assert patterns["summary"]["pattern_counts"]["errors"] == 1
         assert patterns["summary"]["pattern_counts"]["successes"] == 1
 
     def test_generate_intelligence_report(self):
         """Test intelligence report generation"""
-        with patch.object(AgentLogScraper, 'scrape_agent_logs') as mock_logs, \
-             patch.object(AgentLogScraper, 'extract_intelligence_patterns') as mock_patterns:
-            
+        with patch.object(
+            AgentLogScraper, "scrape_agent_logs"
+        ) as mock_logs, patch.object(
+            AgentLogScraper, "extract_intelligence_patterns"
+        ) as mock_patterns:
+
             mock_logs.return_value = [{"message": "Test log", "agent": "test"}]
             mock_patterns.return_value = {
                 "error_patterns": [],
                 "success_patterns": [],
-                "summary": {"pattern_counts": {"errors": 0, "successes": 0}}
+                "summary": {"pattern_counts": {"errors": 0, "successes": 0}},
             }
-            
+
             scraper = AgentLogScraper()
             report = scraper.generate_intelligence_report(hours_back=24)
-            
+
             assert report["report_type"] == "agent_intelligence"
             assert "insights" in report
-            assert "recommendations" in report 
+            assert "recommendations" in report

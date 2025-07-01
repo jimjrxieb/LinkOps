@@ -18,37 +18,41 @@ async def activate_shadow_army():
             "Summoning Core Agents...",
             "Establishing Neural Links...",
             "Activating Command Protocols...",
-            "Shadow Army Online"
+            "Shadow Army Online",
         ]
-        
+
         # Log activation
         log_execution(
             f"arise-{datetime.utcnow().strftime('%Y%m%d-%H%M%S')}",
             "ARISE",
             "Shadow Army activation sequence completed successfully",
-            "success"
+            "success",
         )
-        
+
         return {
             "message": "ARISE... The LinkOps network is awake.",
             "status": "success",
             "timestamp": datetime.utcnow().isoformat(),
             "activation_steps": activation_steps,
             "shadow_agents": [
-                {"name": "Whis", "status": "online", "role": "Rune Forger & Shadow Brain"},
+                {
+                    "name": "Whis",
+                    "status": "online",
+                    "role": "Rune Forger & Shadow Brain",
+                },
                 {"name": "Igris", "status": "online", "role": "Platform Guardian"},
                 {"name": "Katie", "status": "online", "role": "Kubernetes Sentinel"},
                 {"name": "Ficknury", "status": "online", "role": "Task Evaluator"},
                 {"name": "James", "status": "online", "role": "Voice of the Monarch"},
-                {"name": "AuditGuard", "status": "online", "role": "Compliance Warden"}
-            ]
+                {"name": "AuditGuard", "status": "online", "role": "Compliance Warden"},
+            ],
         }
     except Exception as e:
         return {
             "message": "Activation failed",
             "status": "failed",
             "error": str(e),
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
 
