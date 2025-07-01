@@ -30,7 +30,6 @@ def receive_training_data(data: TrainingPayload):
         try:
             # Extract solution information
             task_id = data.payload.get("task_id", str(uuid.uuid4()))
-            task_description = data.payload.get("task_description", "")
             solution_path = data.payload.get("solution_path", [])
             result = data.payload.get("result", "Success")
 
@@ -58,7 +57,6 @@ def receive_training_data(data: TrainingPayload):
     try:
         # Extract task information
         task_id = data.payload.get("task_id", str(uuid.uuid4()))
-        description = data.payload.get("task_description", "")
 
         # Categorize the input
         category = categorize_input(data.input_type, data.payload)
