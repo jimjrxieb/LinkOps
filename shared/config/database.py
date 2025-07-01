@@ -14,8 +14,7 @@ logger = logging.getLogger(__name__)
 
 # Database configuration
 DATABASE_URL = os.getenv(
-    "DATABASE_URL", 
-    "postgresql://linkops:linkops@postgres:5432/linkops"
+    "DATABASE_URL", "postgresql://linkops:linkops@postgres:5432/linkops"
 )
 
 # Create SQLAlchemy engine
@@ -24,7 +23,7 @@ engine = create_engine(
     poolclass=StaticPool,
     pool_pre_ping=True,
     pool_recycle=300,
-    echo=os.getenv("SQL_ECHO", "false").lower() == "true"
+    echo=os.getenv("SQL_ECHO", "false").lower() == "true",
 )
 
 # Create session factory
@@ -33,6 +32,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # Create base class for models
 Base = declarative_base()
 
+
 def get_db():
     """Get database session"""
     db = SessionLocal()
@@ -40,6 +40,7 @@ def get_db():
         yield db
     finally:
         db.close()
+
 
 def init_db():
     """Initialize database tables"""
@@ -50,6 +51,7 @@ def init_db():
         logger.error(f"Failed to initialize database: {str(e)}")
         raise
 
+
 def check_db_connection():
     """Check database connection"""
     try:
@@ -58,4 +60,4 @@ def check_db_connection():
         return True
     except Exception as e:
         logger.error(f"Database connection failed: {str(e)}")
-        return False 
+        return False

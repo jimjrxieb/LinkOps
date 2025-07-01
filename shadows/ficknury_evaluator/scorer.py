@@ -133,7 +133,6 @@ class TaskScorer:
             )
 
             # Determine if any logic source is suitable
-            best_score = sorted_scores[0]["total_score"] if sorted_scores else 0
             suitable_sources = [s for s in sorted_scores if s["total_score"] >= 0.6]
 
             result = {

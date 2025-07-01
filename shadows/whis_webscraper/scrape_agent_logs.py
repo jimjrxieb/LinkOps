@@ -211,7 +211,7 @@ class AgentLogScraper:
                 today = datetime.now().date()
                 time_part = datetime.strptime(timestamp_str, "%H:%M:%S").time()
                 return datetime.combine(today, time_part)
-        except:
+        except Exception:
             return datetime.now()
 
     def _is_relevant_entry(self, message: str, keywords: List[str]) -> bool:

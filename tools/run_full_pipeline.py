@@ -9,7 +9,10 @@ import time
 
 MANUAL_ENDPOINT = "http://localhost:8000/api/input/manual"
 YOUTUBE_ENDPOINT = "http://localhost:8000/api/input/youtube-transcript"
-SMITHING_ENDPOINT = "http://localhost:8002/api/whis/smith-orbs"  # Example future endpoint
+SMITHING_ENDPOINT = (
+    "http://localhost:8002/api/whis/smith-orbs"  # Example future endpoint
+)
+
 
 def submit_manual():
     with open("tools/mocks/sample_task.json") as f:
@@ -19,6 +22,7 @@ def submit_manual():
     print("✅ Submission Response:", res.status_code, res.json())
     return res.ok
 
+
 def submit_youtube():
     with open("tools/mocks/sample_transcript.json") as f:
         payload = json.load(f)
@@ -27,15 +31,22 @@ def submit_youtube():
     print("✅ Submission Response:", res.status_code, res.json())
     return res.ok
 
+
 def simulate_smithing():
     print("🛠️  Simulating Orb & Rune Smithing... (stubbed for now)")
     time.sleep(1.5)
     print("✨ Orbs & Runes generated successfully.")
     return True
 
+
 def main():
     parser = argparse.ArgumentParser(description="Simulate full Whis MLOps pipeline.")
-    parser.add_argument("--type", choices=["manual", "youtube"], required=True, help="Type of input to simulate")
+    parser.add_argument(
+        "--type",
+        choices=["manual", "youtube"],
+        required=True,
+        help="Type of input to simulate",
+    )
 
     args = parser.parse_args()
 
@@ -59,5 +70,6 @@ def main():
     else:
         print("❌ Input submission failed.")
 
+
 if __name__ == "__main__":
-    main() 
+    main()

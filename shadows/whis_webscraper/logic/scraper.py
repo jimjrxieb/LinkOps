@@ -42,7 +42,6 @@ def extract_agent_insights(logs):
         return insights
 
     success_count = 0
-    error_patterns = {}
     agent_stats = {}
 
     for log in logs:

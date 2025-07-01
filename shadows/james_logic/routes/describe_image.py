@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 # James' persona for image descriptions
 JAMES_IMAGE_PROMPT = """
-You are James, the LinkOps Executive Assistant. 
+You are James, the LinkOps Executive Assistant.
 When describing images, be calm, precise, and professional.
 Focus on:
 - Clear identification of UI elements

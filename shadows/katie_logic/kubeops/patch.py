@@ -136,7 +136,7 @@ class KubernetesPatcher:
                 }
 
             # Apply patch
-            patched_configmap = self.v1.patch_namespaced_config_map(
+            self.v1.patch_namespaced_config_map(
                 configmap_name, namespace, patch_data
             )
 
@@ -193,7 +193,7 @@ class KubernetesPatcher:
                 }
 
             # Apply patch
-            patched_service = self.v1.patch_namespaced_service(
+            self.v1.patch_namespaced_service(
                 service_name, namespace, patch_data
             )
 

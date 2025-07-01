@@ -11,4 +11,4 @@ if transcript:
     print("✅ Transcript Downloaded:\n")
     print(transcript[:300] + "...")
 else:
-    print("❌ No transcript found.") 
+    print("❌ No transcript found.")

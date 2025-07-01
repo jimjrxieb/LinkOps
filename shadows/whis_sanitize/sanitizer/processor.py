@@ -37,7 +37,7 @@ def sanitize_input(input_type: str, payload: dict):
         cleaned = remove_garbage(remove_profanity(raw_text))
         # Split into lines, remove duplicates, join back
         lines = cleaned.splitlines()
-        lines = [l.strip() for l in lines if l.strip()]
+        lines = [line.strip() for line in lines if line.strip()]
         lines = remove_duplicates(lines)
         cleaned_text = "\n".join(lines)
         # Scrub PII and normalize

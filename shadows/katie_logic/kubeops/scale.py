@@ -55,7 +55,7 @@ class KubernetesScaler:
             deployment.spec.replicas = replicas
 
             # Apply the update
-            updated_deployment = self.apps_v1.patch_namespaced_deployment(
+            self.apps_v1.patch_namespaced_deployment(
                 deployment_name, namespace, deployment
             )
 
@@ -126,7 +126,7 @@ class KubernetesScaler:
             statefulset.spec.replicas = replicas
 
             # Apply the update
-            updated_statefulset = self.apps_v1.patch_namespaced_stateful_set(
+            self.apps_v1.patch_namespaced_stateful_set(
                 statefulset_name, namespace, statefulset
             )
 

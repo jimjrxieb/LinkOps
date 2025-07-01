@@ -283,7 +283,6 @@ class KubernetesDescriber:
     def _analyze_pod_status(self, pod) -> Dict[str, Any]:
         """Analyze pod status and provide insights"""
         status = pod.status.phase
-        conditions = pod.status.conditions if pod.status.conditions else []
 
         analysis = {
             "status": status,

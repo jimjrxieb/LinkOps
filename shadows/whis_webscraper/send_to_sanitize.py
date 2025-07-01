@@ -185,7 +185,7 @@ class WhisSanitizeSender:
                     priority += 2
                 elif days_old <= 7:
                     priority += 1
-            except:
+            except Exception:
                 pass
 
         # Boost priority for trending GitHub repos
@@ -196,7 +196,7 @@ class WhisSanitizeSender:
                     priority += 2
                 elif stars > 100:
                     priority += 1
-            except:
+            except Exception:
                 pass
 
         # Boost priority for official docs
@@ -231,7 +231,7 @@ class WhisSanitizeSender:
         try:
             response = self.session.get(f"{self.sanitize_url}/health")
             return response.status_code == 200
-        except:
+        except Exception:
             return False
 
     def get_sanitize_stats(self) -> Dict[str, Any]:
