@@ -136,9 +136,7 @@ class KubernetesPatcher:
                 }
 
             # Apply patch
-            self.v1.patch_namespaced_config_map(
-                configmap_name, namespace, patch_data
-            )
+            self.v1.patch_namespaced_config_map(configmap_name, namespace, patch_data)
 
             return {
                 "agent": "katie",
@@ -193,9 +191,7 @@ class KubernetesPatcher:
                 }
 
             # Apply patch
-            self.v1.patch_namespaced_service(
-                service_name, namespace, patch_data
-            )
+            self.v1.patch_namespaced_service(service_name, namespace, patch_data)
 
             return {
                 "agent": "katie",

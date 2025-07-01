@@ -296,8 +296,12 @@ class KubernetesLogAnalyzer:
 
                 summary_data[pod_name] = {
                     "log_count": len(log_lines),
-                    "error_count": len([line for line in log_lines if "error" in line.lower()]),
-                    "warning_count": len([line for line in log_lines if "warn" in line.lower()]),
+                    "error_count": len(
+                        [line for line in log_lines if "error" in line.lower()]
+                    ),
+                    "warning_count": len(
+                        [line for line in log_lines if "warn" in line.lower()]
+                    ),
                     "last_log_time": self._extract_last_log_time(log_lines),
                 }
 
