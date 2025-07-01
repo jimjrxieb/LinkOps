@@ -279,7 +279,7 @@ services:
     build: ./shadows/igris_logic
     container_name: linkops-igris-logic
     ports:
-      - "8005:8000"
+      - "8011:8000"
     volumes:
       - ./shadows/igris_logic:/app
       - ~/.aws:/root/.aws
@@ -302,7 +302,7 @@ services:
     build: ./shadows/katie_logic
     container_name: linkops-katie-logic
     ports:
-      - "8006:8000"
+      - "8012:8000"
     volumes:
       - ./shadows/katie_logic:/app
       - ~/.kube:/root/.kube:ro
@@ -311,6 +311,25 @@ services:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - KUBECONFIG=/root/.kube/config
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+  ### 🚀 AUDITMIGRATE LOGIC (Audit-Based Migration Execution)
+  auditmigrate_logic:
+    build: ./shadows/auditmigrate_logic
+    container_name: linkops-auditmigrate-logic
+    ports:
+      - "8010:8007"
+    volumes:
+      - ./shadows/auditmigrate_logic:/app
+      - ./shadows/auditmigrate_logic/generated_services:/app/generated_services
+    environment:
+      - DATABASE_URL=postgresql://linkops:${POSTGRES_PASSWORD:-linkops_password}@db:5432/linkops
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    command: uvicorn main:app --host 0.0.0.0 --port 8007 --reload
     depends_on:
       db:
         condition: service_healthy
