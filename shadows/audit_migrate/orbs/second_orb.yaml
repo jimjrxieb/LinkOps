@@ -1,0 +1,39 @@
+title: "Post-Push Shadow Loop: Auto-Fix + Rebuild"
+type: orb
+shadow: audit_migrate
+triggers:
+  - POST from igris_logic post-push fix
+  - CI/CD failure detection
+  - Manual error trigger
+output:
+  description: Self-healing pipeline with Cursor integration and auto-push
+  details:
+    - igris_logic detects post-push errors
+    - Triggers Cursor patch generation via audit_migrate
+    - Applies patches and auto-commits/pushes
+    - Re-validates service health
+    - Stores successful fixes as Runes for Whis learning
+core_endpoints:
+  - POST /post-push/fix (igris_logic)
+  - POST /patch (audit_migrate)
+  - POST /validate/scaffold (igris_logic)
+flow:
+  1: audit_migrate scaffolds and pushes
+  2: CI fails or deploy fails
+  3: igris_logic POST /post-push/fix { service_path }
+  4: Diagnoses error, sends fix prompt
+  5: audit_migrate POST /patch with Cursor prompt
+  6: Patch applied, git commit + push
+  7: igris re-validates
+  8: whis stores Rune if successful
+requirements:
+  - Error detection in scaffolded services
+  - Cursor integration for patch generation
+  - Git auto-commit and push capabilities
+  - Service re-validation
+  - Whis learning integration
+linked_agents:
+  - igris_logic (error detection)
+  - audit_migrate (patch application)
+  - whis_logic (learning storage)
+  - cursor (patch generation) 

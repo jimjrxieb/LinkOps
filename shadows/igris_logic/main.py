@@ -13,12 +13,14 @@ from analyzer import analyze_platform_components
 from infrastructure import generate_infrastructure_solution, generate_configurations
 from security import generate_security_recommendations
 from opendevin import simulate_opendevin_automation
-from routers import validate_scaffold
+from routers import validate_scaffold, post_push_fix, lint_router
 
 app = FastAPI(title="Igris Service - Platform Engineer")
 
 # Include routers
 app.include_router(validate_scaffold.router)
+app.include_router(post_push_fix.router)
+app.include_router(lint_router.router)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
