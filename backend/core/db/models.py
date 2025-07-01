@@ -46,4 +46,7 @@ class WhisQueue(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     def __repr__(self):
-        return f"<WhisQueue(id='{self.id}', task_id='{self.task_id}', source='{self.source}', status='{self.status}')>"
+        return (
+            f"<WhisQueue(id='{self.id}', task_id='{self.task_id}', "
+            f"source='{self.source}', status='{self.status}')>"
+        )
