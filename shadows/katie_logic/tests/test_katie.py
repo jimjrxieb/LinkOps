@@ -2,18 +2,21 @@
 Tests for Katie Kubernetes AI Agent
 """
 
+import os
+import sys
+from unittest.mock import MagicMock, patch
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
-import sys
-import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from main import app
-from kubeops.describe import k8s_describer
-from kubeops.scale import k8s_scaler
-from kubeops.logs import k8s_log_analyzer
-from kubeops.patch import k8s_patcher
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from kubeops.describe import k8s_describer  # noqa: E402
+from kubeops.logs import k8s_log_analyzer  # noqa: E402
+from kubeops.patch import k8s_patcher  # noqa: E402
+from kubeops.scale import k8s_scaler  # noqa: E402
+from main import app  # noqa: E402
 
 client = TestClient(app)
 
