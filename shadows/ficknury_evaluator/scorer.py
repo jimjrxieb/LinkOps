@@ -292,7 +292,8 @@ class TaskScorer:
                 "logic_source": scores[0]["logic_source"],
                 "confidence": "medium",
                 "reason": (
-                    f"Good match with {scores[0]['name']} " f"(score: {best_score:.2f})"
+                    f"Good match with {scores[0]['name']} "
+                    f"(score: {best_score:.2f})"
                 ),
             }
         elif best_score >= 0.4:
@@ -311,7 +312,9 @@ class TaskScorer:
                 "reason": (
                     f"Poor match with best logic source " f"(score: {best_score:.2f})"
                 ),
-                "suggestion": "Consider revising task requirements or adding new logic source",
+                "suggestion": (
+                    "Consider revising task requirements or adding new logic source"
+                ),
             }
 
     def get_logic_source_capabilities(
