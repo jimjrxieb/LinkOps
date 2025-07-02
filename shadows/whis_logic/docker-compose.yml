@@ -1,9 +1,10 @@
-  ### 🤖 FICKNURY AGENT COMMANDER SERVICE
-  ficknury:
-    build: ./shadows/ficknury
-    container_name: linkops-ficknury
-    ports:
-      - "8004:8004"
-    volumes:
-      - ./shadows/ficknury:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8004 --reload
+---
+### 🤖 FICKNURY AGENT COMMANDER SERVICE
+ficknury:
+  build: ./shadows/ficknury
+  container_name: linkops-ficknury
+  ports:
+    - "8004:8004"
+  volumes:
+    - ./shadows/ficknury:/app
+  command: uvicorn main:app --host 0.0.0.0 --port 8004 --reload

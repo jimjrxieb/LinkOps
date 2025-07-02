@@ -122,4 +122,4 @@ spec:
           secret:
             secretName: {{ .Values.volumes.azure_config.secretName }}
         {{- end }}
-      {{- end }} 
+      {{- end }}

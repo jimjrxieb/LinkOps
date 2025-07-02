@@ -1,9 +1,6 @@
 from fastapi import APIRouter, Body, HTTPException
 from pydantic import BaseModel
 from typing import Dict, List, Any, Optional
-import os
-import tempfile
-import shutil
 from logic.analyzer import RepoAnalyzer
 
 router = APIRouter(prefix="/scan", tags=["Repository Assessment"])

@@ -11,17 +11,17 @@ rules:
   - apiGroups: [""]
     resources: ["pods", "services", "configmaps", "secrets"]
     verbs: ["get", "list", "watch"]
-  
+
   # Infrastructure analysis
   - apiGroups: ["apps"]
     resources: ["deployments", "statefulsets"]
     verbs: ["get", "list", "watch"]
-  
+
   # Security assessment
   - apiGroups: [""]
     resources: ["events"]
     verbs: ["get", "list", "watch"]
-  
+
   # OpenDevin integration
   - apiGroups: [""]
     resources: ["pods/exec"]
@@ -44,4 +44,4 @@ roleRef:
   name: {{ include "igris-logic.fullname" . }}-role
   apiGroup: rbac.authorization.k8s.io
 {{- end }}
-{{- end }} 
+{{- end }}

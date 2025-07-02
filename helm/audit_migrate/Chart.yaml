@@ -1,0 +1,16 @@
+apiVersion: v2
+name: audit-migrate
+description: A Helm chart for Audit Migrate microservice
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - audit
+  - migrate
+  - microservice
+home: https://github.com/jimjrxieb/LinkOps-MLOps
+sources:
+  - https://github.com/jimjrxieb/LinkOps-MLOps
+maintainers:
+  - name: jimjrxieb
+    email: jimjrxieb@example.com 

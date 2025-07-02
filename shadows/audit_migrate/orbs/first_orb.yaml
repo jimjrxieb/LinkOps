@@ -1,3 +1,4 @@
+---
 title: "Repo → Plan → Scaffold: LinkOps Audit-to-Migrate Path"
 type: orb
 shadow: audit_migrate
@@ -32,4 +33,4 @@ linked_agents:
   - audit_assess
   - audit_logic
   - whis_logic
-  - igris_logic 
+  - igris_logic

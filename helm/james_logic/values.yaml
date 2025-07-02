@@ -108,4 +108,4 @@ readinessProbe:
     path: /health
     port: 8000
   initialDelaySeconds: 5
-  periodSeconds: 5 
+  periodSeconds: 5

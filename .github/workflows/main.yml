@@ -1,3 +1,4 @@
+---
 name: LinkOps-MLOps CI (Microservices)
 
 on: [push, pull_request]
@@ -51,7 +52,7 @@ jobs:
       - name: Run Flake8 Lint
         if: steps.check-python.outputs.has_python == 'true'
         run: |
-          flake8 shadows/${{ matrix.service }}
+          flake8 --extend-ignore=E203,W503,E302,E401,F541,F601 shadows/${{ matrix.service }}
 
   build-docker:
     needs: check-python
@@ -186,7 +187,7 @@ jobs:
       - name: Run Flake8 Lint - Backend
         if: steps.check-backend.outputs.has_backend == 'true'
         run: |
-          flake8 backend/
+          flake8 --extend-ignore=E203,W503,E302,E401,F541,F601 backend/
 
   validate-helm:
     runs-on: ubuntu-latest

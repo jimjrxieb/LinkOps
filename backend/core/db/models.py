@@ -6,8 +6,6 @@ from sqlalchemy import Column, String, Text, Boolean, DateTime, UUID
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 import uuid
-from typing import Dict, Any
-import sys
 
 Base = declarative_base()
 

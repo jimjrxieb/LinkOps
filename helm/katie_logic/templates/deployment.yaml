@@ -81,4 +81,4 @@ spec:
         - name: kubeconfig
           secret:
             secretName: {{ .Values.volumes.kubeconfig.secretName }}
-      {{- end }} 
+      {{- end }}

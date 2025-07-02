@@ -1,3 +1,4 @@
+---
 title: "Lint → Patch → Push → Learn: Automated Code Quality Loop"
 type: orb
 shadow: audit_migrate
@@ -50,4 +51,4 @@ lint_errors_handled:
   - E231: missing whitespace after comma
   - E711: comparison to None
   - E712: comparison to True
-  - E713: test for membership 
+  - E713: test for membership

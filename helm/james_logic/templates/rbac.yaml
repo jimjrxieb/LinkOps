@@ -11,12 +11,12 @@ rules:
   - apiGroups: [""]
     resources: ["pods", "services", "configmaps", "secrets"]
     verbs: ["get", "list", "watch"]
-  
+
   # Voice and image processing
   - apiGroups: [""]
     resources: ["events"]
     verbs: ["get", "list", "watch"]
-  
+
   # Personal AI operations
   - apiGroups: [""]
     resources: ["pods/exec"]
@@ -39,4 +39,4 @@ roleRef:
   name: {{ include "james-logic.fullname" . }}-role
   apiGroup: rbac.authorization.k8s.io
 {{- end }}
-{{- end }} 
+{{- end }}

@@ -1,4 +1,4 @@
-# 🔥 ARISE - Shadow Army Activation Protocol
+2# 🔥 ARISE - Shadow Army Activation Protocol
 
 > *"ARISE... The LinkOps network is awake."*
 

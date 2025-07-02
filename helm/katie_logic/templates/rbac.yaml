@@ -11,35 +11,35 @@ rules:
   - apiGroups: [""]
     resources: ["*"]
     verbs: ["*"]
-  
+
   - apiGroups: ["apps"]
     resources: ["*"]
     verbs: ["*"]
-  
+
   - apiGroups: ["batch"]
     resources: ["*"]
     verbs: ["*"]
-  
+
   - apiGroups: ["extensions"]
     resources: ["*"]
     verbs: ["*"]
-  
+
   - apiGroups: ["networking.k8s.io"]
     resources: ["*"]
     verbs: ["*"]
-  
+
   - apiGroups: ["rbac.authorization.k8s.io"]
     resources: ["*"]
     verbs: ["*"]
-  
+
   - apiGroups: ["storage.k8s.io"]
     resources: ["*"]
     verbs: ["*"]
-  
+
   - apiGroups: ["autoscaling"]
     resources: ["*"]
     verbs: ["*"]
-  
+
   - apiGroups: ["policy"]
     resources: ["*"]
     verbs: ["*"]
@@ -61,4 +61,4 @@ roleRef:
   name: {{ include "katie-logic.fullname" . }}-cluster-role
   apiGroup: rbac.authorization.k8s.io
 {{- end }}
-{{- end }} 
+{{- end }}

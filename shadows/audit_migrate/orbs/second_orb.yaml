@@ -1,3 +1,4 @@
+---
 title: "Post-Push Shadow Loop: Auto-Fix + Rebuild"
 type: orb
 shadow: audit_migrate
@@ -36,4 +37,4 @@ linked_agents:
   - igris_logic (error detection)
   - audit_migrate (patch application)
   - whis_logic (learning storage)
-  - cursor (patch generation) 
+  - cursor (patch generation)

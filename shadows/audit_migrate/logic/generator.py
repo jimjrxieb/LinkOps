@@ -457,22 +457,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pytest pytest-asyncio
-    
+
     - name: Run tests
       run: |
         pytest tests/ -v
-    
+
     - name: Run linting
       run: |
         pip install flake8 black
@@ -488,20 +488,20 @@ jobs:
       packages: write
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Log in to Container Registry
       uses: docker/login-action@v3
       with:
         registry: ${{{{ env.REGISTRY }}}}
         username: ${{{{ github.actor }}}}
         password: ${{{{ secrets.GITHUB_TOKEN }}}}
-    
+
     - name: Extract metadata
       id: meta
       uses: docker/metadata-action@v5
       with:
         images: ${{{{ env.REGISTRY }}}}/${{{{ env.IMAGE_NAME }}}}
-    
+
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:

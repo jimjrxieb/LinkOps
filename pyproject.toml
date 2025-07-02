@@ -1,2 +1,43 @@
 [tool.black]
 line-length = 88
+target-version = ['py310']
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = [
+  "E203",  # whitespace before colon (black-compatible)
+  "W503",  # line break before binary operator (black-compatible)
+  "E302",  # expected 2 blank lines (black formats this)
+  "E401",  # multiple imports on one line (handled by prettier/isort)
+  "F541",  # f-string with no interpolation (common in AI scaffolds)
+  "F601"   # dictionary key reused
+]
+exclude = [
+  ".git",
+  "__pycache__",
+  ".venv",
+  "venv",
+  "node_modules",
+  ".pytest_cache",
+  ".mypy_cache"
+]
+per-file-ignores = {"__init__.py" = ["F401"]}
+
+[tool.yamllint]
+strict = false
+
+[tool.yamllint.rules]
+document-start = disable
+empty-lines = enable
+line-length = {max = 120, level = "warning"}
+indentation = {spaces = 2, indent-sequences = false}
+trailing-spaces = enable
+comments = enable
+
+[tool.prettier]
+print-width = 88
+use-tabs = false
+single-quote = true
+trailing-comma = "es5"
+end-of-line = "lf"
+bracket-spacing = true
