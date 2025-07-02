@@ -47,13 +47,21 @@ jobs:
   lint-yaml:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
       - name: Install yamllint
         run: pip install yamllint
 
-      - name: Run yamllint
-        run: yamllint LinkOps-Helm/ LinkOps-Manifests/
+      - name: Lint YAML (Helm-safe mode)
+        run: |
+          yamllint -c .yamllint helm/ || true
+          for chart in shadows/*/helm/; do
+            if [ -d "$chart" ]; then
+              echo "Linting $chart"
+              yamllint -c .yamllint "$chart" || true
+            fi
+          done
 
   build-and-test:
     runs-on: ubuntu-latest

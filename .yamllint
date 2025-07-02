@@ -1,0 +1,24 @@
+extends: default
+
+rules:
+  # Basic formatting
+  document-start: disable
+  comments-indentation: disable
+  truthy: disable
+  trailing-spaces: disable  # Helm templates often have trailing spaces
+  
+  # Indentation - more flexible for GitHub Actions
+  indentation:
+    spaces: 2
+    indent-sequences: false
+    check-multi-line-strings: false
+  
+  # Line length - more lenient for complex workflows
+  line-length:
+    max: 140
+    allow-non-breakable-inline-mappings: true
+  
+  # Empty values - Helm-friendly
+  empty-values:
+    forbid-in-block-mappings: false
+    forbid-in-flow-mappings: false
