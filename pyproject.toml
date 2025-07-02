@@ -27,12 +27,12 @@ per-file-ignores = {"__init__.py" = ["F401"]}
 strict = false
 
 [tool.yamllint.rules]
-document-start = disable
-empty-lines = enable
+document-start = false
+empty-lines = true
 line-length = {max = 120, level = "warning"}
 indentation = {spaces = 2, indent-sequences = false}
-trailing-spaces = enable
-comments = enable
+trailing-spaces = true
+comments = true
 
 [tool.prettier]
 print-width = 88

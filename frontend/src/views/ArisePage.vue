@@ -91,8 +91,8 @@
       </div>
     </div>
 
-    <!-- Audio Element for Voice Activation -->
-    <audio ref="activationAudio" preload="auto">
+    <!-- Audio Element for Voice Activation (only if file exists) -->
+    <audio v-if="audioFileExists" ref="activationAudio" preload="auto" @error="handleAudioError">
       <source src="/audio/arise-activation.mp3" type="audio/mpeg">
     </audio>
   </div>
@@ -109,6 +109,7 @@ export default {
     const router = useRouter()
     const isActivating = ref(false)
     const activationAudio = ref(null)
+    const audioFileExists = ref(false)
 
     const shadowAgents = ref([
       { name: 'Whis', icon: '🧠', status: 'offline', description: 'Rune Forger & Shadow Brain' },
@@ -182,7 +183,7 @@ export default {
         activationSteps.value[4].active = false
         
         // Play activation sound if available
-        if (activationAudio.value) {
+        if (activationAudio.value && audioFileExists.value) {
           try {
             await activationAudio.value.play()
           } catch (error) {
@@ -204,24 +205,34 @@ export default {
       }
     }
 
+    const handleAudioError = () => {
+      console.error('Audio playback error')
+    }
+
+    // Check if audio file exists
+    const checkAudioFile = async () => {
+      try {
+        const response = await fetch('/audio/arise-activation.mp3', { method: 'HEAD' })
+        audioFileExists.value = response.ok
+      } catch (error) {
+        audioFileExists.value = false
+        console.log('Audio file not available')
+      }
+    }
+
     onMounted(() => {
-      // Check initial health status
-      apiUtils.checkAllServices().then(healthStatus => {
-        shadowAgents.value.forEach(agent => {
-          const serviceName = agent.name.toLowerCase().replace(/\s+/g, '')
-          if (healthStatus[serviceName]) {
-            agent.status = 'online'
-          }
-        })
-      })
+      checkAudioFile()
     })
 
     return {
-      isActivating,
       shadowAgents,
+      isActivating,
       activationSteps,
       activationAudio,
-      activateShadowArmy
+      activateShadowArmy,
+      handleAudioError,
+      audioFileExists,
+      checkAudioFile
     }
   }
 }
