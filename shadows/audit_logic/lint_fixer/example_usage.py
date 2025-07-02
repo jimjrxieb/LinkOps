@@ -44,7 +44,7 @@ python lint_runner.py /path/to/your/repo 88
 
 # The script will:
 # 1. Run flake8 on all Python files
-# 2. Run black formatting on all Python files  
+# 2. Run black formatting on all Python files
 # 3. Run yamllint on all YAML files
 # 4. Run prettier formatting on all YAML files
 # 5. Provide a summary of results

@@ -161,20 +161,24 @@ def lint_and_fix_repo(
                     stats["errors"].append(f"YAML linting failed: {full_path}")
 
     # Print summary
-    print(f"\n📊 Linting Summary:")
+    print("\n📊 Linting Summary:")
     print(
-        f"   Python files: {stats['python_files']} processed, {stats['python_success']} successful"
+        "   Python files: {} processed, {} successful".format(
+            stats["python_files"], stats["python_success"]
+        )
     )
     print(
-        f"   YAML files: {stats['yaml_files']} processed, {stats['yaml_success']} successful"
+        "   YAML files: {} processed, {} successful".format(
+            stats["yaml_files"], stats["yaml_success"]
+        )
     )
 
     if stats["errors"]:
-        print(f"\n❌ Errors encountered:")
+        print("\n❌ Errors encountered:")
         for error in stats["errors"]:
             print(f"   - {error}")
     else:
-        print(f"\n✅ All files processed successfully!")
+        print("\n✅ All files processed successfully!")
 
     return stats
 

@@ -3,12 +3,9 @@ Shared Agent Log Model
 Database model for agent logs used across LinkOps microservices
 """
 
-from sqlalchemy import Column, Integer, String, Text, DateTime, JSON, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String, Text, DateTime, JSON
 from sqlalchemy.sql import func
-from datetime import datetime
 from typing import Optional, Dict, Any
-
 from shared.config.database import Base
 
 

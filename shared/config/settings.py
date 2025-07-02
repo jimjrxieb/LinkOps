@@ -3,8 +3,7 @@ Shared Settings Configuration
 Environment variables and configuration management for LinkOps microservices
 """
 
-import os
-from typing import Optional, List
+from typing import Optional
 from pydantic import BaseSettings, Field
 
 
