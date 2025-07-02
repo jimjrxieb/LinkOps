@@ -24,7 +24,9 @@ jobs:
           - whis_webscraper
           - whis_smithing
           - whis_enhance
-          - auditguard
+          - audit_assess
+          - audit_logic
+          - audit_migrate
           - ficknury_deploy
           - ficknury_evaluator
     steps:
