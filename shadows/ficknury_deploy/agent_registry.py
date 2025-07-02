@@ -31,7 +31,7 @@ class AgentRegistry:
                 "agents": {
                     "igris_logic": {
                         "agent_name": "igris",
-                        "description": "Platform Engineering Agent",
+                        "description": ("Platform Engineering Agent"),
                         "capabilities": [
                             "Infrastructure Analysis",
                             "Security Assessment",
@@ -39,7 +39,9 @@ class AgentRegistry:
                             "Platform Engineering",
                         ],
                         "deployment_config": {
-                            "image": "ghcr.io/shadow-link-industries/igris_logic:latest",
+                            "image": (
+                                "ghcr.io/shadow-link-industries/igris_logic:latest"
+                            ),
                             "port": 8000,
                             "env": {"LOG_LEVEL": "INFO", "OPENAI_MODEL": "gpt-4"},
                             "resources": {
@@ -53,7 +55,7 @@ class AgentRegistry:
                     },
                     "katie_logic": {
                         "agent_name": "katie",
-                        "description": "Kubernetes AI Agent & Cluster Guardian",
+                        "description": ("Kubernetes AI Agent & Cluster Guardian"),
                         "capabilities": [
                             "Cluster Management",
                             "Resource Scaling",
@@ -62,7 +64,9 @@ class AgentRegistry:
                             "SRE Operations",
                         ],
                         "deployment_config": {
-                            "image": "ghcr.io/shadow-link-industries/katie_logic:latest",
+                            "image": (
+                                "ghcr.io/shadow-link-industries/katie_logic:latest"
+                            ),
                             "port": 8000,
                             "env": {
                                 "LOG_LEVEL": "INFO",
@@ -87,7 +91,7 @@ class AgentRegistry:
                     },
                     "whis_logic": {
                         "agent_name": "whis",
-                        "description": "Intelligence Processing & Analysis Agent",
+                        "description": ("Intelligence Processing & Analysis Agent"),
                         "capabilities": [
                             "Data Processing",
                             "Intelligence Analysis",
@@ -95,7 +99,9 @@ class AgentRegistry:
                             "ML Model Integration",
                         ],
                         "deployment_config": {
-                            "image": "ghcr.io/shadow-link-industries/whis_logic:latest",
+                            "image": (
+                                "ghcr.io/shadow-link-industries/whis_logic:latest"
+                            ),
                             "port": 8000,
                             "env": {
                                 "LOG_LEVEL": "INFO",
@@ -114,7 +120,7 @@ class AgentRegistry:
                     },
                     "james_logic": {
                         "agent_name": "james",
-                        "description": "Personal AI Assistant & Executive Agent",
+                        "description": ("Personal AI Assistant & Executive Agent"),
                         "capabilities": [
                             "Voice Interaction",
                             "Image Processing",
@@ -122,7 +128,9 @@ class AgentRegistry:
                             "Personal AI",
                         ],
                         "deployment_config": {
-                            "image": "ghcr.io/shadow-link-industries/james_logic:latest",
+                            "image": (
+                                "ghcr.io/shadow-link-industries/james_logic:latest"
+                            ),
                             "port": 8000,
                             "env": {
                                 "LOG_LEVEL": "INFO",

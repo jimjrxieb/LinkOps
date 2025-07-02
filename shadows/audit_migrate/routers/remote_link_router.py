@@ -64,7 +64,8 @@ async def link_from_assess(request: AssessPlanRequest = Body(...)):
 async def link_from_repo(request: RepoScanRequest = Body(...)):
     """Trigger full chain: audit_assess → audit_migrate"""
     try:
-        # from .service_connector import ServiceConnector  # Uncomment if you have this module
+        # from .service_connector import ServiceConnector
+        # Uncomment if you have this module
 
         class ServiceConnector:
             async def call_audit_assess_scan(self, repo_url, branch):
@@ -158,8 +159,7 @@ async def create_remote_link(request: RemoteLinkRequest = Body(...)) -> Dict[str
 
     except Exception as e:
         raise HTTPException(
-            status_code=500,
-            detail=f"Failed to create remote link: {str(e)}"
+            status_code=500, detail=f"Failed to create remote link: {str(e)}"
         )
 
 

@@ -106,7 +106,8 @@ async def get_suggestions():
                 "category": "Deployment",
                 "title": "Implement ArgoCD for GitOps",
                 "description": (
-                    "Replace manual deployments with ArgoCD for automated GitOps workflows"
+                    "Replace manual deployments with ArgoCD for automated "
+                    "GitOps workflows"
                 ),
                 "priority": "high",
                 "implementation_steps": [

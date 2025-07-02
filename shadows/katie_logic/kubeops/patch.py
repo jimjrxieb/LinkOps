@@ -262,9 +262,7 @@ class KubernetesPatcher:
                 return {
                     "agent": "katie",
                     "operation": "apply_manifest",
-                    "error": (
-                        f"Manifest application failed: {result.stderr}"
-                    ),
+                    "error": (f"Manifest application failed: {result.stderr}"),
                     "status": "error",
                 }
 
@@ -602,9 +600,7 @@ class KubernetesPatcher:
             "namespace": namespace,
             "patch_applied": False,
             "status": "dry_run",
-            "katie_insight": (
-                f"DRY RUN: Would update Service {service_name}"
-            ),
+            "katie_insight": (f"DRY RUN: Would update Service {service_name}"),
         }
 
     def _dry_run_apply_manifest(

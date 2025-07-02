@@ -144,10 +144,12 @@ class TaskScorer:
                 "scored_at": "{{datetime.now().isoformat()}}",
             }
 
-            logger.info(
-                f"Task scoring complete. Best: "
-                f"{result['best_logic_source']['logic_source'] if result['best_logic_source'] else 'None'}"
+            best_source = (
+                result["best_logic_source"]["logic_source"]
+                if result["best_logic_source"]
+                else "None"
             )
+            logger.info(f"Task scoring complete. Best: {best_source}")
             return result
 
         except Exception as e:

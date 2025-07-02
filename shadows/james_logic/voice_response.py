@@ -6,8 +6,6 @@ Generates James' signature calm, powerful voice responses
 from typing import Dict, Any, Optional
 import logging
 import random
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
@@ -151,7 +149,10 @@ class JamesVoiceGenerator:
                 "error_response",
                 f"There are {len(alerts)} alerts requiring attention",
                 context={
-                    "details": f"Out of {total_services} services, {len(healthy_services)} are healthy."
+                    "details": (
+                        f"Out of {total_services} services, "
+                        f"{len(healthy_services)} are healthy."
+                    )
                 },
             )
         else:

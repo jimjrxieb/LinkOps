@@ -265,12 +265,13 @@ class AuditScorer:
         # Add specific area explanations
         if gitops_score < 0.5:
             explanations.append(
-                "GitOps practices need improvement - consider implementing ArgoCD or Flux."
+                "GitOps practices need improvement - "
+                "consider implementing ArgoCD or Flux."
             )
         if security_score < 0.6:
             explanations.append(
-                "Security posture requires enhancement - review secrets management "
-                "and access controls."
+                "Security posture requires enhancement - review secrets "
+                "management and access controls."
             )
         if architecture_score < 0.5:
             explanations.append(

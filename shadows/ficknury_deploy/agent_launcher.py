@@ -194,7 +194,8 @@ class AgentLauncher:
 
             if result.returncode == 0:
                 logger.info(
-                    f"Successfully applied ArgoCD application: {app_manifest['metadata']['name']}"
+                    f"Successfully applied ArgoCD application: "
+                    f"{app_manifest['metadata']['name']}"
                 )
                 return True
             else:

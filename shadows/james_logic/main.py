@@ -4,8 +4,7 @@ from routes import chat, actions, explain, describe_image, voice
 app = FastAPI(
     title="James – LinkOps Executive Assistant",
     description=(
-        "Your personal J.A.R.V.I.S. for LinkOps with voice and "
-        "vision capabilities"
+        "Your personal J.A.R.V.I.S. for LinkOps with voice and " "vision capabilities"
     ),
     version="2.0.0",
 )

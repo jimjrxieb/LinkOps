@@ -225,8 +225,7 @@ async def james_conversation(audio: UploadFile = File(...)) -> Dict[str, Any]:
     except Exception as e:
         logger.error(f"James conversation failed: {str(e)}")
         raise HTTPException(
-            status_code=500,
-            detail=f"Conversation processing failed: {str(e)}"
+            status_code=500, detail=f"Conversation processing failed: {str(e)}"
         )
 
 

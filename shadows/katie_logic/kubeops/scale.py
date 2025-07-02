@@ -554,9 +554,7 @@ spec:
                 {
                     "type": "scale_down",
                     "priority": "low",
-                    "description": (
-                        "Consider scaling down to optimize resource usage"
-                    ),
+                    "description": ("Consider scaling down to optimize resource usage"),
                     "action": "scale_down",
                     "suggested_replicas": max(current_replicas - 1, 2),
                 }

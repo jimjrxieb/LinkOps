@@ -73,7 +73,8 @@ async def deploy_agent(request: DeployRequest, background_tasks: BackgroundTasks
         if not agent_config:
             raise HTTPException(
                 status_code=404,
-                detail=f"No agent configuration found for logic source: {request.logic_source}",
+                detail=f"No agent configuration found for logic source: "
+                f"{request.logic_source}",
             )
 
         # Check if already deployed (unless force redeploy)
@@ -98,7 +99,8 @@ async def deploy_agent(request: DeployRequest, background_tasks: BackgroundTasks
         if not launch_result["success"]:
             raise HTTPException(
                 status_code=500,
-                detail=f"Agent deployment failed: {launch_result.get('error', 'Unknown error')}",
+                detail=f"Agent deployment failed: "
+                f"{launch_result.get('error', 'Unknown error')}",
             )
 
         # Create response

@@ -153,9 +153,7 @@ class Flake8LintParser:
             "E304": f"Remove blank lines after decorator on line {line_num}",
             "E305": f"Add 2 blank lines after class/function definition on line {line_num}",
             "E306": f"Add blank line before nested definition on line {line_num}",
-            "E401": f"Separate imports on line {line_num}",
             "E402": f"Move import to top of file (line {line_num})",
-            "E501": f"Break long line {line_num} into multiple lines",
             "E502": f"Remove redundant backslash on line {line_num}",
             "E701": f"Split multiple statements on line {line_num}",
             "E702": f"Remove semicolon on line {line_num}",
@@ -174,24 +172,25 @@ class Flake8LintParser:
             "E902": f"Fix file I/O error on line {line_num}",
             "W191": f"Replace tabs with spaces on line {line_num}",
             "W291": f"Remove trailing whitespace on line {line_num}",
-            "W292": f"Add newline at end of file",
+            "W292": "Add newline at end of file",
             "W293": f"Remove whitespace from blank line {line_num}",
             "W391": f"Remove blank line at end of file",
             "W503": f"Move line break after binary operator on line {line_num}",
             "W504": f"Move line break before binary operator on line {line_num}",
             "W505": f"Break long docstring on line {line_num}",
             "W601": f"Use 'in' instead of '.has_key()' on line {line_num}",
-            "W602": (
-                f"Use 'raise Exception()' instead of 'raise Exception, value' "
-                f"on line {line_num}"
-            ),
+            "W602": "Use 'raise Exception()' instead of 'raise Exception, value' on line {line_num}",
             "W603": f"Use '!=' instead of '<>' on line {line_num}",
             "W604": f"Use 'repr()' instead of backticks on line {line_num}",
             "W605": f"Fix invalid escape sequence on line {line_num}",
             "W606": f"Use 'async'/'await' keywords properly on line {line_num}",
         }
 
-        return suggestions.get(error_code, f"Fix {error_code} error on line {line_num}")
+        return (
+            suggestions.get(error_code, f"Fix {error_code} error on line {line_num}")
+            if error_code != "W602"
+            else suggestions["W602"].format(line_num=line_num)
+        )
 
     def create_cursor_prompt(self, errors: List[Dict[str, Any]]) -> str:
         """Create a Cursor prompt for fixing lint errors"""
