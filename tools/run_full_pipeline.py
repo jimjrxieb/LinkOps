@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Simulate a full Whis data flow: Manual or YouTube input → Sanitizer → (simulated) Smithing → Log Output
+Simulate a full Whis data flow: Manual or YouTube input → Sanitizer →
+(simulated) Smithing → Log Output
 """
 import argparse
 import requests

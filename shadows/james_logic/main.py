@@ -3,7 +3,10 @@ from routes import chat, actions, explain, describe_image, voice
 
 app = FastAPI(
     title="James – LinkOps Executive Assistant",
-    description="Your personal J.A.R.V.I.S. for LinkOps with voice and vision capabilities",
+    description=(
+        "Your personal J.A.R.V.I.S. for LinkOps with voice and "
+        "vision capabilities"
+    ),
     version="2.0.0",
 )
 
@@ -18,21 +21,14 @@ app.include_router(voice.router)
 @app.get("/health")
 def health():
     return {
+        "agent": "james",
+        "operation": "health_check",
         "status": "healthy",
-        "service": "james",
-        "role": "LinkOps Executive Assistant",
         "capabilities": [
-            "Voice Input/Output",
-            "Image Analysis & Description",
-            "System Status Monitoring",
-            "Agent Communication",
-            "Natural Language Processing",
-            "Screenshot Analysis",
-            "Conversation Management",
+            "voice_interaction",
+            "image_processing",
+            "task_management",
+            "executive_assistance",
         ],
-        "voice_characteristics": {
-            "tone": "calm_powerful",
-            "inspiration": "Giancarlo Esposito",
-            "style": "elegant_authority",
-        },
+        "version": "2.0.0",
     }

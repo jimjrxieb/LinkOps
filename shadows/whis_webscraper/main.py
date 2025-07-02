@@ -7,7 +7,6 @@ from fastapi import FastAPI, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 from typing import Dict, List, Any, Optional
 import logging
-import asyncio
 from datetime import datetime
 
 # Import Whis WebScraper modules
@@ -136,7 +135,8 @@ async def scrape_intelligence(
         )
 
         logger.info(
-            f"Intelligence scraping completed: {total_items} items from {len(sources_scraped)} sources"
+            f"Intelligence scraping completed: {total_items} items "
+            f"from {len(sources_scraped)} sources"
         )
         return response
 

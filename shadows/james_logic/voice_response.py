@@ -3,9 +3,11 @@ James Voice Response Module
 Generates James' signature calm, powerful voice responses
 """
 
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, Optional
 import logging
 import random
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 

@@ -3,12 +3,10 @@ Whis WebScraper - Send to Sanitize Module
 Sends scraped intelligence to whis_sanitize for processing and training queue
 """
 
-import requests
-import json
 import logging
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 from datetime import datetime
-import yaml
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +48,10 @@ class WhisSanitizeSender:
                     },
                     "priority": self._calculate_priority(item),
                     "tags": self._generate_tags(item),
-                    "processing_notes": f"Auto-scraped by Whis WebScraper from {item.get('source', 'unknown')}",
+                    "processing_notes": (
+                        f"Auto-scraped by Whis WebScraper from "
+                        f"{item.get('source', 'unknown')}"
+                    ),
                 }
 
                 formatted_items.append(formatted_item)
@@ -119,7 +120,8 @@ class WhisSanitizeSender:
                 logger.error(f"Unexpected error processing item: {str(e)}")
 
         logger.info(
-            f"Sanitize processing complete: {results['success_count']} success, {results['error_count']} errors"
+            f"Sanitize processing complete: {results['success_count']} success, "
+            f"{results['error_count']} errors"
         )
         return results
 

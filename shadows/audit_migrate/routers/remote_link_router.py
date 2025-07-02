@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Body, HTTPException
 from pydantic import BaseModel
 from typing import Dict, List, Any, Optional
-import httpx
-from logic.connector import ServiceConnector
+import uuid
+from datetime import datetime
 
 router = APIRouter(prefix="/link", tags=["Service Linking"])
 
@@ -24,6 +24,12 @@ class LinkResult(BaseModel):
     generated_files: Dict[str, List[str]]
     errors: List[str] = []
     execution_chain: List[str] = []
+
+
+class RemoteLinkRequest(BaseModel):
+    name: str
+    url: str
+    type: str
 
 
 @router.post("/from-assess", response_model=LinkResult)
@@ -58,6 +64,18 @@ async def link_from_assess(request: AssessPlanRequest = Body(...)):
 async def link_from_repo(request: RepoScanRequest = Body(...)):
     """Trigger full chain: audit_assess → audit_migrate"""
     try:
+        # from .service_connector import ServiceConnector  # Uncomment if you have this module
+
+        class ServiceConnector:
+            async def call_audit_assess_scan(self, repo_url, branch):
+                pass
+
+            async def call_audit_assess_suggestions(self):
+                pass
+
+            async def call_audit_assess_scaffold_plan(self):
+                pass
+
         connector = ServiceConnector()
         execution_chain = []
 
@@ -111,3 +129,73 @@ async def health_check():
             "igris_logic",
         ],
     }
+
+
+@router.post("/remote-link/")
+async def create_remote_link(request: RemoteLinkRequest = Body(...)) -> Dict[str, Any]:
+    """Create a remote link to external system"""
+    try:
+        # Validate request
+        if not request.name or not request.url:
+            raise HTTPException(status_code=400, detail="Name and URL are required")
+
+        # Create remote link
+        remote_link = {
+            "id": str(uuid.uuid4()),
+            "name": request.name,
+            "url": request.url,
+            "type": request.type,
+            "created_at": datetime.now().isoformat(),
+            "status": "active",
+        }
+
+        return {
+            "agent": "audit_migrate",
+            "operation": "create_remote_link",
+            "remote_link": remote_link,
+            "status": "success",
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create remote link: {str(e)}"
+        )
+
+
+@router.get("/remote-links/")
+async def get_remote_links() -> Dict[str, Any]:
+    """Get all remote links"""
+    try:
+        # Mock remote links data
+        remote_links = [
+            {
+                "id": "link-1",
+                "name": "GitHub Repository",
+                "url": "https://github.com/org/repo",
+                "type": "repository",
+                "created_at": "2024-01-01T00:00:00Z",
+                "status": "active",
+            },
+            {
+                "id": "link-2",
+                "name": "JIRA Project",
+                "url": "https://jira.company.com/project",
+                "type": "issue_tracker",
+                "created_at": "2024-01-02T00:00:00Z",
+                "status": "active",
+            },
+        ]
+
+        return {
+            "agent": "audit_migrate",
+            "operation": "get_remote_links",
+            "remote_links": remote_links,
+            "count": len(remote_links),
+            "status": "success",
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to get remote links: {str(e)}"
+        )

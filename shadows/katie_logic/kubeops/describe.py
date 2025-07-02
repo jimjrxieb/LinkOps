@@ -4,9 +4,8 @@ Handles all describe operations for Kubernetes resources
 """
 
 import subprocess
-import json
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Dict, List, Any
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
@@ -404,7 +403,10 @@ class KubernetesDescriber:
             if issues:
                 return f"Pod {pod.metadata.name} has issues: {'; '.join(issues[:2])}"
             else:
-                return f"Pod {pod.metadata.name} status: {pod.status.phase}"
+                return (
+                    f"Pod {pod.metadata.name} is running on node {pod.spec.node_name} "
+                    f"with IP {pod.status.pod_ip}."
+                )
 
     def _analyze_deployment_status(
         self, deployment, pods: List[Dict]
@@ -507,13 +509,22 @@ class KubernetesDescriber:
     ) -> str:
         """Generate Katie's insight about the deployment"""
         if status_analysis["healthy"]:
-            return f"Deployment {deployment.metadata.name} is healthy with all replicas ready."
+            return (
+                f"Deployment {deployment.metadata.name} is healthy "
+                f"with all replicas ready."
+            )
         else:
             issues = status_analysis["issues"]
             if issues:
-                return f"Deployment {deployment.metadata.name} needs attention: {'; '.join(issues[:2])}"
+                return (
+                    f"Deployment {deployment.metadata.name} needs attention: "
+                    f"{'; '.join(issues[:2])}"
+                )
             else:
-                return f"Deployment {deployment.metadata.name} status: {deployment.status.phase}"
+                return (
+                    f"Deployment {deployment.metadata.name} status: "
+                    f"{deployment.status.phase}"
+                )
 
     def _analyze_service_config(self, service) -> Dict[str, Any]:
         """Analyze service configuration"""
@@ -566,10 +577,16 @@ class KubernetesDescriber:
     def _generate_service_insight(self, service, endpoints: List[Dict]) -> str:
         """Generate Katie's insight about the service"""
         if not endpoints:
-            return f"Service {service.metadata.name} has no endpoints - check pod selectors."
+            return (
+                f"Service {service.metadata.name} has no endpoints - "
+                f"check pod selectors."
+            )
         else:
             total_endpoints = sum(len(ep["addresses"]) for ep in endpoints)
-            return f"Service {service.metadata.name} is healthy with {total_endpoints} endpoints."
+            return (
+                f"Service {service.metadata.name} is healthy with "
+                f"{total_endpoints} endpoints."
+            )
 
     def _get_namespace_resources(self, namespace: str) -> Dict[str, int]:
         """Get resource counts for a namespace"""
@@ -608,9 +625,12 @@ class KubernetesDescriber:
         """Generate Katie's insight about the namespace"""
         total_resources = sum(resource_counts.values())
         if total_resources == 0:
-            return f"Namespace {ns.metadata.name} is empty - ready for deployments."
+            return f"Namespace {ns.metadata.name} is empty - " f"ready for deployments."
         else:
-            return f"Namespace {ns.metadata.name} contains {total_resources} resources and is active."
+            return (
+                f"Namespace {ns.metadata.name} contains {total_resources} "
+                f"resources and is active."
+            )
 
     def _analyze_pod_status_summary(self, pods: List) -> Dict[str, int]:
         """Analyze pod status summary"""

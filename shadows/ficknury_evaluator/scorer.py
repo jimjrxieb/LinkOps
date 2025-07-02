@@ -4,11 +4,9 @@ Evaluates tasks against logic source capabilities and selects appropriate agents
 """
 
 import requests
-import json
 import logging
 from typing import Dict, List, Any, Optional
 from pathlib import Path
-import yaml
 
 logger = logging.getLogger(__name__)
 
@@ -147,7 +145,8 @@ class TaskScorer:
             }
 
             logger.info(
-                f"Task scoring complete. Best: {result['best_logic_source']['logic_source'] if result['best_logic_source'] else 'None'}"
+                f"Task scoring complete. Best: "
+                f"{result['best_logic_source']['logic_source'] if result['best_logic_source'] else 'None'}"
             )
             return result
 
@@ -280,26 +279,36 @@ class TaskScorer:
                 "action": "approve",
                 "logic_source": scores[0]["logic_source"],
                 "confidence": "high",
-                "reason": f"Excellent match with {scores[0]['name']} (score: {best_score:.2f})",
+                "reason": (
+                    f"Excellent match with {scores[0]['name']} "
+                    f"(score: {best_score:.2f})"
+                ),
             }
         elif best_score >= 0.6:
             return {
                 "action": "approve",
                 "logic_source": scores[0]["logic_source"],
                 "confidence": "medium",
-                "reason": f"Good match with {scores[0]['name']} (score: {best_score:.2f})",
+                "reason": (
+                    f"Good match with {scores[0]['name']} " f"(score: {best_score:.2f})"
+                ),
             }
         elif best_score >= 0.4:
             return {
                 "action": "approve_with_fallback",
                 "logic_source": scores[0]["logic_source"],
                 "confidence": "low",
-                "reason": f"Moderate match with {scores[0]['name']} (score: {best_score:.2f}), will use fallback",
+                "reason": (
+                    f"Moderate match with {scores[0]['name']} "
+                    f"(score: {best_score:.2f}), will use fallback"
+                ),
             }
         else:
             return {
                 "action": "reject",
-                "reason": f"Poor match with best logic source (score: {best_score:.2f})",
+                "reason": (
+                    f"Poor match with best logic source " f"(score: {best_score:.2f})"
+                ),
                 "suggestion": "Consider revising task requirements or adding new logic source",
             }
 

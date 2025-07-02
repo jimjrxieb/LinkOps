@@ -69,28 +69,34 @@ async def get_suggestions():
             {
                 "name": "auth-service",
                 "description": "Authentication and authorization microservice",
-                "reasoning": "Separate authentication logic to improve security and scalability",
+                "reasoning": (
+                    "Separate authentication logic to improve security and scalability"
+                ),
                 "complexity": "medium",
                 "dependencies": ["user-service", "permission-service"],
             },
             {
                 "name": "notification-service",
                 "description": "Centralized notification handling",
-                "reasoning": "Consolidate all notification logic for better maintainability",
+                "reasoning": (
+                    "Consolidate all notification logic for better maintainability"
+                ),
                 "complexity": "low",
                 "dependencies": ["user-service"],
             },
             {
                 "name": "api-gateway",
                 "description": "API Gateway for external access",
-                "reasoning": "Provide unified entry point and handle cross-cutting concerns",
+                "reasoning": (
+                    "Provide unified entry point and handle cross-cutting concerns"
+                ),
                 "complexity": "medium",
                 "dependencies": ["auth-service", "rate-limiting"],
             },
             {
                 "name": "monitoring-service",
                 "description": "Centralized monitoring and observability",
-                "reasoning": "Implement comprehensive monitoring for all services",
+                "reasoning": ("Implement comprehensive monitoring for all services"),
                 "complexity": "high",
                 "dependencies": ["logging-service", "metrics-service"],
             },
@@ -99,7 +105,9 @@ async def get_suggestions():
             {
                 "category": "Deployment",
                 "title": "Implement ArgoCD for GitOps",
-                "description": "Replace manual deployments with ArgoCD for automated GitOps workflows",
+                "description": (
+                    "Replace manual deployments with ArgoCD for automated GitOps workflows"
+                ),
                 "priority": "high",
                 "implementation_steps": [
                     "Install ArgoCD in the cluster",
@@ -111,7 +119,9 @@ async def get_suggestions():
             {
                 "category": "Configuration",
                 "title": "Centralize Configuration Management",
-                "description": "Use ConfigMaps and Secrets with external secret management",
+                "description": (
+                    "Use ConfigMaps and Secrets with external secret management"
+                ),
                 "priority": "medium",
                 "implementation_steps": [
                     "Implement HashiCorp Vault or AWS Secrets Manager",
@@ -123,7 +133,9 @@ async def get_suggestions():
             {
                 "category": "CI/CD",
                 "title": "Enhance CI/CD Pipeline",
-                "description": "Add security scanning, testing, and automated quality gates",
+                "description": (
+                    "Add security scanning, testing, and automated quality gates"
+                ),
                 "priority": "high",
                 "implementation_steps": [
                     "Add security vulnerability scanning",
@@ -135,7 +147,9 @@ async def get_suggestions():
             {
                 "category": "Monitoring",
                 "title": "Implement Service Mesh",
-                "description": "Add Istio or Linkerd for service-to-service communication",
+                "description": (
+                    "Add Istio or Linkerd for service-to-service communication"
+                ),
                 "priority": "medium",
                 "implementation_steps": [
                     "Install and configure Istio",
@@ -244,3 +258,24 @@ async def get_scaffold_plan():
             "Perform security audit and penetration testing",
         ],
     }
+
+
+@router.post("/scan-results/")
+async def scan_results(scan_id: str, results: List[Dict[str, Any]]):
+    """Receive and process scan results"""
+    try:
+        return {
+            "agent": "audit_assess",
+            "operation": "scan_router",
+            "scan_id": scan_id,
+            "status": "completed",
+            "results": results,
+            "insight": (
+                f"Scan completed successfully with {len(results)} "
+                f"assessment results"
+            ),
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to process scan results: {str(e)}"
+        )

@@ -4,13 +4,11 @@ Provides calm, precise descriptions of uploaded images and screenshots
 """
 
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from fastapi.responses import JSONResponse
 from typing import Dict, Any
 import logging
 import io
 from PIL import Image
 import pytesseract
-import requests
 
 router = APIRouter(prefix="/api", tags=["image-analysis"])
 

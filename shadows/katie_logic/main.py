@@ -5,7 +5,7 @@ Handles all Kubernetes operations with intelligent analysis and K8GPT fallback
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, Optional
 import logging
 import requests
 
@@ -17,7 +17,9 @@ from kubeops.patch import k8s_patcher
 
 app = FastAPI(
     title="Katie - Kubernetes AI Agent",
-    description="Cluster Guardian with intelligent K8s operations and K8GPT integration",
+    description=(
+        "Cluster Guardian with intelligent K8s operations and K8GPT integration"
+    ),
     version="2.0.0",
 )
 
@@ -75,7 +77,8 @@ def execute(data: KubernetesTask):
     """
     try:
         logger.info(
-            f"Katie executing {data.task_type} on {data.resource_type}: {data.resource_name}"
+            f"Katie executing {data.task_type} on {data.resource_type}: "
+            f"{data.resource_name}"
         )
 
         # Execute the task based on type
@@ -427,14 +430,21 @@ def _get_k8gpt_insight(data: KubernetesTask, result: Dict[str, Any]) -> Optional
 def _generate_katie_response(data: KubernetesTask, result: Dict[str, Any]) -> str:
     """Generate Katie's response message"""
     if result.get("status") == "error":
-        return f"Katie encountered an issue with {data.task_type} on {data.resource_type} {data.resource_name}: {result.get('error', 'Unknown error')}"
+        return (
+            f"Katie encountered an issue with {data.task_type} on "
+            f"{data.resource_type} {data.resource_name}: "
+            f"{result.get('error', 'Unknown error')}"
+        )
 
     # Use Katie's insight if available
     if "katie_insight" in result:
         return result["katie_insight"]
 
     # Generate default response
-    return f"Katie successfully completed {data.task_type} operation on {data.resource_type} {data.resource_name}"
+    return (
+        f"Katie successfully completed {data.task_type} operation on "
+        f"{data.resource_type} {data.resource_name}"
+    )
 
 
 def _calculate_confidence(result: Dict[str, Any]) -> float:

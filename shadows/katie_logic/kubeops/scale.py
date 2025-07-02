@@ -211,7 +211,10 @@ class KubernetesScaler:
                         "target_cpu_percentage": target_cpu_percentage,
                     },
                     "status": "success",
-                    "katie_insight": f"Auto-scaling configured for {deployment_name} with CPU target of {target_cpu_percentage}%",
+                    "katie_insight": (
+                        f"Auto-scaling configured for {deployment_name} with CPU "
+                        f"target of {target_cpu_percentage}%"
+                    ),
                 }
             else:
                 return {
@@ -319,7 +322,10 @@ class KubernetesScaler:
                 "scaling_direction": "up" if replicas > current_replicas else "down",
                 "status": "dry_run",
                 "impact_analysis": impact_analysis,
-                "katie_insight": f"DRY RUN: Would scale {deployment_name} from {current_replicas} to {replicas} replicas",
+                "katie_insight": (
+                    f"DRY RUN: Would scale {deployment_name} from "
+                    f"{current_replicas} to {replicas} replicas"
+                ),
             }
         except Exception as e:
             return {
@@ -353,7 +359,10 @@ class KubernetesScaler:
                 "scaling_direction": "up" if replicas > current_replicas else "down",
                 "status": "dry_run",
                 "impact_analysis": impact_analysis,
-                "katie_insight": f"DRY RUN: Would scale {statefulset_name} from {current_replicas} to {replicas} replicas",
+                "katie_insight": (
+                    f"DRY RUN: Would scale {statefulset_name} from "
+                    f"{current_replicas} to {replicas} replicas"
+                ),
             }
         except Exception as e:
             return {
@@ -545,7 +554,9 @@ spec:
                 {
                     "type": "scale_down",
                     "priority": "low",
-                    "description": "Consider scaling down to optimize resource usage",
+                    "description": (
+                        "Consider scaling down to optimize resource usage"
+                    ),
                     "action": "scale_down",
                     "suggested_replicas": max(current_replicas - 1, 2),
                 }
@@ -558,11 +569,20 @@ spec:
     ) -> str:
         """Generate Katie's insight about scaling operation"""
         if target > current:
-            return f"Scaling {deployment_name} up from {current} to {target} replicas for better performance and availability."
+            return (
+                f"Scaling {deployment_name} up from {current} to {target} "
+                f"replicas for better performance and availability."
+            )
         elif target < current:
-            return f"Scaling {deployment_name} down from {current} to {target} replicas to optimize resource usage."
+            return (
+                f"Scaling {deployment_name} down from {current} to {target} "
+                f"replicas to optimize resource usage."
+            )
         else:
-            return f"No scaling needed for {deployment_name} - already at {current} replicas."
+            return (
+                f"No scaling needed for {deployment_name} - already at "
+                f"{current} replicas."
+            )
 
     def _generate_statefulset_scaling_insight(
         self, statefulset_name: str, current: int, target: int, impact: Dict[str, Any]
@@ -573,9 +593,15 @@ spec:
         )
 
         if target < current:
-            return f"{base_insight} Note: Statefulset scaling down requires careful consideration of data persistence."
+            return (
+                f"{base_insight} Note: Statefulset scaling down requires "
+                f"careful consideration of data persistence."
+            )
         else:
-            return f"{base_insight} Statefulset scaling will provision persistent volumes for new replicas."
+            return (
+                f"{base_insight} Statefulset scaling will provision "
+                f"persistent volumes for new replicas."
+            )
 
     def _generate_recommendation_insight(
         self, recommendations: List[Dict[str, Any]]

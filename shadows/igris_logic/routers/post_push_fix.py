@@ -2,7 +2,6 @@ from fastapi import APIRouter, Body, HTTPException
 from pydantic import BaseModel
 from typing import Dict, List, Any, Optional
 import requests
-import subprocess
 from pathlib import Path
 import logging
 

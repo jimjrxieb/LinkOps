@@ -1,7 +1,5 @@
 import os
-import json
-from typing import Dict, List, Any
-from pathlib import Path
+from typing import Dict, Any, List
 
 
 class ServiceGenerator:
@@ -38,7 +36,8 @@ class ServiceGenerator:
 
             except Exception as e:
                 errors.append(
-                    f"Failed to generate {service_config.get('name', 'unknown')}: {str(e)}"
+                    f"Failed to generate {service_config.get('name', 'unknown')}: "
+                    f"{str(e)}"
                 )
 
         return {

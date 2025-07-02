@@ -316,7 +316,10 @@ class RepoAnalyzer:
                     {
                         "type": "microservice",
                         "confidence": "high",
-                        "evidence": f"Found service directories: {[d for d in dirs if 'service' in d.lower()]}",
+                        "evidence": (
+                            f"Found service directories: "
+                            f"{[d for d in dirs if 'service' in d.lower()]}"
+                        ),
                     }
                 )
 
@@ -325,7 +328,10 @@ class RepoAnalyzer:
                     {
                         "type": "api-gateway",
                         "confidence": "medium",
-                        "evidence": f"Found API directories: {[d for d in dirs if 'api' in d.lower()]}",
+                        "evidence": (
+                            f"Found API directories: "
+                            f"{[d for d in dirs if 'api' in d.lower()]}"
+                        ),
                     }
                 )
 
@@ -334,7 +340,10 @@ class RepoAnalyzer:
                     {
                         "type": "api-gateway",
                         "confidence": "high",
-                        "evidence": f"Found gateway directories: {[d for d in dirs if 'gateway' in d.lower()]}",
+                        "evidence": (
+                            f"Found gateway directories: "
+                            f"{[d for d in dirs if 'gateway' in d.lower()]}"
+                        ),
                     }
                 )
 
@@ -349,7 +358,10 @@ class RepoAnalyzer:
                             {
                                 "type": "health-check",
                                 "confidence": "high",
-                                "evidence": f"Health check endpoint found in {os.path.relpath(file_path, self.repo_path)}",
+                                "evidence": (
+                                    f"Health check endpoint found in "
+                                    f"{os.path.relpath(file_path, self.repo_path)}"
+                                ),
                             }
                         )
                         break

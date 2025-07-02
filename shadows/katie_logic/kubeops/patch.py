@@ -4,7 +4,6 @@ Handles resource patching with intelligent validation and rollback
 """
 
 import subprocess
-import json
 import logging
 import yaml
 from typing import Dict, Any, List, Optional
@@ -263,7 +262,9 @@ class KubernetesPatcher:
                 return {
                     "agent": "katie",
                     "operation": "apply_manifest",
-                    "error": f"Manifest application failed: {result.stderr}",
+                    "error": (
+                        f"Manifest application failed: {result.stderr}"
+                    ),
                     "status": "error",
                 }
 
@@ -323,7 +324,10 @@ class KubernetesPatcher:
                     "namespace": namespace,
                     "rollback_revision": revision,
                     "rollback_successful": True,
-                    "katie_insight": f"Deployment {deployment_name} rolled back to revision {revision}.",
+                    "katie_insight": (
+                        f"Deployment {deployment_name} rolled back to revision "
+                        f"{revision}."
+                    ),
                 }
             else:
                 return {
@@ -549,7 +553,10 @@ class KubernetesPatcher:
             "patch_applied": False,
             "status": "dry_run",
             "impact_analysis": impact_analysis,
-            "katie_insight": f"DRY RUN: Would patch {deployment_name} with {len(impact_analysis['changes'])} changes",
+            "katie_insight": (
+                f"DRY RUN: Would patch {deployment_name} with "
+                f"{len(impact_analysis['changes'])} changes"
+            ),
         }
 
     def _dry_run_patch_configmap(
@@ -595,7 +602,9 @@ class KubernetesPatcher:
             "namespace": namespace,
             "patch_applied": False,
             "status": "dry_run",
-            "katie_insight": f"DRY RUN: Would update Service {service_name}",
+            "katie_insight": (
+                f"DRY RUN: Would update Service {service_name}"
+            ),
         }
 
     def _dry_run_apply_manifest(
@@ -631,11 +640,20 @@ class KubernetesPatcher:
         risk_level = impact_analysis.get("risk_level", "low")
 
         if risk_level == "high":
-            return f"High-risk patch applied to {resource_name}. Changes: {', '.join(changes)}. Monitor closely."
+            return (
+                f"High-risk patch applied to {resource_name}. "
+                f"Changes: {', '.join(changes)}. Monitor closely."
+            )
         elif risk_level == "medium":
-            return f"Medium-risk patch applied to {resource_name}. Changes: {', '.join(changes)}."
+            return (
+                f"Medium-risk patch applied to {resource_name}. "
+                f"Changes: {', '.join(changes)}."
+            )
         else:
-            return f"Low-risk patch applied to {resource_name}. Changes: {', '.join(changes)}."
+            return (
+                f"Low-risk patch applied to {resource_name}. "
+                f"Changes: {', '.join(changes)}."
+            )
 
 
 # Global instance

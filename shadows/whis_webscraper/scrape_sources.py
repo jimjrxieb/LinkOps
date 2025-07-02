@@ -3,15 +3,13 @@ Whis WebScraper - External Intelligence Harvester
 Scrapes top posts from dev blogs, K8s docs, Terraform guides for Whis training
 """
 
-import requests
-import yaml
-import json
 import logging
 from typing import Dict, List, Any, Optional
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 import feedparser
 import time
+import requests
 
 logger = logging.getLogger(__name__)
 

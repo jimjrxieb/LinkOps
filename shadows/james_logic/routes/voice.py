@@ -4,17 +4,14 @@ Handles voice input/output with James' signature calm, powerful tone
 """
 
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from fastapi.responses import FileResponse, StreamingResponse
-from typing import Dict, Any, Optional
+from fastapi.responses import FileResponse
+from typing import Dict, Any
 import logging
-import io
 import tempfile
 import os
 from pydantic import BaseModel
 import speech_recognition as sr
 from gtts import gTTS
-import pygame
-import json
 
 router = APIRouter(prefix="/api", tags=["voice"])
 
@@ -228,7 +225,8 @@ async def james_conversation(audio: UploadFile = File(...)) -> Dict[str, Any]:
     except Exception as e:
         logger.error(f"James conversation failed: {str(e)}")
         raise HTTPException(
-            status_code=500, detail=f"Conversation processing failed: {str(e)}"
+            status_code=500,
+            detail=f"Conversation processing failed: {str(e)}"
         )
 
 

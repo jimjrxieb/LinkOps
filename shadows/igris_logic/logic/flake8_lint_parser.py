@@ -1,8 +1,8 @@
 import subprocess
 import re
-from typing import List, Dict, Any, Optional
-from pathlib import Path
 import logging
+from typing import List, Dict, Any
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -181,7 +181,10 @@ class Flake8LintParser:
             "W504": f"Move line break before binary operator on line {line_num}",
             "W505": f"Break long docstring on line {line_num}",
             "W601": f"Use 'in' instead of '.has_key()' on line {line_num}",
-            "W602": f"Use 'raise Exception()' instead of 'raise Exception, value' on line {line_num}",
+            "W602": (
+                f"Use 'raise Exception()' instead of 'raise Exception, value' "
+                f"on line {line_num}"
+            ),
             "W603": f"Use '!=' instead of '<>' on line {line_num}",
             "W604": f"Use 'repr()' instead of backticks on line {line_num}",
             "W605": f"Fix invalid escape sequence on line {line_num}",

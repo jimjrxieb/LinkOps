@@ -269,7 +269,8 @@ class AuditScorer:
             )
         if security_score < 0.6:
             explanations.append(
-                "Security posture requires enhancement - review secrets management and access controls."
+                "Security posture requires enhancement - review secrets management "
+                "and access controls."
             )
         if architecture_score < 0.5:
             explanations.append(
@@ -301,7 +302,8 @@ class AuditScorer:
         if security_score < 0.7:
             recommendations.extend(
                 [
-                    "Implement proper secrets management (HashiCorp Vault, AWS Secrets Manager)",
+                    "Implement proper secrets management "
+                    "(HashiCorp Vault, AWS Secrets Manager)",
                     "Review and fix security vulnerabilities",
                     "Enable RBAC and implement least privilege access",
                 ]
@@ -335,3 +337,15 @@ class AuditScorer:
             )
 
         return list(set(recommendations))  # Remove duplicates
+
+    def _score_confidence(self, factors: List[float]) -> Dict[str, Any]:
+        """Calculate confidence based on a list of factors"""
+        score = sum(factors) / len(factors)
+        confidence = score
+        return {
+            "score": score,
+            "confidence": confidence,
+            "reasoning": (
+                f"Based on {len(factors)} factors with " f"{confidence:.2f} confidence"
+            ),
+        }

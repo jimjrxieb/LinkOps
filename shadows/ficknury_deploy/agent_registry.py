@@ -4,7 +4,7 @@ Agent Registry - Manages logic source to agent mappings and deployment configura
 
 import yaml
 import json
-from typing import Dict, List, Any, Optional
+from typing import Dict, Any, Optional
 from datetime import datetime
 import logging
 

@@ -10,7 +10,8 @@ def test_database_connection():
 
     if not postgres_user or not postgres_password:
         print(
-            "Skipping test: POSTGRES_USER and POSTGRES_PASSWORD environment variables required"
+            "Skipping test: POSTGRES_USER and POSTGRES_PASSWORD "
+            "environment variables required"
         )
         return
 

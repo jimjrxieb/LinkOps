@@ -5,9 +5,8 @@ Deploys logic sources as AI agents using the agent registry and launcher
 
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from pydantic import BaseModel
-from typing import Dict, List, Any, Optional
+from typing import Dict, Any, Optional
 import logging
-import asyncio
 from datetime import datetime
 
 # Import agent deployment components
@@ -85,7 +84,10 @@ async def deploy_agent(request: DeployRequest, background_tasks: BackgroundTasks
             if deployment_history and deployment_history.get("status") == "deployed":
                 raise HTTPException(
                     status_code=409,
-                    detail=f"Agent {agent_config['agent_name']} is already deployed. Use force_redeploy=true to override.",
+                    detail=(
+                        f"Agent {agent_config['agent_name']} is already deployed. "
+                        "Use force_redeploy=true to override."
+                    ),
                 )
 
         # Launch shadow agent
@@ -110,7 +112,8 @@ async def deploy_agent(request: DeployRequest, background_tasks: BackgroundTasks
         )
 
         logger.info(
-            f"Successfully deployed {agent_config['agent_name']} from {request.logic_source}"
+            f"Successfully deployed {agent_config['agent_name']} "
+            f"from {request.logic_source}"
         )
         return response
 

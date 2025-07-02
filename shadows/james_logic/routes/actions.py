@@ -3,7 +3,6 @@ import subprocess
 import shlex
 import json
 from datetime import datetime
-import asyncio
 
 router = APIRouter(prefix="/api/james", tags=["Actions"])
 

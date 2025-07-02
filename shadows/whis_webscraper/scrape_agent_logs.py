@@ -4,13 +4,11 @@ Scrapes logs from LinkOps agents for intelligence and pattern analysis
 """
 
 import os
-import json
+import re
 import logging
 from typing import Dict, List, Any, Optional
 from datetime import datetime, timedelta
 import glob
-import re
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -162,7 +160,8 @@ class AgentLogScraper:
         # Common log formats
         log_patterns = [
             # ISO timestamp format
-            r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2}))\s+(\w+)\s+(.+)",
+            r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2}))"
+            r"\s+(\w+)\s+(.+)",
             # Standard timestamp format
             r"(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})\s+(\w+)\s+(.+)",
             # Simple timestamp

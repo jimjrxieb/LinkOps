@@ -3,8 +3,6 @@ Katie - Kubernetes Logs Operations
 Handles log retrieval, analysis, and intelligent filtering
 """
 
-import subprocess
-import json
 import logging
 import re
 from typing import Dict, Any, List, Optional
@@ -44,10 +42,10 @@ class KubernetesLogAnalyzer:
         try:
             logger.info(f"Katie retrieving logs for pod: {pod_name}")
 
-            # Get pod logs
-            logs = self.v1.read_namespaced_pod_log(
-                pod_name,
-                namespace,
+            # Get logs for the specific pod
+            pod_logs = self.v1.read_namespaced_pod_log(
+                name=pod_name,
+                namespace=namespace,
                 container=container,
                 tail_lines=tail_lines,
                 since_time=since_time,
@@ -55,10 +53,10 @@ class KubernetesLogAnalyzer:
             )
 
             # Analyze logs
-            log_analysis = self._analyze_logs(logs)
+            log_analysis = self._analyze_logs(pod_logs)
 
             # Extract key information
-            key_events = self._extract_key_events(logs)
+            key_events = self._extract_key_events(pod_logs)
 
             return {
                 "agent": "katie",
@@ -66,8 +64,8 @@ class KubernetesLogAnalyzer:
                 "pod_name": pod_name,
                 "namespace": namespace,
                 "container": container,
-                "log_count": len(logs.split("\n")) if logs else 0,
-                "logs": logs.split("\n") if logs else [],
+                "log_count": len(pod_logs.split("\n")) if pod_logs else 0,
+                "logs": pod_logs.split("\n") if pod_logs else [],
                 "analysis": log_analysis,
                 "key_events": key_events,
                 "katie_insight": self._generate_log_insight(log_analysis, key_events),
@@ -391,7 +389,7 @@ class KubernetesLogAnalyzer:
                 if re.search(pattern, line, re.IGNORECASE):
                     key_events.append(
                         {
-                            "type": "error" if "error" in line.lower() else "info",
+                            "type": ("error" if "error" in line.lower() else "info"),
                             "message": line.strip(),
                             "timestamp": self._extract_timestamp(line),
                         }
@@ -493,9 +491,15 @@ class KubernetesLogAnalyzer:
     ) -> str:
         """Generate Katie's insight about logs"""
         if analysis["severity"] == "critical":
-            return f"Critical log analysis: {analysis['error_count']} errors detected. Immediate attention required."
+            return (
+                f"Critical log analysis: {analysis['error_count']} errors detected. "
+                f"Immediate attention required."
+            )
         elif analysis["severity"] == "high":
-            return f"High severity logs: {analysis['error_count']} errors and {analysis['warning_count']} warnings found."
+            return (
+                f"High severity logs: {analysis['error_count']} errors and "
+                f"{analysis['warning_count']} warnings found."
+            )
         elif analysis["severity"] == "medium":
             return (
                 f"Moderate log activity: {analysis['warning_count']} warnings detected."
@@ -510,11 +514,20 @@ class KubernetesLogAnalyzer:
     ) -> str:
         """Generate Katie's insight about deployment logs"""
         if analysis["severity"] == "critical":
-            return f"Deployment {deployment_name} has critical issues across {pod_count} pods."
+            return (
+                f"Deployment {deployment_name} has critical issues across "
+                f"{pod_count} pods."
+            )
         elif analysis["severity"] == "high":
-            return f"Deployment {deployment_name} shows concerning patterns in {pod_count} pods."
+            return (
+                f"Deployment {deployment_name} shows concerning patterns in "
+                f"{pod_count} pods."
+            )
         else:
-            return f"Deployment {deployment_name} is operating normally across {pod_count} pods."
+            return (
+                f"Deployment {deployment_name} is operating normally "
+                f"across {pod_count} pods."
+            )
 
     def _generate_search_insight(
         self, pattern: str, match_count: int, pod_count: int
@@ -523,7 +536,10 @@ class KubernetesLogAnalyzer:
         if match_count == 0:
             return f"No matches found for pattern '{pattern}' across all pods."
         elif match_count > 100:
-            return f"High volume of matches ({match_count}) for pattern '{pattern}' across {pod_count} pods."
+            return (
+                f"High volume of matches ({match_count}) for pattern '{pattern}' "
+                f"across {pod_count} pods."
+            )
         else:
             return f"Found {match_count} matches for pattern '{pattern}' across {pod_count} pods."
 
@@ -535,7 +551,10 @@ class KubernetesLogAnalyzer:
         if total_errors == 0:
             return "No errors detected in the analyzed time period."
         elif total_errors > 50:
-            return f"Critical error situation: {total_errors} errors across {pods_with_errors} pods."
+            return (
+                f"Critical error situation: {total_errors} errors across "
+                f"{pods_with_errors} pods."
+            )
         else:
             return f"Moderate error activity: {total_errors} errors across {pods_with_errors} pods."
 
@@ -546,9 +565,15 @@ class KubernetesLogAnalyzer:
         if total_logs == 0:
             return f"No log activity detected for {target}."
         elif total_logs > 1000:
-            return f"High log volume for {target}: {total_logs} entries across {pod_count} pods."
+            return (
+                f"High log volume for {target}: {total_logs} entries across "
+                f"{pod_count} pods."
+            )
         else:
-            return f"Normal log activity for {target}: {total_logs} entries across {pod_count} pods."
+            return (
+                f"Normal log activity for {target}: {total_logs} entries across "
+                f"{pod_count} pods."
+            )
 
 
 # Global instance

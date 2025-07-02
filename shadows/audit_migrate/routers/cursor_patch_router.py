@@ -1,11 +1,9 @@
 from fastapi import APIRouter, Body, HTTPException
 from pydantic import BaseModel
-from typing import Dict, List, Any, Optional
-import subprocess
-import os
-import json
-import logging
+from typing import Dict, Any, List, Optional
 from pathlib import Path
+import logging
+import subprocess
 
 router = APIRouter(prefix="/patch", tags=["Cursor Patch Handler"])
 
@@ -416,9 +414,6 @@ def git_commit_and_push(path: Path, message: str) -> Dict[str, Any]:
         if not git_dir.exists():
             # Initialize git repository
             subprocess.run(["git", "init"], cwd=path, check=True)
-
-            # Add remote if not exists (placeholder)
-            # subprocess.run(["git", "remote", "add", "origin", "https://github.com/user/repo.git"], cwd=path, check=True)
 
         # Add all changes
         subprocess.run(["git", "add", "."], cwd=path, check=True)

@@ -1,12 +1,9 @@
 """
-Tests for Whis WebScraper Intelligence Harvester
+Test suite for Whis WebScraper
 """
 
-import pytest
-from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
-import json
-from datetime import datetime
+from fastapi.testclient import TestClient
 
 from main import app
 from scrape_sources import WhisWebScraper
@@ -39,15 +36,12 @@ class TestIntelligenceScraping:
             "send_to_sanitize": True,
         }
 
-        with patch.object(
-            WhisWebScraper, "scrape_dev_blogs"
-        ) as mock_blogs, patch.object(
-            WhisWebScraper, "scrape_github_trending"
-        ) as mock_github, patch.object(
-            AgentLogScraper, "scrape_agent_logs"
-        ) as mock_logs, patch.object(
-            WhisSanitizeSender, "send_batch_to_sanitize"
-        ) as mock_sanitize:
+        with (
+            patch.object(WhisWebScraper, "scrape_dev_blogs") as mock_blogs,
+            patch.object(WhisWebScraper, "scrape_github_trending") as mock_github,
+            patch.object(AgentLogScraper, "scrape_agent_logs") as mock_logs,
+            patch.object(WhisSanitizeSender, "send_batch_to_sanitize") as mock_sanitize,
+        ):
 
             mock_blogs.return_value = [{"title": "Test Blog", "source": "test"}]
             mock_github.return_value = [{"title": "Test Repo", "category": "test"}]
@@ -89,11 +83,10 @@ class TestIntelligenceScraping:
 class TestWebSourcesScraping:
     def test_scrape_web_sources(self):
         """Test web sources scraping endpoint"""
-        with patch.object(
-            WhisWebScraper, "scrape_all_sources"
-        ) as mock_scrape, patch.object(
-            WhisSanitizeSender, "send_batch_to_sanitize"
-        ) as mock_sanitize:
+        with (
+            patch.object(WhisWebScraper, "scrape_all_sources") as mock_scrape,
+            patch.object(WhisSanitizeSender, "send_batch_to_sanitize") as mock_sanitize,
+        ):
 
             mock_scrape.return_value = {
                 "blog_posts": [{"title": "Blog 1"}],
@@ -115,11 +108,10 @@ class TestWebSourcesScraping:
 
     def test_scrape_blogs_only(self):
         """Test blog scraping endpoint"""
-        with patch.object(
-            WhisWebScraper, "scrape_dev_blogs"
-        ) as mock_blogs, patch.object(
-            WhisSanitizeSender, "send_batch_to_sanitize"
-        ) as mock_sanitize:
+        with (
+            patch.object(WhisWebScraper, "scrape_dev_blogs") as mock_blogs,
+            patch.object(WhisSanitizeSender, "send_batch_to_sanitize") as mock_sanitize,
+        ):
 
             mock_blogs.return_value = [
                 {"title": "Blog 1", "source": "kubernetes_blog"},
@@ -138,11 +130,10 @@ class TestWebSourcesScraping:
 
     def test_scrape_github_trending(self):
         """Test GitHub trending scraping endpoint"""
-        with patch.object(
-            WhisWebScraper, "scrape_github_trending"
-        ) as mock_github, patch.object(
-            WhisSanitizeSender, "send_batch_to_sanitize"
-        ) as mock_sanitize:
+        with (
+            patch.object(WhisWebScraper, "scrape_github_trending") as mock_github,
+            patch.object(WhisSanitizeSender, "send_batch_to_sanitize") as mock_sanitize,
+        ):
 
             mock_github.return_value = [
                 {"title": "repo1", "category": "kubernetes"},
@@ -163,15 +154,16 @@ class TestWebSourcesScraping:
 class TestAgentLogScraping:
     def test_scrape_agent_logs(self):
         """Test agent log scraping endpoint"""
-        with patch.object(
-            AgentLogScraper, "scrape_agent_logs"
-        ) as mock_logs, patch.object(
-            AgentLogScraper, "extract_intelligence_patterns"
-        ) as mock_patterns, patch.object(
-            AgentLogScraper, "generate_intelligence_report"
-        ) as mock_report, patch.object(
-            WhisSanitizeSender, "send_batch_to_sanitize"
-        ) as mock_sanitize:
+        with (
+            patch.object(AgentLogScraper, "scrape_agent_logs") as mock_logs,
+            patch.object(
+                AgentLogScraper, "extract_intelligence_patterns"
+            ) as mock_patterns,
+            patch.object(
+                AgentLogScraper, "generate_intelligence_report"
+            ) as mock_report,
+            patch.object(WhisSanitizeSender, "send_batch_to_sanitize") as mock_sanitize,
+        ):
 
             mock_logs.return_value = [
                 {"message": "Error in deployment", "agent": "katie"},
@@ -283,7 +275,10 @@ class TestWhisWebScraper:
         """Test GitHub trending scraping"""
         with patch.object(WhisWebScraper, "session") as mock_session:
             mock_response = MagicMock()
-            mock_response.content = '<html><body><article class="Box-row"><h2 class="h3">test/repo</h2><p>Test description</p></article></body></html>'
+            mock_response.content = (
+                '<html><body><article class="Box-row"><h2 class="h3">test/repo</h2>'
+                "<p>Test description</p></article></body></html>"
+            )
             mock_response.raise_for_status.return_value = None
             mock_session.get.return_value = mock_response
 
@@ -369,11 +364,12 @@ class TestAgentLogScraper:
 
     def test_generate_intelligence_report(self):
         """Test intelligence report generation"""
-        with patch.object(
-            AgentLogScraper, "scrape_agent_logs"
-        ) as mock_logs, patch.object(
-            AgentLogScraper, "extract_intelligence_patterns"
-        ) as mock_patterns:
+        with (
+            patch.object(AgentLogScraper, "scrape_agent_logs") as mock_logs,
+            patch.object(
+                AgentLogScraper, "extract_intelligence_patterns"
+            ) as mock_patterns,
+        ):
 
             mock_logs.return_value = [{"message": "Test log", "agent": "test"}]
             mock_patterns.return_value = {

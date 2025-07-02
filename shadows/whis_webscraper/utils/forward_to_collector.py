@@ -1,5 +1,8 @@
+"""
+Forward scraped data to collector service
+"""
+
 import requests
-import json
 
 
 def forward_payload(data: dict):

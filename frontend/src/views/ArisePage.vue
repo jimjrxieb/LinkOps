@@ -101,7 +101,7 @@
 <script>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { apiUtils, jamesService } from '@/services/api'
+import { jamesService } from '@/services/api'
 
 export default {
   name: 'ArisePage',

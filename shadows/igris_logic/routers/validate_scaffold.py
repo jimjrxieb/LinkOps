@@ -1,8 +1,6 @@
 from fastapi import APIRouter, Body
-import os
-import subprocess
-import requests
 from pathlib import Path
+import subprocess
 
 router = APIRouter(prefix="/validate", tags=["Scaffold Validator"])
 
