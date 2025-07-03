@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class TestFailure:
     """Structured test failure data"""
+
     test_name: str
     service: str
     failure_type: str  # assertion, keyerror, import, etc.
@@ -48,7 +49,9 @@ class TestFailureIngestor:
         """
         Ingest a test failure and generate a suggested fix
         """
-        logger.info(f"Ingesting test failure: {failure_data.get('test_name', 'unknown')}")
+        logger.info(
+            f"Ingesting test failure: {failure_data.get('test_name', 'unknown')}"
+        )
 
         # Create structured failure object
         failure = TestFailure(
@@ -65,10 +68,10 @@ class TestFailureIngestor:
 
         # Generate suggested fix
         failure.suggested_fix = self._generate_fix_suggestion(failure)
-        
+
         # Store failure
         self.failures_db.append(failure)
-        
+
         logger.info(f"Generated fix suggestion for {failure.test_name}")
         return failure
 
@@ -90,7 +93,7 @@ class TestFailureIngestor:
         Generate fix for assertion failures
         """
         assertion = failure.assertion_failed.lower()
-        
+
         # Handle string subset assertions
         if "in" in assertion and "certifications" in assertion:
             return """
@@ -101,7 +104,7 @@ class TestFailureIngestor:
 # Update test assertion:
 assert any("CKA" in cert for cert in data["certifications"])
 """
-        
+
         # Handle status assertions
         elif "status" in assertion and "dry_run" in assertion:
             return """
@@ -114,15 +117,19 @@ if dry_run:
         "new_replicas": replicas
     }
 """
-        
+
         return f"# Generic assertion fix for: {failure.assertion_failed}"
 
     def _generate_keyerror_fix(self, failure: TestFailure) -> str:
         """
         Generate fix for KeyError failures
         """
-        missing_key = failure.assertion_failed.split("'")[1] if "'" in failure.assertion_failed else "unknown"
-        
+        missing_key = (
+            failure.assertion_failed.split("'")[1]
+            if "'" in failure.assertion_failed
+            else "unknown"
+        )
+
         return f"""
 # Fix: Add missing key '{missing_key}' to response
 # Update service function to include required field:
@@ -201,19 +208,19 @@ from main import app  # noqa: E402
             "assertion_patterns": {
                 "string_subset": {
                     "pattern": r'assert\s+"([^"]+)"\s+in\s+data\["([^"]+)"\]',
-                    "fix_template": 'assert any("{key}" in item for item in data["{field}"])'
+                    "fix_template": 'assert any("{key}" in item for item in data["{field}"])',
                 },
                 "status_check": {
                     "pattern": r'assert\s+data\["status"\]\s*==\s*"([^"]+)"',
-                    "fix_template": 'if condition:\n    return {{"status": "{expected_status}"}}'
-                }
+                    "fix_template": 'if condition:\n    return {{"status": "{expected_status}"}}',
+                },
             },
             "keyerror_patterns": {
                 "missing_field": {
                     "pattern": r"KeyError:\s*'([^']+)'",
-                    "fix_template": 'return {{"{field}": value, "status": "success"}}'
+                    "fix_template": 'return {{"{field}": value, "status": "success"}}',
                 }
-            }
+            },
         }
 
     def export_failures(self) -> str:
@@ -229,4 +236,4 @@ from main import app  # noqa: E402
 
 
 # Global instance
-test_failure_ingestor = TestFailureIngestor() 
+test_failure_ingestor = TestFailureIngestor()
