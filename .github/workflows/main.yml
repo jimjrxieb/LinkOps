@@ -1,6 +1,6 @@
 name: LinkOps-MLOps CI/CD
 
-on: [push, pull_request, workflow_dispatch]
+on: ["push", "pull_request", "workflow_dispatch"]
 
 env:
   DOCKER_IMAGE_PREFIX: linkops
@@ -68,19 +68,19 @@ jobs:
   helm-lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-      - name: Set up Helm
-        run: |
-          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-      - name: Lint all Helm charts
-        run: |
-          for chart in helm/*; do
-            if [ -d "$chart" ]; then
-              echo "Running helm lint on $chart"
-              helm lint "$chart"
-            fi
-          done
+    - name: Checkout repo
+      uses: actions/checkout@v4
+    - name: Set up Helm
+      run: |
+        curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+    - name: Lint all Helm charts
+      run: |
+        for chart in helm/*; do
+          if [ -d "$chart" ]; then
+            echo "Running helm lint on $chart"
+            helm lint "$chart"
+          fi
+        done
 
   build-and-test:
     runs-on: ubuntu-latest

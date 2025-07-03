@@ -91,7 +91,7 @@ securityContext:
   readOnlyRootFilesystem: false
   capabilities:
     drop:
-      - ALL
+    - ALL
 
 podSecurityContext:
   fsGroup: 1000

@@ -1,4 +1,4 @@
-apiVersion: v2
+apiVersion: v2 
 name: katie-logic
 description: AI Logic Service for Katie - Kubernetes AI Agent & Cluster Guardian
 type: application
@@ -19,4 +19,3 @@ maintainers:
 annotations:
   category: AI/ML
   licenses: MIT
- 

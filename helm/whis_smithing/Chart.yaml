@@ -5,12 +5,12 @@ type: application
 version: 0.1.0
 appVersion: "1.0.0"
 keywords:
-  - whis
-  - smithing
-  - microservice
+- whis
+- smithing
+- microservice
 home: https://github.com/jimjrxieb/LinkOps-MLOps
 sources:
-  - https://github.com/jimjrxieb/LinkOps-MLOps
+- https://github.com/jimjrxieb/LinkOps-MLOps
 maintainers:
-  - name: jimjrxieb
-    email: jimjrxieb@example.com 
+- name: jimjrxieb
+  email: jimjrxieb@example.com 

@@ -30,10 +30,10 @@ ingress:
   className: ""
   annotations: {}
   hosts:
-    - host: whis-logic.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
+  - host: whis-logic.local
+    paths:
+    - path: /
+      pathType: ImplementationSpecific
   tls: []
 
 resources:
@@ -91,7 +91,7 @@ securityContext:
   readOnlyRootFilesystem: false
   capabilities:
     drop:
-      - ALL
+    - ALL
 
 podSecurityContext:
   fsGroup: 1000

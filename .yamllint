@@ -1,6 +1,7 @@
 extends: default
 
 ignore: |
+  **/node_modules/**
   helm/*/templates/*
 
 rules:
