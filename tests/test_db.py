@@ -1,5 +1,6 @@
 import psycopg2
 import os
+import pytest
 
 
 def test_database_connection():
@@ -9,11 +10,10 @@ def test_database_connection():
     postgres_password = os.getenv("POSTGRES_PASSWORD")
 
     if not postgres_user or not postgres_password:
-        print(
-            "Skipping test: POSTGRES_USER and POSTGRES_PASSWORD "
+        pytest.skip(
+            "POSTGRES_USER and POSTGRES_PASSWORD "
             "environment variables required"
         )
-        return
 
     conn = psycopg2.connect(
         dbname=os.getenv("POSTGRES_DB", "linkops"),

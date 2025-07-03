@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from ..utils.youtube_transcript import download_transcript
 import requests
+import os
 
 router = APIRouter()
 
@@ -28,7 +29,8 @@ def handle_youtube_transcript(request: YouTubeTranscriptRequest):
 
         # Forward to sanitizer service
         try:
-            response = requests.post("http://whis-sanitize:8000/sanitize", json=payload)
+            sanitizer_url = os.environ.get("SANITIZER_URL", "http://whis-sanitize:8000")
+            response = requests.post(f"{sanitizer_url}/sanitize", json=payload)
             response.raise_for_status()
             return {"status": "queued", "sanitizer_response": response.json()}
         except requests.exceptions.RequestException as e:
