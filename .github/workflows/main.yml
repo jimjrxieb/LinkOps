@@ -175,10 +175,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: GitGuardian Scan
-      uses: GitGuardian/ggshield-action@v1.41.0
-      with:
-        args: ggshield secret scan repo .
+    - name: GitGuardian Secret Scan
+      run: |
+        docker run --rm -v "$GITHUB_WORKSPACE:/repo" -w /repo gitguardian/ggshield:v1.41.0 \
+          ggshield secret scan repo .
       env:
         GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
 
