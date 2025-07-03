@@ -178,7 +178,7 @@ jobs:
     - name: GitGuardian Scan
       uses: GitGuardian/ggshield-action@v1.41.0
       with:
-        args: scan repo .
+        args: ggshield secret scan repo .
       env:
         GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
 
