@@ -72,6 +72,8 @@ class KubernetesDescriber:
             return {
                 "agent": "katie",
                 "operation": "describe_pod",
+                "pod_name": pod_name,
+                "namespace": namespace,
                 "error": f"Pod {pod_name} not found or inaccessible: {e.reason}",
                 "status": "error",
             }
@@ -80,6 +82,8 @@ class KubernetesDescriber:
             return {
                 "agent": "katie",
                 "operation": "describe_pod",
+                "pod_name": pod_name,
+                "namespace": namespace,
                 "error": f"Failed to describe pod: {str(e)}",
                 "status": "error",
             }
@@ -139,6 +143,8 @@ class KubernetesDescriber:
             return {
                 "agent": "katie",
                 "operation": "describe_deployment",
+                "deployment_name": deployment_name,
+                "namespace": namespace,
                 "error": f"Deployment {deployment_name} not found: {e.reason}",
                 "status": "error",
             }
@@ -147,6 +153,8 @@ class KubernetesDescriber:
             return {
                 "agent": "katie",
                 "operation": "describe_deployment",
+                "deployment_name": deployment_name,
+                "namespace": namespace,
                 "error": f"Failed to describe deployment: {str(e)}",
                 "status": "error",
             }

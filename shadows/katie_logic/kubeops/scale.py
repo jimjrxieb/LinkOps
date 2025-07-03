@@ -41,9 +41,18 @@ class KubernetesScaler:
             )
 
             if dry_run:
-                return self._dry_run_scale_deployment(
-                    namespace, deployment_name, replicas
-                )
+                return {
+                    "agent": "katie",
+                    "operation": "scale_deployment",
+                    "deployment_name": deployment_name,
+                    "namespace": namespace,
+                    "previous_replicas": None,
+                    "new_replicas": replicas,
+                    "scaling_direction": None,
+                    "status": "dry_run",
+                    "impact_analysis": {},
+                    "katie_insight": "Dry run: no changes applied."
+                }
 
             # Get current deployment
             deployment = self.apps_v1.read_namespaced_deployment(
@@ -84,6 +93,9 @@ class KubernetesScaler:
             return {
                 "agent": "katie",
                 "operation": "scale_deployment",
+                "deployment_name": deployment_name,
+                "namespace": namespace,
+                "new_replicas": replicas,
                 "error": f"Failed to scale deployment: {e.reason}",
                 "status": "error",
             }
@@ -92,6 +104,9 @@ class KubernetesScaler:
             return {
                 "agent": "katie",
                 "operation": "scale_deployment",
+                "deployment_name": deployment_name,
+                "namespace": namespace,
+                "new_replicas": replicas,
                 "error": f"Scaling failed: {str(e)}",
                 "status": "error",
             }

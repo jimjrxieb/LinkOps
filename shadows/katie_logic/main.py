@@ -66,7 +66,7 @@ def health():
             "K8GPT Integration",
             "Error Pattern Analysis",
         ],
-        "certifications": ["Kubernetes CKA", "Kubernetes CKS", "SRE Best Practices"],
+        "certifications": ["CKA", "Kubernetes CKS", "SRE Best Practices"],
     }
 
 
@@ -299,7 +299,7 @@ def get_capabilities():
             "Scaling Recommendations",
             "K8GPT Integration",
         ],
-        "certifications": ["Kubernetes CKA", "Kubernetes CKS", "SRE Best Practices"],
+        "certifications": ["CKA", "Kubernetes CKS", "SRE Best Practices"],
         "focus_areas": [
             "Cluster Operations",
             "Resource Management",
