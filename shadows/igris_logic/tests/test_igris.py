@@ -4,6 +4,7 @@ Tests for Igris Platform Engineering Service
 
 import os
 import sys
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
