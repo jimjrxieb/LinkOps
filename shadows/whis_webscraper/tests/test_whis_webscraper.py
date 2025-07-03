@@ -2,8 +2,13 @@
 Test suite for Whis WebScraper
 """
 
+import os
+import sys
 from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
+
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from main import app
 from scrape_sources import WhisWebScraper

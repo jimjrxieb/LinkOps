@@ -258,6 +258,7 @@ def patch_service(
 class ManifestRequest(BaseModel):
     manifest_yaml: str
 
+
 @app.post("/apply/manifest")
 def apply_manifest(
     request: ManifestRequest, namespace: str = "default", dry_run: bool = False
