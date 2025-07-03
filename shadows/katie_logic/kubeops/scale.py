@@ -51,7 +51,7 @@ class KubernetesScaler:
                     "scaling_direction": None,
                     "status": "dry_run",
                     "impact_analysis": {},
-                    "katie_insight": "Dry run: no changes applied."
+                    "katie_insight": "Dry run: no changes applied.",
                 }
 
             # Get current deployment
