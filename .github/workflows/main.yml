@@ -201,6 +201,33 @@ jobs:
             trivy image --severity HIGH,CRITICAL $image || true
           done
 
+  frontend-security-audit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install frontend dependencies
+      run: |
+        cd frontend
+        npm ci
+
+    - name: Run npm audit
+      run: |
+        cd frontend
+        npm audit --audit-level=moderate
+
+    - name: Check for outdated packages
+      run: |
+        cd frontend
+        npm outdated
+
   sonarqube-analysis:
     runs-on: ubuntu-latest
     needs: build-and-test

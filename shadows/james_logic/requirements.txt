@@ -8,12 +8,12 @@ gTTS==2.3.2
 pygame==2.5.2
 
 # Image processing
-Pillow==10.1.0
+Pillow==11.2.1
 pytesseract==0.3.10
 
 # Additional dependencies
-requests==2.31.0
-python-multipart==0.0.6
+requests>=2.32.4
+python-multipart==0.0.19
 
 # For testing
 pytest==7.4.3
