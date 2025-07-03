@@ -10,6 +10,7 @@ app.include_router(image_input.router)
 app.include_router(fixlog.router)
 app.include_router(youtube.router)
 
+
 @app.get("/health")
 def health():
     """Basic health check"""

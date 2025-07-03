@@ -105,4 +105,4 @@ def create_app() -> FastAPI:
         db.commit()
         return {"status": "deleted"}
 
-    return app 
+    return app

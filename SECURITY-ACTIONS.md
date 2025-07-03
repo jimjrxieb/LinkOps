@@ -14,7 +14,25 @@
 **Date**: July 3, 2025  
 **Status**: ✅ RESOLVED - Fixed vulnerable dependency  
 **CVE**: CVE-2023-4863  
-**Severity**: Critical (CVSS 9.6)  
+**Severity**: Critical (CVSS 9.6)
+
+---
+
+## CVE-2024-24762 Response (python-multipart Resource Exhaustion)
+
+**Date**: July 3, 2025  
+**Status**: ✅ RESOLVED - Fixed vulnerable dependency  
+**CVE**: CVE-2024-24762  
+**Severity**: High
+
+---
+
+## CVE-2024-47081 Response (requests Credential Leak)
+
+**Date**: July 3, 2025  
+**Status**: ✅ RESOLVED - Fixed vulnerable dependency  
+**CVE**: CVE-2024-47081  
+**Severity**: High (CWE-201)  
 
 ### Assessment
 - **Direct Impact**: None - Platform doesn't use Chromium directly
@@ -26,6 +44,16 @@
 - **Indirect Impact**: Image processing functionality at risk
 - **Risk Level**: CRITICAL - Fixed by updating to Pillow 11.2.1
 
+### Assessment
+- **Direct Impact**: HIGH - james_logic service used vulnerable python-multipart 0.0.6
+- **Indirect Impact**: Resource exhaustion via malicious multipart requests
+- **Risk Level**: HIGH - Fixed by updating to python-multipart 0.0.19
+
+### Assessment
+- **Direct Impact**: HIGH - All services used vulnerable requests 2.31.0
+- **Indirect Impact**: Credential leak via malicious URLs
+- **Risk Level**: HIGH - Fixed by updating to requests 2.32.4+
+
 ### Actions Taken
 - [x] Analyzed codebase for Chromium usage
 - [x] Identified indirect dependencies
@@ -35,6 +63,18 @@
 - [x] Identified vulnerable Pillow 10.1.0 in james_logic service
 - [x] Updated Pillow to secure version 11.2.1
 - [x] Verified no other services use vulnerable Pillow versions
+- [x] Updated security documentation
+
+### Actions Taken
+- [x] Identified vulnerable python-multipart 0.0.6 in james_logic service
+- [x] Updated python-multipart to secure version 0.0.19
+- [x] Verified other services already use secure versions
+- [x] Updated security documentation
+
+### Actions Taken
+- [x] Identified vulnerable requests 2.31.0 across all services
+- [x] Updated all requirements to requests>=2.32.4
+- [x] Updated 6 requirements files across all services
 - [x] Updated security documentation
 
 ### Recommended Actions

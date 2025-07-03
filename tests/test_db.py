@@ -11,8 +11,7 @@ def test_database_connection():
 
     if not postgres_user or not postgres_password:
         pytest.skip(
-            "POSTGRES_USER and POSTGRES_PASSWORD "
-            "environment variables required"
+            "POSTGRES_USER and POSTGRES_PASSWORD " "environment variables required"
         )
 
     conn = psycopg2.connect(
