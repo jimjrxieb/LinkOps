@@ -4,14 +4,9 @@ Tests for Igris Platform Engineering Service
 
 import os
 import sys
-import pytest
-from fastapi.testclient import TestClient
-
-# Add parent directory to path for imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-# from unittest.mock import patch, MagicMock
-
+import pytest  # noqa: E402
+from fastapi.testclient import TestClient  # noqa: E402
 from main import app  # noqa: E402
 from analyzer import analyze_platform_components  # noqa: E402
 from infrastructure import (

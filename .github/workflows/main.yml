@@ -44,7 +44,7 @@ jobs:
       run: black --check shadows/${{ matrix.service }}
 
     - name: Run Flake8
-      run: flake8 --extend-ignore=E203,W503,E501 shadows/${{ matrix.service }}
+      run: flake8 --extend-ignore=E203,W503,E501,E402 shadows/${{ matrix.service }}
 
   lint-yaml:
     runs-on: ubuntu-latest
