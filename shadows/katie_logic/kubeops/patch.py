@@ -82,6 +82,7 @@ class KubernetesPatcher:
                 "deployment_name": deployment_name,
                 "namespace": namespace,
                 "patch_applied": True,
+                "status": "success",
                 "impact_analysis": impact_analysis,
                 "rollback_available": True,
                 "katie_insight": self._generate_patch_insight(
@@ -255,6 +256,7 @@ class KubernetesPatcher:
                     "operation": "apply_manifest",
                     "namespace": namespace,
                     "manifest_applied": True,
+                    "status": "success",
                     "output": result.stdout,
                     "katie_insight": "Manifest applied successfully.",
                 }
@@ -322,6 +324,7 @@ class KubernetesPatcher:
                     "namespace": namespace,
                     "rollback_revision": revision,
                     "rollback_successful": True,
+                    "status": "success",
                     "katie_insight": (
                         f"Deployment {deployment_name} rolled back to revision "
                         f"{revision}."

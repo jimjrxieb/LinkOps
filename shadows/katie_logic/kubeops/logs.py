@@ -65,6 +65,7 @@ class KubernetesLogAnalyzer:
                 "namespace": namespace,
                 "container": container,
                 "log_count": len(pod_logs.split("\n")) if pod_logs else 0,
+                "status": "success",
                 "logs": pod_logs.split("\n") if pod_logs else [],
                 "analysis": log_analysis,
                 "key_events": key_events,

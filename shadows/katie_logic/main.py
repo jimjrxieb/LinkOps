@@ -255,12 +255,15 @@ def patch_service(
     return k8s_patcher.patch_service(namespace, service_name, patch_data, dry_run)
 
 
+class ManifestRequest(BaseModel):
+    manifest_yaml: str
+
 @app.post("/apply/manifest")
 def apply_manifest(
-    manifest_yaml: str, namespace: str = "default", dry_run: bool = False
+    request: ManifestRequest, namespace: str = "default", dry_run: bool = False
 ):
     """Apply a Kubernetes manifest"""
-    return k8s_patcher.apply_manifest(manifest_yaml, namespace, dry_run)
+    return k8s_patcher.apply_manifest(request.manifest_yaml, namespace, dry_run)
 
 
 @app.post("/rollback/deployment/{namespace}/{deployment_name}")

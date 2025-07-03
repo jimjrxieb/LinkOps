@@ -57,7 +57,8 @@ class KubernetesDescriber:
                 "operation": "describe_pod",
                 "pod_name": pod_name,
                 "namespace": namespace,
-                "status": pod.status.phase,
+                "status": "success",
+                "pod_status": pod.status.phase,
                 "status_analysis": status_analysis,
                 "resource_analysis": resource_analysis,
                 "recent_logs": logs,
@@ -113,6 +114,7 @@ class KubernetesDescriber:
                 "operation": "describe_deployment",
                 "deployment_name": deployment_name,
                 "namespace": namespace,
+                "status": "success",
                 "replicas": {
                     "desired": deployment.spec.replicas,
                     "current": deployment.status.replicas,
