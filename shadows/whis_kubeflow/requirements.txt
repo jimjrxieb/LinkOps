@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+pydantic
+# Optional: uncomment if connecting to real Kubeflow
+# kfp 

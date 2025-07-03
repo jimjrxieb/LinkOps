@@ -336,6 +336,24 @@ services:
     kafka:
       condition: service_healthy
 
+  ### 🔄 WHIS KUBEFLOW SERVICE (Kubeflow Pipeline Orchestration)
+  whis_kubeflow:
+    build: ./shadows/whis_kubeflow
+    container_name: linkops-whis-kubeflow
+    ports:
+    - "8013:8005"
+    volumes:
+    - ./shadows/whis_kubeflow:/app
+    environment:
+    - DATABASE_URL=postgresql://linkops:${POSTGRES_PASSWORD:-linkops_password}@db:5432/linkops
+    - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    command: uvicorn main:app --host 0.0.0.0 --port 8005 --reload
+    depends_on:
+    db:
+      condition: service_healthy
+    kafka:
+      condition: service_healthy
+
 volumes:
   postgres_data:
   kafka_data:

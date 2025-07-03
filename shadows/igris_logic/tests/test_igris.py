@@ -82,6 +82,95 @@ class TestExecuteEndpoint:
         assert response.status_code == 200  # Should still process
 
 
+class TestDevSecOpsEndpoint:
+    def test_analyze_devsecops(self):
+        """Test DevSecOps pipeline analysis"""
+        devsecops_data = {
+            "codebase_path": ".",
+            "platform": "kubernetes",
+            "tools": ["github_actions", "trivy", "snyk"],
+        }
+
+        response = client.post("/devsecops/analyze", json=devsecops_data)
+        assert response.status_code == 200
+
+        data = response.json()
+        assert "analysis" in data
+        assert "pipeline_config" in data
+        assert "antipatterns" in data
+        assert "recommendations" in data
+
+
+class TestGitOpsEndpoint:
+    def test_analyze_gitops(self):
+        """Test GitOps workflow analysis"""
+        gitops_data = {
+            "repo_path": ".",
+            "platform": "kubernetes",
+            "tools": ["argocd", "helm"],
+        }
+
+        response = client.post("/gitops/analyze", json=gitops_data)
+        assert response.status_code == 200
+
+        data = response.json()
+        assert "analysis" in data
+        assert "workflow_config" in data
+        assert "antipatterns" in data
+        assert "recommendations" in data
+
+
+class TestKubernetesPlatformEndpoint:
+    def test_analyze_kubernetes_platform(self):
+        """Test Kubernetes platform engineering analysis"""
+        k8s_data = {
+            "cluster_config": {
+                "nodes": [{"instance_type": "t3.medium", "zone": "us-west-2a"}],
+                "network_policies": [],
+                "rbac": {"service_accounts": []},
+            },
+            "workload_type": "web-application",
+        }
+
+        response = client.post("/kubernetes/platform", json=k8s_data)
+        assert response.status_code == 200
+
+        data = response.json()
+        assert "analysis" in data
+        assert "scaling_config" in data
+        assert "issues" in data
+        assert "recommendations" in data
+
+
+class TestMigrationEndpoint:
+    def test_generate_migration_plan(self):
+        """Test migration plan generation"""
+        response = client.post(
+            "/migration/plan?from_monolith=true&target_platform=kubernetes"
+        )
+        assert response.status_code == 200
+
+        data = response.json()
+        assert "migration_plan" in data
+        assert "estimated_duration" in data
+        assert "complexity" in data
+        assert "risks" in data
+
+
+class TestRunbookEndpoint:
+    def test_generate_runbook(self):
+        """Test runbook generation"""
+        response = client.post(
+            "/runbook/generate?scenario=vulnerability_detected&platform=kubernetes"
+        )
+        assert response.status_code == 200
+
+        data = response.json()
+        assert "runbook" in data
+        assert "scenario" in data
+        assert "platform" in data
+
+
 class TestOpenDevinEndpoint:
     def test_opendevin_automate(self):
         """Test OpenDevin automation integration"""
@@ -145,6 +234,8 @@ class TestAnalyzerModule:
 
         assert components["kubernetes"] is True
         assert components["platform"] is True
+        assert components["pods"] is True
+        assert components["services"] is True
         assert isinstance(components, dict)
 
     def test_analyze_aws_components(self):
@@ -156,6 +247,8 @@ class TestAnalyzerModule:
 
         assert components["aws"] is True
         assert components["platform"] is True
+        assert components["ec2"] is True
+        assert components["s3"] is True
 
     def test_analyze_security_components(self):
         """Test security component detection"""
