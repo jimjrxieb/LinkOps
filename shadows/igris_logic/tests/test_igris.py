@@ -12,11 +12,11 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 # from unittest.mock import patch, MagicMock
 
-from main import app
-from analyzer import analyze_platform_components
-from infrastructure import generate_infrastructure_solution, generate_configurations
-from security import generate_security_recommendations
-from opendevin import simulate_opendevin_automation
+from main import app  # noqa: E402
+from analyzer import analyze_platform_components  # noqa: E402
+from infrastructure import generate_infrastructure_solution, generate_configurations  # noqa: E402
+from security import generate_security_recommendations  # noqa: E402
+from opendevin import simulate_opendevin_automation  # noqa: E402
 
 client = TestClient(app)
 

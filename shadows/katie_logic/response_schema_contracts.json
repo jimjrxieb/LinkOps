@@ -1,0 +1,120 @@
+{
+  "health_endpoint": {
+    "required_fields": ["status", "service", "role", "capabilities", "certifications"],
+    "field_types": {
+      "status": "string",
+      "service": "string", 
+      "role": "string",
+      "capabilities": "array",
+      "certifications": "array"
+    },
+    "test_assertions": {
+      "certifications": "any('CKA' in cert for cert in data['certifications'])"
+    }
+  },
+  "describe_pod": {
+    "required_fields": ["agent", "operation", "pod_name", "status"],
+    "field_types": {
+      "agent": "string",
+      "operation": "string",
+      "pod_name": "string",
+      "status": "string"
+    },
+    "test_assertions": {
+      "agent": "data['agent'] == 'katie'",
+      "pod_name": "data['pod_name'] == expected_pod_name"
+    }
+  },
+  "describe_deployment": {
+    "required_fields": ["agent", "operation", "deployment_name", "status"],
+    "field_types": {
+      "agent": "string",
+      "operation": "string", 
+      "deployment_name": "string",
+      "status": "string"
+    },
+    "test_assertions": {
+      "agent": "data['agent'] == 'katie'",
+      "deployment_name": "data['deployment_name'] == expected_deployment_name"
+    }
+  },
+  "scale_deployment": {
+    "required_fields": ["agent", "operation", "new_replicas", "status"],
+    "field_types": {
+      "agent": "string",
+      "operation": "string",
+      "new_replicas": "integer",
+      "status": "string"
+    },
+    "test_assertions": {
+      "agent": "data['agent'] == 'katie'",
+      "new_replicas": "data['new_replicas'] == expected_replicas",
+      "dry_run_status": "data['status'] == 'dry_run' if dry_run else data['status'] == 'success'"
+    }
+  },
+  "get_pod_logs": {
+    "required_fields": ["agent", "operation", "log_count", "status"],
+    "field_types": {
+      "agent": "string",
+      "operation": "string",
+      "log_count": "integer",
+      "status": "string"
+    },
+    "test_assertions": {
+      "agent": "data['agent'] == 'katie'",
+      "log_count": "data['log_count'] >= 0"
+    }
+  },
+  "patch_deployment": {
+    "required_fields": ["agent", "operation", "patch_applied", "status"],
+    "field_types": {
+      "agent": "string",
+      "operation": "string",
+      "patch_applied": "boolean",
+      "status": "string"
+    },
+    "test_assertions": {
+      "agent": "data['agent'] == 'katie'",
+      "patch_applied": "data['patch_applied'] is True"
+    }
+  },
+  "apply_manifest": {
+    "required_fields": ["agent", "operation", "manifest_applied", "status"],
+    "field_types": {
+      "agent": "string",
+      "operation": "string",
+      "manifest_applied": "boolean",
+      "status": "string"
+    },
+    "test_assertions": {
+      "agent": "data['agent'] == 'katie'",
+      "manifest_applied": "data['manifest_applied'] is True"
+    }
+  },
+  "rollback_deployment": {
+    "required_fields": ["agent", "operation", "rollback_successful", "status"],
+    "field_types": {
+      "agent": "string",
+      "operation": "string",
+      "rollback_successful": "boolean",
+      "status": "string"
+    },
+    "test_assertions": {
+      "agent": "data['agent'] == 'katie'",
+      "rollback_successful": "data['rollback_successful'] is True"
+    }
+  },
+  "capabilities_endpoint": {
+    "required_fields": ["agent", "role", "current_capabilities", "certifications"],
+    "field_types": {
+      "agent": "string",
+      "role": "string",
+      "current_capabilities": "array",
+      "certifications": "array"
+    },
+    "test_assertions": {
+      "agent": "data['agent'] == 'katie'",
+      "certifications": "any('CKA' in cert for cert in data['certifications'])"
+    }
+  }
+} 

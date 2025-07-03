@@ -4,16 +4,17 @@ Test suite for Whis WebScraper
 
 import os
 import sys
-from unittest.mock import patch, MagicMock
-from fastapi.testclient import TestClient
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from main import app
-from scrape_sources import WhisWebScraper
-from send_to_sanitize import WhisSanitizeSender
-from scrape_agent_logs import AgentLogScraper
+from unittest.mock import patch, MagicMock
+from fastapi.testclient import TestClient
+
+from main import app  # noqa: E402
+from scrape_sources import WhisWebScraper  # noqa: E402
+from send_to_sanitize import WhisSanitizeSender  # noqa: E402
+from scrape_agent_logs import AgentLogScraper  # noqa: E402
 
 client = TestClient(app)
 
