@@ -13,22 +13,22 @@ jobs:
   lint-python:
     runs-on: ubuntu-latest
     strategy:
-    matrix:
-      service:
-      - james_logic
-      - igris_logic
-      - katie_logic
-      - whis_logic
-      - whis_sanitize
-      - whis_data_input
-      - whis_webscraper
-      - whis_smithing
-      - whis_enhance
-      - audit_assess
-      - audit_logic
-      - audit_migrate
-      - ficknury_deploy
-      - ficknury_evaluator
+      matrix:
+        service:
+        - james_logic
+        - igris_logic
+        - katie_logic
+        - whis_logic
+        - whis_sanitize
+        - whis_data_input
+        - whis_webscraper
+        - whis_smithing
+        - whis_enhance
+        - audit_assess
+        - audit_logic
+        - audit_migrate
+        - ficknury_deploy
+        - ficknury_evaluator
     steps:
     - uses: actions/checkout@v4
 
