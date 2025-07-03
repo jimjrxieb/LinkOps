@@ -5,17 +5,17 @@ type: application
 version: 0.1.0
 appVersion: "1.0"
 keywords:
-  - ai
-  - assistant
-  - voice
-  - executive
-  - personal
+- ai
+- assistant
+- voice
+- executive
+- personal
 home: https://github.com/shadow-link-industries/linkops-mlops
 sources:
-  - https://github.com/shadow-link-industries/linkops-mlops
+- https://github.com/shadow-link-industries/linkops-mlops
 maintainers:
-  - name: Shadow Link Industries
-    email: dev@shadow-link-industries.com
+- name: Shadow Link Industries
+  email: dev@shadow-link-industries.com
 annotations:
   category: AI/ML
   licenses: MIT

@@ -13,166 +13,190 @@ jobs:
   lint-python:
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        service:
-          - james_logic
-          - igris_logic
-          - katie_logic
-          - whis_logic
-          - whis_sanitize
-          - whis_data_input
-          - whis_webscraper
-          - whis_smithing
-          - whis_enhance
-          - audit_assess
-          - audit_logic
-          - audit_migrate
-          - ficknury_deploy
-          - ficknury_evaluator
+    matrix:
+      service:
+      - james_logic
+      - igris_logic
+      - katie_logic
+      - whis_logic
+      - whis_sanitize
+      - whis_data_input
+      - whis_webscraper
+      - whis_smithing
+      - whis_enhance
+      - audit_assess
+      - audit_logic
+      - audit_migrate
+      - ficknury_deploy
+      - ficknury_evaluator
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
 
-      - name: Install linters
-        run: pip install black flake8
+    - name: Install linters
+      run: pip install black flake8
 
-      - name: Run Black
-        run: black --check shadows/${{ matrix.service }}
+    - name: Run Black
+      run: black --check shadows/${{ matrix.service }}
 
-      - name: Run Flake8
-        run: flake8 --extend-ignore=E203,W503,E501 shadows/${{ matrix.service }}
+    - name: Run Flake8
+      run: flake8 --extend-ignore=E203,W503,E501 shadows/${{ matrix.service }}
 
   lint-yaml:
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Install yamllint
+      run: pip install yamllint
+
+    - name: Lint YAML (Helm-safe mode)
+      run: |
+        yamllint -c .yamllint helm/ || true
+        for chart in shadows/*/helm/; do
+          if [ -d "$chart" ]; then
+            echo "Linting $chart"
+            yamllint -c .yamllint "$chart" || true
+          fi
+        done
+
+  helm-lint:
+    runs-on: ubuntu-latest
+    steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
-      - name: Install yamllint
-        run: pip install yamllint
-
-      - name: Lint YAML (Helm-safe mode)
+      - name: Set up Helm
         run: |
-          yamllint -c .yamllint helm/ || true
-          for chart in shadows/*/helm/; do
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      - name: Lint all Helm charts
+        run: |
+          for chart in helm/*; do
             if [ -d "$chart" ]; then
-              echo "Linting $chart"
-              yamllint -c .yamllint "$chart" || true
+              echo "Running helm lint on $chart"
+              helm lint "$chart"
             fi
           done
 
   build-and-test:
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        service:
-          - james_logic
-          - igris_logic
-          - katie_logic
-          - whis_logic
-          - whis_sanitize
-          - whis_data_input
-          - whis_webscraper
-          - whis_smithing
-          - whis_enhance
-          - audit_assess
-          - audit_logic
-          - audit_migrate
-          - ficknury_deploy
-          - ficknury_evaluator
+    matrix:
+      service:
+      - james_logic
+      - igris_logic
+      - katie_logic
+      - whis_logic
+      - whis_sanitize
+      - whis_data_input
+      - whis_webscraper
+      - whis_smithing
+      - whis_enhance
+      - audit_assess
+      - audit_logic
+      - audit_migrate
+      - ficknury_deploy
+      - ficknury_evaluator
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
 
-      - name: Install dependencies
-        run: |
-          pip install pytest pytest-cov
-          if [ -f "shadows/${{ matrix.service }}/requirements.txt" ]; then
-            pip install -r shadows/${{ matrix.service }}/requirements.txt
-          fi
+    - name: Install dependencies
+      run: |
+        pip install pytest pytest-cov
+        if [ -f "shadows/${{ matrix.service }}/requirements.txt" ]; then
+          pip install -r shadows/${{ matrix.service }}/requirements.txt
+        fi
 
-      - name: Run tests
-        run: |
-          if [ -d "shadows/${{ matrix.service }}/tests" ]; then
-            pytest shadows/${{ matrix.service }}/tests --cov=shadows/${{ matrix.service }} --cov-report=xml
-          else
-            echo "No tests found"
-          fi
+    - name: Run tests
+      run: |
+        if [ -d "shadows/${{ matrix.service }}/tests" ]; then
+          pytest shadows/${{ matrix.service }}/tests \
+            --cov=shadows/${{ matrix.service }} \
+            --cov-report=xml
+        else
+          echo "No tests found"
+        fi
 
-      - name: Upload coverage
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.service }}-coverage
-          path: coverage.xml
+    - name: Upload coverage
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.service }}-coverage
+        path: coverage.xml
 
   docker-build:
     runs-on: ubuntu-latest
     needs: [lint-python, build-and-test]
     strategy:
-      matrix:
-        service:
-          - james_logic
-          - igris_logic
-          - katie_logic
-          - whis_logic
-          - whis_sanitize
-          - whis_data_input
-          - whis_webscraper
-          - whis_smithing
-          - whis_enhance
-          - audit_assess
-          - audit_logic
-          - audit_migrate
-          - ficknury_deploy
-          - ficknury_evaluator
+    matrix:
+      service:
+      - james_logic
+      - igris_logic
+      - katie_logic
+      - whis_logic
+      - whis_sanitize
+      - whis_data_input
+      - whis_webscraper
+      - whis_smithing
+      - whis_enhance
+      - audit_assess
+      - audit_logic
+      - audit_migrate
+      - ficknury_deploy
+      - ficknury_evaluator
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Log in to DockerHub
-        run: echo "${{ env.DOCKER_PASS }}" | docker login -u "${{ env.DOCKER_USER }}" --password-stdin
+    - name: Log in to DockerHub
+      run: echo "${{ env.DOCKER_PASS }}" | docker login -u "${{ env.DOCKER_USER }}" --password-stdin
 
-      - name: Build Docker image
-        run: |
-          docker build -t ${{ env.REGISTRY }}/${{ env.DOCKER_USER }}/${{ env.DOCKER_IMAGE_PREFIX }}-${{ matrix.service }}:latest ./shadows/${{ matrix.service }}
+    - name: Build Docker image
+      run: |
+        docker build \
+          -t ${{ env.REGISTRY }}/${{ env.DOCKER_USER }}/${{ env.DOCKER_IMAGE_PREFIX }}-${{ matrix.service }}:latest \
+          ./shadows/${{ matrix.service }}
 
-      - name: Push Docker image
-        run: |
-          docker push ${{ env.REGISTRY }}/${{ env.DOCKER_USER }}/${{ env.DOCKER_IMAGE_PREFIX }}-${{ matrix.service }}:latest
+    - name: Push Docker image
+      run: |
+        docker push \
+          ${{ env.REGISTRY }}/${{ env.DOCKER_USER }}/${{ env.DOCKER_IMAGE_PREFIX }}-${{ matrix.service }}:latest
 
   gitguardian-secrets-scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: GitGuardian Scan
-        uses: GitGuardian/ggshield-action@v1.24.0
-        with:
-          args: scan secret repo .
-        env:
-          GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+    - name: GitGuardian Scan
+      uses: GitGuardian/ggshield-action@v1.24.0
+      with:
+        args: scan secret repo .
+      env:
+        GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
 
   trivy-scan:
     runs-on: ubuntu-latest
     needs: docker-build
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Install Trivy
-        run: |
-          wget -qO trivy.deb https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.48.5_Linux-64bit.deb
-          sudo dpkg -i trivy.deb
+    - name: Install Trivy
+      run: |
+        wget -qO trivy.deb https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.48.5_Linux-64bit.deb
+        sudo dpkg -i trivy.deb
 
-      - name: Scan Docker Images
-        run: |
-          docker images --format "{{.Repository}}:{{.Tag}}" | grep '^${{ env.REGISTRY }}/${{ env.DOCKER_USER }}/linkops-' | while read image; do
+    - name: Scan Docker Images
+      run: |
+        docker images --format "{{.Repository}}:{{.Tag}}" | \
+          grep '^${{ env.REGISTRY }}/${{ env.DOCKER_USER }}/linkops-' | \
+          while read image; do
             echo "🔍 Scanning $image"
             trivy image --severity HIGH,CRITICAL $image || true
           done
@@ -181,17 +205,18 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-and-test
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: SonarQube Scan
-        run: |
-          curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
-          unzip -qq sonar-scanner.zip
-          mv sonar-scanner-* sonar-scanner
-          ./sonar-scanner/bin/sonar-scanner \
-            -Dsonar.organization=${{ secrets.SONAR_ORG }} \
-            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} \
-            -Dsonar.sources=. \
-            -Dsonar.python.coverage.reportPaths=coverage.xml \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+    - name: SonarQube Scan
+      run: |
+        curl -sSLo sonar-scanner.zip \
+          https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+        unzip -qq sonar-scanner.zip
+        mv sonar-scanner-* sonar-scanner
+        ./sonar-scanner/bin/sonar-scanner \
+          -Dsonar.organization=${{ secrets.SONAR_ORG }} \
+          -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} \
+          -Dsonar.sources=. \
+          -Dsonar.python.coverage.reportPaths=coverage.xml \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}

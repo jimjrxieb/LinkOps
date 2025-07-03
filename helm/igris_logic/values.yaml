@@ -30,10 +30,10 @@ ingress:
   className: ""
   annotations: {}
   hosts:
-    - host: igris-logic.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
+  - host: igris-logic.local
+    paths:
+    - path: /
+      pathType: ImplementationSpecific
   tls: []
 
 resources:
@@ -92,7 +92,7 @@ securityContext:
   readOnlyRootFilesystem: true
   capabilities:
     drop:
-      - ALL
+    - ALL
 
 podSecurityContext:
   fsGroup: 1000

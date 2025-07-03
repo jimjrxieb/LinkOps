@@ -3,22 +3,22 @@ title: "Lint → Patch → Push → Learn: Automated Code Quality Loop"
 type: orb
 shadow: audit_migrate
 triggers:
-  - POST from igris_logic lint detection
-  - CI/CD flake8 failure
-  - Manual lint check trigger
+- POST from igris_logic lint detection
+- CI/CD flake8 failure
+- Manual lint check trigger
 output:
   description: Automated lint error detection, fixing, and learning pipeline
   details:
-    - igris_logic detects flake8 lint errors
-    - Parses errors into structured format
-    - Triggers Cursor patch generation via audit_migrate
-    - Applies lint-specific fixes and auto-commits/pushes
-    - Re-validates code quality
-    - Stores successful fixes as Runes for Whis learning
+  - igris_logic detects flake8 lint errors
+  - Parses errors into structured format
+  - Triggers Cursor patch generation via audit_migrate
+  - Applies lint-specific fixes and auto-commits/pushes
+  - Re-validates code quality
+  - Stores successful fixes as Runes for Whis learning
 core_endpoints:
-  - POST /lint/flake8 (igris_logic)
-  - POST /patch (audit_migrate) with patch_type="lint_fix"
-  - POST /post-push/fix (igris_logic) for re-validation
+- POST /lint/flake8 (igris_logic)
+- POST /patch (audit_migrate) with patch_type="lint_fix"
+- POST /post-push/fix (igris_logic) for re-validation
 flow:
   1: Developer or CI runs flake8
   2: igris_logic POST /lint/flake8 { service_path }
@@ -30,25 +30,25 @@ flow:
   8: igris_logic re-runs flake8 validation
   9: whis_logic stores successful fixes as Runes
 requirements:
-  - Flake8 error detection and parsing
-  - Lint-specific patch generation
-  - Cursor integration for code fixes
-  - Git auto-commit and push
-  - Code quality re-validation
-  - Whis learning integration
+- Flake8 error detection and parsing
+- Lint-specific patch generation
+- Cursor integration for code fixes
+- Git auto-commit and push
+- Code quality re-validation
+- Whis learning integration
 linked_agents:
-  - igris_logic (lint detection)
-  - audit_migrate (patch application)
-  - whis_logic (learning storage)
-  - cursor (lint fix generation)
+- igris_logic (lint detection)
+- audit_migrate (patch application)
+- whis_logic (learning storage)
+- cursor (lint fix generation)
 lint_errors_handled:
-  - F841: unused variable
-  - E401: multiple imports on one line
-  - E501: line too long
-  - E302: expected 2 blank lines
-  - W291: trailing whitespace
-  - E225: missing whitespace around operator
-  - E231: missing whitespace after comma
-  - E711: comparison to None
-  - E712: comparison to True
-  - E713: test for membership
+- F841: unused variable
+- E401: multiple imports on one line
+- E501: line too long
+- E302: expected 2 blank lines
+- W291: trailing whitespace
+- E225: missing whitespace around operator
+- E231: missing whitespace after comma
+- E711: comparison to None
+- E712: comparison to True
+- E713: test for membership

@@ -30,10 +30,10 @@ ingress:
   className: ""
   annotations: {}
   hosts:
-    - host: katie-logic.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
+  - host: katie-logic.local
+    paths:
+    - path: /
+      pathType: ImplementationSpecific
   tls: []
 
 resources:
@@ -86,7 +86,7 @@ securityContext:
   readOnlyRootFilesystem: true
   capabilities:
     drop:
-      - ALL
+    - ALL
 
 podSecurityContext:
   fsGroup: 1000

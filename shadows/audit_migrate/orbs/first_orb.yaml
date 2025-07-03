@@ -2,35 +2,40 @@
 title: "Repo → Plan → Scaffold: LinkOps Audit-to-Migrate Path"
 type: orb
 shadow: audit_migrate
+
 triggers:
-  - POST from audit_assess
-  - webhook
-  - manager UI
+- POST from audit_assess
+- webhook
+- manager UI
+
 output:
   description: Fully scaffolded microservices + report + triggers
   details:
-    - Receives scaffold plan from audit_assess
-    - Builds real service folders based on that plan
-    - Scaffolds:
-        - main.py
-        - Dockerfile
-        - requirements.txt
-        - routers/
-        - helm/Chart.yaml
-        - .github/workflows/{service}-ci.yml
-    - Links to other agents (audit_assess, audit_logic)
-    - Optionally forwards results to Whis and Igris
+  - Receives scaffold plan from audit_assess
+  - Builds real service folders based on that plan
+  - Scaffolds:
+    - main.py
+    - Dockerfile
+    - requirements.txt
+    - routers/
+    - helm/Chart.yaml
+    - .github/workflows/{service}-ci.yml
+  - Links to other agents (audit_assess, audit_logic)
+  - Optionally forwards results to Whis and Igris
+
 core_endpoints:
-  - POST /migrate/
-  - POST /link/from-assess
-  - POST /link/from-repo
+- POST /migrate/
+- POST /link/from-assess
+- POST /link/from-repo
+
 requirements:
-  - Expose on port 8007
-  - Use fastapi, uvicorn, requests
-  - Output path: /app/generated_services/{name}
-  - Generated services must include all required files
+- Expose on port 8007
+- Use fastapi, uvicorn, requests
+- Output path: /app/generated_services/{name}
+- Generated services must include all required files
+
 linked_agents:
-  - audit_assess
-  - audit_logic
-  - whis_logic
-  - igris_logic
+- audit_assess
+- audit_logic
+- whis_logic
+- igris_logic

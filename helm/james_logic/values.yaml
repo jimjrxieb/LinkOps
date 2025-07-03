@@ -30,10 +30,10 @@ ingress:
   className: ""
   annotations: {}
   hosts:
-    - host: james-logic.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
+  - host: james-logic.local
+    paths:
+    - path: /
+      pathType: ImplementationSpecific
   tls: []
 
 resources:
