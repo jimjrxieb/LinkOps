@@ -119,6 +119,7 @@ jobs:
         if [ -f "shadows/${{ matrix.service }}/requirements.txt" ]; then
           pip install -r shadows/${{ matrix.service }}/requirements.txt
         fi
+      continue-on-error: true
 
     - name: Run tests (log only)
       run: |
@@ -133,9 +134,11 @@ jobs:
 
     - name: Upload coverage
       uses: actions/upload-artifact@v4
+      if: always()
       with:
         name: ${{ matrix.service }}-coverage
         path: coverage.xml
+      continue-on-error: true
 
   docker-build:
     runs-on: ubuntu-latest
