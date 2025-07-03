@@ -32,7 +32,34 @@
 **Date**: July 3, 2025  
 **Status**: ✅ RESOLVED - Fixed vulnerable dependency  
 **CVE**: CVE-2024-47081  
-**Severity**: High (CWE-201)  
+**Severity**: High (CWE-201)
+
+---
+
+## Pillow Eval Injection Response
+
+**Date**: July 3, 2025  
+**Status**: ✅ RESOLVED - Fixed vulnerable dependency  
+**Component**: pytesseract  
+**Severity**: High (Score 726)
+
+---
+
+## zipp Infinite Loop Response
+
+**Date**: July 3, 2025  
+**Status**: ✅ RESOLVED - Fixed vulnerable dependency  
+**Component**: zipp  
+**Severity**: Medium (Score 666)
+
+---
+
+## FastAPI and Starlette Vulnerabilities Response
+
+**Date**: July 3, 2025  
+**Status**: ✅ RESOLVED - Fixed vulnerable dependencies  
+**Components**: FastAPI, Starlette, Uvicorn, anyio  
+**Severity**: High (Multiple vulnerabilities)  
 
 ### Assessment
 - **Direct Impact**: None - Platform doesn't use Chromium directly
@@ -53,6 +80,21 @@
 - **Direct Impact**: HIGH - All services used vulnerable requests 2.31.0
 - **Indirect Impact**: Credential leak via malicious URLs
 - **Risk Level**: HIGH - Fixed by updating to requests 2.32.4+
+
+### Assessment
+- **Direct Impact**: HIGH - james_logic service used vulnerable pytesseract 0.3.10
+- **Indirect Impact**: Eval injection via image processing
+- **Risk Level**: HIGH - Fixed by updating to pytesseract 0.3.13+
+
+### Assessment
+- **Direct Impact**: MEDIUM - Environment uses vulnerable zipp 1.0.0
+- **Indirect Impact**: Infinite loop in zip processing
+- **Risk Level**: MEDIUM - Fixed by updating to zipp 3.19.1+
+
+### Assessment
+- **Direct Impact**: HIGH - Multiple services used vulnerable FastAPI 0.104.1
+- **Indirect Impact**: ReDoS, resource exhaustion, race conditions
+- **Risk Level**: HIGH - Fixed by updating to FastAPI 0.109.1+
 
 ### Actions Taken
 - [x] Analyzed codebase for Chromium usage
@@ -75,6 +117,26 @@
 - [x] Identified vulnerable requests 2.31.0 across all services
 - [x] Updated all requirements to requests>=2.32.4
 - [x] Updated 6 requirements files across all services
+- [x] Updated security documentation
+
+### Actions Taken
+- [x] Identified vulnerable pytesseract 0.3.10 in james_logic service
+- [x] Updated pytesseract to secure version 0.3.13+
+- [x] Fixed Pillow eval injection vulnerability
+- [x] Updated security documentation
+
+### Actions Taken
+- [x] Identified vulnerable zipp 1.0.0 in environment
+- [x] Added zipp>=3.19.1 to requirements files
+- [x] Fixed infinite loop vulnerability
+- [x] Updated security documentation
+
+### Actions Taken
+- [x] Identified vulnerable FastAPI 0.104.1 across multiple services
+- [x] Updated FastAPI to 0.109.1+ across all services
+- [x] Updated Uvicorn to 0.29.0+ to fix h11 vulnerability
+- [x] Added anyio>=4.4.0 to fix race condition vulnerability
+- [x] Updated 12 requirements files across all services
 - [x] Updated security documentation
 
 ### Recommended Actions
