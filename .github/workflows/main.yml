@@ -152,6 +152,7 @@ jobs:
         - audit_migrate
         - ficknury_deploy
         - ficknury_evaluator
+        
     steps:
     - uses: actions/checkout@v4
 
@@ -175,7 +176,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: GitGuardian Scan
-      uses: GitGuardian/ggshield-action@v1.24.3
+      uses: GitGuardian/ggshield-action@v1.41.0
       with:
         args: secret scan repo .
       env:
