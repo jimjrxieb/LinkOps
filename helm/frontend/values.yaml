@@ -1,14 +1,14 @@
 replicaCount: 1
 
 image:
-  repository: linkops/whis_enhance
+  repository: linkops/frontend
   tag: latest
   pullPolicy: IfNotPresent
 
 service:
   type: ClusterIP
-  port: 8000
+  port: 5173
 
 ingress:
   enabled: true
-  pathPrefix: whis-enhance
+  pathPrefix: frontend 

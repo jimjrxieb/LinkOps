@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from routes import chat, actions, explain, describe_image, voice
+from manual_task_export import app as manual_export_app
 
 app = FastAPI(
     title="James – LinkOps Executive Assistant",
@@ -16,6 +17,9 @@ app.include_router(explain.router)
 app.include_router(describe_image.router)
 app.include_router(voice.router)
 
+# Include manual task export functionality
+app.mount("/manual", manual_export_app)
+
 
 @app.get("/health")
 def health():
@@ -28,6 +32,7 @@ def health():
             "image_processing",
             "task_management",
             "executive_assistance",
+            "manual_task_export",
         ],
         "version": "2.0.0",
     }

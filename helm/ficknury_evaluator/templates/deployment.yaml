@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "james-logic.fullname" . }}
+  name: {{ include "ficknury-evaluator.fullname" . }}
   labels:
-    {{- include "james-logic.labels" . | nindent 4 }}
+    {{- include "ficknury-evaluator.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "james-logic.selectorLabels" . | nindent 6 }}
+      {{- include "ficknury-evaluator.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,13 +18,13 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "james-logic.selectorLabels" . | nindent 8 }}
+        {{- include "ficknury-evaluator.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "james-logic.serviceAccountName" . }}
+      serviceAccountName: {{ include "ficknury-evaluator.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -38,15 +38,15 @@ spec:
               containerPort: {{ .Values.service.port }}
               protocol: TCP
           livenessProbe:
-            {{- toYaml .Values.livenessProbe | nindent 12 }}
+            httpGet:
+              path: /health
+              port: http
           readinessProbe:
-            {{- toYaml .Values.readinessProbe | nindent 12 }}
+            httpGet:
+              path: /health
+              port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          {{- with .Values.env }}
-          env:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -58,21 +58,4 @@ spec:
       {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
-      {{- end }}
-      volumes:
-        {{- if .Values.volumes.voice_cache.enabled }}
-        - name: voice-cache
-          {{- if .Values.volumes.voice_cache.emptyDir }}
-          emptyDir: {}
-          {{- else }}
-          emptyDir: {}
-          {{- end }}
-        {{- end }}
-        {{- if .Values.volumes.image_cache.enabled }}
-        - name: image-cache
-          {{- if .Values.volumes.image_cache.emptyDir }}
-          emptyDir: {}
-          {{- else }}
-          emptyDir: {}
-          {{- end }}
-        {{- end }}
+      {{- end }} 

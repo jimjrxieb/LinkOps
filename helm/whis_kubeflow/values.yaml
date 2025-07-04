@@ -1,0 +1,37 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/shadow-link-industries/whis_kubeflow
+  tag: latest
+  pullPolicy: Always
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+service:
+  type: ClusterIP
+  port: 8005
+
+env:
+  DATABASE_URL: "postgresql://linkops:${POSTGRES_PASSWORD:-linkops_password}@db:5432/linkops"
+  KAFKA_BOOTSTRAP_SERVERS: "kafka:29092"
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {} 

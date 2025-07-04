@@ -1,0 +1,19 @@
+apiVersion: v2
+name: whis-kubeflow
+description: Kubeflow Pipeline Orchestration Service for Whis
+version: 0.1.0
+appVersion: "1.0"
+type: application
+keywords:
+  - kubeflow
+  - mlops
+  - pipeline
+home: https://github.com/shadow-link-industries/linkops-mlops
+sources:
+  - https://github.com/shadow-link-industries/linkops-mlops
+maintainers:
+  - name: Shadow Link Industries
+    email: dev@shadow-link-industries.com
+annotations:
+  category: AI/ML
+  licenses: MIT 

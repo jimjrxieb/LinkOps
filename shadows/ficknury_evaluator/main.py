@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import List, Dict
 from scorer import score_task
 from selector import select_agent_for_task
+from task_router import evaluate_task, Task, TaskEvaluation
 
 app = FastAPI(title="FickNury Evaluator")
 
@@ -49,6 +50,14 @@ async def evaluate_tasks(request: Request):
         score_map=score_map,
         suggestions=suggestions,
     )
+
+
+@app.post("/evaluate")
+async def evaluate_single_task(task: Task) -> TaskEvaluation:
+    """
+    Evaluate a single task using the new task router.
+    """
+    return await evaluate_task(task)
 
 
 @app.get("/health")
