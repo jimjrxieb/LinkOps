@@ -1,0 +1,54 @@
+apiVersion: v2
+name: linkops-full
+description: A Helm chart for the complete LinkOps MLOps system
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+- linkops
+- mlops
+- microservices
+home: https://github.com/jimjrxieb/LinkOps-MLOps
+sources:
+- https://github.com/jimjrxieb/LinkOps-MLOps
+maintainers:
+- name: jimjrxieb
+  email: jimjrxieb@example.com
+
+dependencies:
+- name: frontend
+  version: 0.1.0
+  condition: frontend.enabled
+  repository: "file://../frontend"
+- name: james_logic
+  version: 0.1.0
+  condition: james_logic.enabled
+  repository: "file://../james_logic"
+- name: ficknury_evaluator
+  version: 0.1.0
+  condition: ficknury_evaluator.enabled
+  repository: "file://../ficknury_evaluator"
+- name: whis_data_input
+  version: 0.1.0
+  condition: whis_data_input.enabled
+  repository: "file://../whis_data_input"
+- name: whis_sanitize
+  version: 0.1.0
+  condition: whis_sanitize.enabled
+  repository: "file://../whis_sanitize"
+- name: whis_smithing
+  version: 0.1.0
+  condition: whis_smithing.enabled
+  repository: "file://../whis_smithing"
+- name: whis_enhance
+  version: 0.1.0
+  condition: whis_enhance.enabled
+  repository: "file://../whis_enhance"
+- name: igris_logic
+  version: 0.1.0
+  condition: igris_logic.enabled
+  repository: "file://../igris_logic"
+- name: katie_logic
+  version: 0.1.0
+  condition: katie_logic.enabled
+  repository: "file://../katie_logic" 

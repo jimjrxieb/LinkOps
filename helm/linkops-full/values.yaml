@@ -1,0 +1,36 @@
+# Default values for linkops-full
+# This is an umbrella chart that deploys all LinkOps microservices
+
+# Global settings
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: ""
+
+# Enable/disable individual services
+frontend:
+  enabled: true
+
+james_logic:
+  enabled: true
+
+ficknury_evaluator:
+  enabled: true
+
+whis_data_input:
+  enabled: true
+
+whis_sanitize:
+  enabled: true
+
+whis_smithing:
+  enabled: true
+
+whis_enhance:
+  enabled: true
+
+igris_logic:
+  enabled: true
+
+katie_logic:
+  enabled: true 
