@@ -3,8 +3,7 @@ Kubernetes Platform Engineering Module
 Elite knowledge of node scaling, network policies, RBAC, service accounts, and sidecars
 """
 
-from typing import Dict, List, Any, Optional
-import yaml
+from typing import Dict, List, Any
 
 
 class KubernetesPlatformEngineer:

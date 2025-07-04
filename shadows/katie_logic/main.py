@@ -7,7 +7,6 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any, Optional, List
 import logging
-import requests
 
 # Import Katie's Kubernetes operations
 from kubeops.describe import k8s_describer

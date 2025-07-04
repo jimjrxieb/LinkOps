@@ -3,10 +3,7 @@ CKS Security Module - Certified Kubernetes Security Specialist
 Elite Kubernetes security capabilities including policies, compliance, and threat detection
 """
 
-from typing import Dict, List, Any, Optional
-import yaml
-import json
-import re
+from typing import Dict, List, Any
 
 
 class CKSSecurity:
@@ -550,7 +547,7 @@ class CKSSecurity:
         threats = {"critical": [], "high": [], "medium": [], "low": []}
 
         for event in events:
-            event_type = event.get("type", "")
+            event.get("type", "")
             reason = event.get("reason", "")
             message = event.get("message", "")
 

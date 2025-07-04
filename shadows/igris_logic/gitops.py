@@ -3,9 +3,7 @@ GitOps Module - Elite GitOps Workflow Knowledge
 Handles ArgoCD, Helm charts, and GitOps best practices
 """
 
-from typing import Dict, List, Any, Optional
-import yaml
-import json
+from typing import Dict, List, Any
 
 
 class GitOpsEngineer:

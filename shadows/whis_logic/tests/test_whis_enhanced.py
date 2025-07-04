@@ -3,20 +3,19 @@ Enhanced Whis Logic Tests - AI/ML Capabilities
 Tests for comprehensive ML operations, Orbs/Runes system, and workflows
 """
 
+from ai_ml_workflows import ai_ml_workflows
+from orbs_runes_system import orbs_runes_system
+from mlops_engine import mlops_engine
+import numpy as np
+import pandas as pd
+import pytest
 import sys
 import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import pytest
-from unittest.mock import Mock, patch
-import pandas as pd
-import numpy as np
 
 # Import the enhanced modules
-from mlops_engine import mlops_engine
-from orbs_runes_system import orbs_runes_system
-from ai_ml_workflows import ai_ml_workflows
 
 
 class TestMLOpsEngine:
@@ -169,7 +168,7 @@ class TestOrbsRunesSystem:
     def test_add_rune_to_orb(self):
         """Test adding Rune to Orb"""
         orb = orbs_runes_system.create_orb("test_orb", "Test orb", "testing")
-        rune = orbs_runes_system.create_rune("test_rune", "pattern", "code", {})
+        orbs_runes_system.create_rune("test_rune", "pattern", "code", {})
 
         orbs_runes_system.add_rune_to_orb("test_orb", "test_rune")
 
@@ -258,8 +257,8 @@ class TestOrbsRunesSystem:
 
     def test_get_orb_knowledge(self):
         """Test getting Orb knowledge"""
-        orb = orbs_runes_system.create_orb("ml_orb", "ML knowledge", "machine_learning")
-        rune = orbs_runes_system.create_rune("ml_rune", "pattern", "code", {})
+        orbs_runes_system.create_orb("ml_orb", "ML knowledge", "machine_learning")
+        orbs_runes_system.create_rune("ml_rune", "pattern", "code", {})
         orbs_runes_system.add_rune_to_orb("ml_orb", "ml_rune")
 
         knowledge = orbs_runes_system.get_orb_knowledge("ml_orb")

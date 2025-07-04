@@ -3,10 +3,8 @@ CKA Operations Module - Certified Kubernetes Administrator
 Elite Kubernetes operations with Helm, ArgoCD, and Terraform AKS patterns
 """
 
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 import yaml
-import json
-import re
 
 
 class CKAOperations:
@@ -165,7 +163,7 @@ class CKAOperations:
 
         for resource in resources:
             resource_type = resource.get("kind", "Unknown")
-            resource_name = resource.get("metadata", {}).get("name", "unknown")
+            resource.get("metadata", {}).get("name", "unknown")
 
             if resource_type == "Pod":
                 pod_issues = self._analyze_pod_misconfigurations(resource)

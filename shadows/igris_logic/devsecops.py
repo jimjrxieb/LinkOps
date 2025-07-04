@@ -3,9 +3,8 @@ DevSecOps Module - Elite Security Pipeline Knowledge
 Handles GitHub Actions, SonarQube, Snyk, Trivy, Bandit, Checkov integration
 """
 
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 import re
-import yaml
 
 
 class DevSecOpsAnalyzer:
@@ -269,7 +268,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Run Trivy vulnerability scanner
       uses: aquasecurity/trivy-action@master
       with:
@@ -277,19 +276,19 @@ jobs:
         scan-ref: '.'
         format: 'sarif'
         output: 'trivy-results.sarif'
-    
+
     - name: Run Snyk to check for vulnerabilities
       uses: snyk/actions/node@master
       env:
         SNYK_TOKEN: ${{{{ secrets.SNYK_TOKEN }}}}
       with:
         args: --severity-threshold=high
-    
+
     - name: Run Bandit security linter
       run: |
         pip install bandit
         bandit -r . -f json -o bandit-report.json
-    
+
     - name: Upload Trivy scan results to GitHub Security tab
       uses: github/codeql-action/upload-sarif@v2
       if: always()
