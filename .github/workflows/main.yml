@@ -24,6 +24,7 @@ jobs:
         - whis_webscraper
         - whis_smithing
         - whis_enhance
+        - whis_kubeflow
         - audit_assess
         - audit_logic
         - audit_migrate
@@ -100,6 +101,7 @@ jobs:
         - whis_webscraper
         - whis_smithing
         - whis_enhance
+        - whis_kubeflow
         - audit_assess
         - audit_logic
         - audit_migrate
@@ -155,6 +157,7 @@ jobs:
         - whis_webscraper
         - whis_smithing
         - whis_enhance
+        - whis_kubeflow
         - audit_assess
         - audit_logic
         - audit_migrate

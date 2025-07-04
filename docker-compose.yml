@@ -71,13 +71,27 @@ services:
     ports:
     - "2181:2181"
     environment:
-    ZOOKEEPER_CLIENT_PORT: 2181
-    ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
     volumes:
     - zookeeper_data:/var/lib/zookeeper/data
     - zookeeper_logs:/var/lib/zookeeper/log
     healthcheck:
     test: ["CMD-SHELL", "echo ruok | nc localhost 2181"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+
+  ### 🔴 REDIS (Caching & Session Store)
+  redis:
+    image: redis:7-alpine
+    container_name: linkops-redis
+    ports:
+    - "6379:6379"
+    volumes:
+    - redis_data:/data
+    healthcheck:
+    test: ["CMD", "redis-cli", "ping"]
     interval: 30s
     timeout: 10s
     retries: 3
@@ -89,13 +103,13 @@ services:
     ports:
     - "9092:9092"
     environment:
-    KAFKA_BROKER_ID: 1
-    KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-    KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-    KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-    KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-    KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
     depends_on:
     - zookeeper
     volumes:
@@ -255,19 +269,54 @@ services:
     kafka:
       condition: service_healthy
 
-  ### 🛡️ AUDITGUARD SECURITY & COMPLIANCE SERVICE
-  auditguard:
-    build: ./shadows/auditguard
-    container_name: linkops-auditguard
+  ### 🛡️ AUDIT LOGIC SOURCE (Security & Compliance Logic)
+  audit_logic:
+    build: ./shadows/audit_logic
+    container_name: linkops-audit-logic
     ports:
-    - "8008:8000"
+    - "8014:8000"
     volumes:
-    - ./shadows/auditguard:/app
-    - /var/run/docker.sock:/var/run/docker.sock
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    - ./shadows/audit_logic:/app
     environment:
     - DATABASE_URL=postgresql://linkops:${POSTGRES_PASSWORD:-linkops_password}@db:5432/linkops
     - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+    db:
+      condition: service_healthy
+    kafka:
+      condition: service_healthy
+
+  ### 🔍 AUDIT ASSESS SERVICE (Security Assessment)
+  audit_assess:
+    build: ./shadows/audit_assess
+    container_name: linkops-audit-assess
+    ports:
+    - "8015:8000"
+    volumes:
+    - ./shadows/audit_assess:/app
+    environment:
+    - DATABASE_URL=postgresql://linkops:${POSTGRES_PASSWORD:-linkops_password}@db:5432/linkops
+    - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+    db:
+      condition: service_healthy
+    kafka:
+      condition: service_healthy
+
+  ### 🚀 AUDIT MIGRATE SERVICE (Migration Execution)
+  audit_migrate:
+    build: ./shadows/audit_migrate
+    container_name: linkops-audit-migrate
+    ports:
+    - "8016:8000"
+    volumes:
+    - ./shadows/audit_migrate:/app
+    environment:
+    - DATABASE_URL=postgresql://linkops:${POSTGRES_PASSWORD:-linkops_password}@db:5432/linkops
+    - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
     db:
       condition: service_healthy
